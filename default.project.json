@@ -1,0 +1,12 @@
+{
+  "name": "Sawdust",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Sawdust": {
+        "$path": "src/ReplicatedStorage/Sawdust"
+      }
+    }
+  }
+}

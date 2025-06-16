@@ -1,0 +1,9 @@
+[package]
+name = "griff/sawdust"
+version = "1.0.0"
+registry = "https://github.com/UpliftGames/wally-index"
+license = "GPL-3.0-or-later"
+realm = "shared"
+
+
+[dependencies]
