@@ -5,8 +5,35 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-> ## [1.0.1] - 2025-07-16
+> ## [1.0.2] - 2025-06-1
+> Dependency-injected service implementation with support for runtime injections & dependencies.
+>
+> ### Additions
+>
+>> #### **SVCBuilder** `src\ReplicatedStorage\Sawdust\__impl\builder`
+>> - Wrapper to build a **SawdustService**
+>> - "**Injection**" allows developers to "Inject" code into a phase of service runtime *(e.g. 'init' & 'start')*
+>> - "**Dependency**" allows developers to "Depend" their service on another, allowing services to load only after others load.
+>> - When a service depends on another, the services the first one depends on will be passed in *init*, and any code injected into *init*.
+>
+>> #### **SVCManager** `src\ReplicatedStorage\Sawdust\__internal\__service_manager`
+>> - Must be called through **Sawdust** main module. `Sawdust.services`
+>> - In a setup script, you need to use `services:register(SawdustService)`, getting **SawdustService** from **SVCBuilder**
+>> - After, you do `services:resolveAll()` to **initalize** each service.
+>> - To **start** the services, follow that with `services:startAll()`.
+>
+> ### Changes
+> 
+> `__impl\networking` Added a "once" flag for a connection, disconnecting connection as soon as a event is caught.
+> `__impl\networking` Also added a "wait" method, yielding the script until an event is caught.
+> `Sawdust.lua` Changed the way implementations get passed through Sawdust main module.
+> `README.md` 
 
+---
+
+> ## [1.0.1] - 2025-06-17
+> New content delivery implementation with support for preloading assets, and efficent memory & caching practices.
+>
 > #### Additions
 >
 >> ##### **CDN** `src\ReplicatedStorage\Sawdust\__impl\cdn`
@@ -19,12 +46,11 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > - `__impl\cache` Allowed finding caches within caches, basically allowing you to have objects much like tables.
 
 
----
 
 > ## [1.0.0] - 2025-06-16
-
+> Inital release of Sawdust library with a couple core implementations. 
+>
 > #### Additions
-> - Inital release of Sawdust framework
 >
 >> ##### **Networking** `src\ReplicatedStorage\Sawdust\__impl\networking`
 >> - "**Middleware**" allowing developers to attach events to different points of an event's lifecycle

@@ -34,9 +34,13 @@ type __sawdustSettings = {
 		
 	},
 
+	builder: {
+
+	},
+
 	maid: {
 		debug: boolean,
-	}
+	},
 }
 local __settings = {} :: __sawdustSettings
 
@@ -60,6 +64,10 @@ __settings.content = {
 }
 
 __settings.cache = {
+	
+}
+
+__settings.builder = {
 	
 }
 

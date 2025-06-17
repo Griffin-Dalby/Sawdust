@@ -40,6 +40,8 @@ type self_event = {
     attachedEvent: RemoteEvent|RemoteFunction,
     middleware: __middleware.SawdustNetworkingMiddleware }
 export type SawdustEvent = typeof(setmetatable({} :: self_event, event))
+export type SawdustNetworkingMiddleware = __middleware.SawdustNetworkingMiddleware
+export type SawdustNetworkingMiddlewarePipeline = __middleware.SawdustNetworkingMiddlewarePipeline
 
 type self_connection = {
     attachedEvent: RemoteEvent|RemoteFunction,
@@ -142,9 +144,21 @@ function event:fire(...) self = self :: self_event
     --> After
 end
 
---[[ event:connect(callback: (...any) -> nil)
-    Attaches a connection callback to the attached event. ]]
-function event:connect(callback: (...any) -> nil): SawdustConnection
+--[[ event:wait()
+    Yields until this event gets fired]]
+function event:wait()
+    local flag = false
+    self:connect(function()
+        flag = true
+    end, true)
+
+    repeat task.wait(0) until flag
+end
+
+--[[ event:connect(callback: (...any) -> nil, once: boolean?)
+    Attaches a connection callback to the attached event.
+    if *once* is set to true, this connection will disconnect after one event.]]
+function event:connect(callback: (...any) -> nil, once: boolean?): SawdustConnection
     local event = self.attachedEvent :: RemoteEvent|RemoteFunction
     local self = setmetatable({} :: self_connection, connection)
 
@@ -158,6 +172,9 @@ function event:connect(callback: (...any) -> nil): SawdustConnection
         for uuid, connection: SawdustConnection in pairs(connections[event]) do
             coroutine.wrap(function()
                 connection.callback(unpack(args))
+                if once then
+                    self:disconnect()
+                end
             end)()
         end
     end
