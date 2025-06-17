@@ -5,22 +5,19 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-> ## [Unreleased]
-> 
+> ## [1.0.1] - 2025-07-16
+
 > #### Additions
 >
->> `CDN`
->> - I need to create a custom content delivery module, Sawdust/Content will be where assets and metadata is placed.
+>> ##### **CDN** `src\ReplicatedStorage\Sawdust\__impl\cdn`
+>> - Created a dynamic and quite efficient CDN system, utilizing the caching module internally.
+>> - Allows you to get "**Providers**" whose main job is to provide assets utilizing AssetIDs.
+>> - Provides a "**Preload**" feature, allowing you to preload assets in batches, or singulars
+>> - I want to flex how efficent I made it actually, I love how it turned out so much 🙏
 >
 > #### Changes
->
->> `Caching`
->> - I need to let the developer find caches inside caches, basically tables can be placed in caches, then tables in those tables.
->
-> #### Fixes
->
->> `WARNING`
->> I'm not 100% sure all features in 1.0.0 work. I haven't been able to test because my computer keeps crashing, although all syntax looks right.
+> - `__impl\cache` Allowed finding caches within caches, basically allowing you to have objects much like tables.
+
 
 ---
 
@@ -29,19 +26,19 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > #### Additions
 > - Inital release of Sawdust framework
 >
->> `Networking`
+>> ##### **Networking** `src\ReplicatedStorage\Sawdust\__impl\networking`
 >> - "**Middleware**" allowing developers to attach events to different points of an event's lifecycle
 >> - Very easy to understand interface, splitting events into "channels" that you can easily access and connect.
 >> - Event behavior is wrapped smartly, functions and events work the same, but their special behavior is kept in-tact.
 >
->> `Signaling`
+>> ##### **Signaling** `src\ReplicatedStorage\Sawdust\__impl\signal`
 >> - Provides the developer with "Emitters", that you can add events to for very simple, embedded event behavior.
 >> - Smart memory handling and cleanup
 >
->> `Caching`
+>> ##### **Caching** `src\ReplicatedStorage\Sawdust\__impl\cache`
 >> - Splits data into "Caches", from there you can simply get and set data.
 >
->> `Maid`
+>> ##### **Maid** `src\ReplicatedStorage\Sawdust\__impl\util\maid`
 >> - Apart of the "Util" implementation, the Maid module lets the devloper create a new Maid instance.
 >> - Said maid instance can take track of instances, connections, and callback functions.
 >> - The developer can "tag" these tracked objects with names, and take action based off of the tags alone.

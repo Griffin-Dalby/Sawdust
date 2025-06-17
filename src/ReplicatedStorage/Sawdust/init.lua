@@ -50,7 +50,10 @@ sawdust.util = function() : typeof(util)
 	return util end
 export type SawdustMaid = util.SawdustMaid
 
-sawdust.CDN = function(): typeof(cdn)
+sawdust.cdn = function(): typeof(cdn)
 	return cdn end
+export type SawdustCDNProvider = cdn.SawdustCDNProvider
+export type SawdustCDNPreloader = cdn.SawdustCDNPreloader
+export type SawdustCDNReturnTemplate = cdn.SawdustCDNReturnTemplate
 
 return sawdust

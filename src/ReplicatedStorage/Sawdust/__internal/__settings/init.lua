@@ -24,6 +24,10 @@ type __sawdustSettings = {
 	
 	content: {
 		fetchFolder: Folder,
+		debug: {
+			cdn: boolean,
+			preload: boolean
+		}
 	},
 	
 	cache: {
@@ -48,7 +52,11 @@ __settings.networking = {
 }
 
 __settings.content = {
-	fetchFolder = root.Content
+	fetchFolder = root.Content,
+	debug = {
+		cdn = true,
+		preload = true
+	}
 }
 
 __settings.cache = {

@@ -78,4 +78,33 @@ function cache:setValue(key: any, value: any)
     self.contents[key] = value
 end
 
+--[[ cache:createTable(tableKey: any)
+    Creates a table within the cache, basically having caches in caches. ]]
+function cache:createTable(tableKey: any)
+    if self.contents[tableKey] then
+        warn(`[{script.Name}] Conflict while creating new Table!`)
+        return end
+    
+    local pseudoCache = setmetatable({} :: self, cache)
+
+    pseudoCache.cacheName = tableKey
+    pseudoCache.contents = {}
+
+    self.contents[tableKey] = pseudoCache
+    return pseudoCache
+end
+
+--[[ cache:findTable(tableKey: any)
+   Finds a specified table, returning it as if it were another cache. ]]
+function cache:findTable(tableKey: any) : SawdustCache
+    if not tableKey or not self.contents[tableKey] then
+        warn(`[{script.Name}] Unable to find table w/ name "{tableKey or '<none provided>'}"!`)
+        return end
+    if typeof(self.contents) ~= 'table' then
+        warn(`[{script.Name}] Attempted to find table w/ name "{tableKey}", and it was a {typeof(self.contents)}!`)
+        return end
+
+    return self.contents[tableKey] :: SawdustCache
+end
+
 return cache
