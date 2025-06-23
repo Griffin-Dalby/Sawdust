@@ -17,7 +17,7 @@ local players = game:GetService('Players')
 local https = game:GetService('HttpService')
 
 --]] Settings
-local isServer = runService:IsServer()
+local isServer, isStudio = runService:IsServer(), runService:IsStudio()
 
 local __internal = script.Parent.Parent.__internal
 local __settings = require(__internal.__settings)
@@ -40,14 +40,18 @@ type self_event = {
     attachedEvent: RemoteEvent|RemoteFunction,
     middleware: __middleware.SawdustNetworkingMiddleware }
 export type SawdustEvent = typeof(setmetatable({} :: self_event, event))
-export type SawdustNetworkingMiddleware = __middleware.SawdustNetworkingMiddleware
-export type SawdustNetworkingMiddlewarePipeline = __middleware.SawdustNetworkingMiddlewarePipeline
+export type SawdustMiddleware = __middleware.SawdustNetworkingMiddleware
+export type SawdustPipeline = __middleware.SawdustPipeline
+
+export type SawdustChannel = {
+    [string]: SawdustEvent
+}
 
 type self_connection = {
     attachedEvent: RemoteEvent|RemoteFunction,
     callback: (...any) -> nil,
     uuid: string }
-export type SawdustConnection = typeof(setmetatable({} :: self_connection, event))
+export type SawdustConnection = typeof(setmetatable({} :: self_connection, connection))
 
 --[[ event.attach(event: RemoteEvent|RemoteFunction) 
     Constructor function to create a new handled event
@@ -64,13 +68,17 @@ function event.attach(aEvent: RemoteEvent|RemoteFunction) : SawdustEvent
     return self
 end
 
---[[ event:fire(Player?, args...)
+--[[ event:fire(Player?, args...): Pipeline, ...
     Fires the remote function/event.
     If the first argument is a player, it'll fire to them.
     If it isn't, it'll be broadcasted globally.
     
-    And of course, ]]
-function event:fire(...) self = self :: self_event
+    The event pipeline is returned as the first value always.
+    If there are any return values from a remote function on the
+    client, it'll be returned as a tuple after the pipeline. ]]
+function event:fire(...): SawdustPipeline
+    self = self :: self_event
+
     --> Parse args
     local args = {...}
     local player: Player = nil
@@ -109,22 +117,27 @@ function event:fire(...) self = self :: self_event
         else
             thisEvent:FireServer(unpack(args))
         end
+
+        return pipeline
     elseif self.attachedEvent:IsA('RemoteFunction') then
         local thisEvent = self.attachedEvent :: RemoteFunction
 
         if isServer then
             if player then
-                thisEvent:InvokeClient(player, unpack(args)) else
+                thisEvent:InvokeClient(player, unpack(args))
+            else
                 for _, tPlayer in pairs(players:GetPlayers()) do
                     thisEvent:InvokeClient(tPlayer, unpack(args))
                 end end
+            
+            return pipeline
         else
             local res = thisEvent:InvokeServer(unpack(args))
             
             success, pipeline = pcall(self.middleware.run, self.middleware, 'after', res)
             if not success then
                 warn(`[{script.Name}] "After" middleware error: {pipeline}`)
-                return 
+                return false
             end
 
             res = pipeline.res
@@ -134,10 +147,10 @@ function event:fire(...) self = self :: self_event
             if halted then
                 warn(`[{script.Name}] "After" middleware halted event call! ({self.attachedEvent.Parent.Name}.{self.attachedEvent.Name})`)
                 warn(`[{script.Name}] {errorMsg or 'No message was provided.'}`)
-                return
+                return false
             end
 
-            return unpack(res)
+            return pipeline, unpack(res)
         end
     end
 
@@ -193,10 +206,12 @@ function event:connect(callback: (...any) -> nil, once: boolean?): SawdustConnec
     end
 
     connections[event][self.uuid] = self
-    return connection
+    return self
 end
 
---[[ connection:disconnect()]]
+--[[ connection:disconnect()
+    Disconnects this connection by removing itself from the event connection
+    list, and cleaning the connection out. ]]
 function connection:disconnect()
     connections[self.attachedEvent][self.uuid] = nil
     table.clear(self)
@@ -208,7 +223,7 @@ local networking = {}
 --[[ Channel.getChannel(channelName: string!)
     Fetches a specified channel with "channelName", and
     providing a special table to fetch events. ]]
-function networking.getChannel(channelName: string)
+function networking.getChannel(channelName: string) : SawdustChannel
     local self = {}
     
     local channel = __settings.networking.fetchFolder:FindFirstChild(channelName)

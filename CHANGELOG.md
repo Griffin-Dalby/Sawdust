@@ -5,7 +5,39 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-> ## [1.0.2] - 2025-06-1
+> ## [1.1.0] - 2025-06-
+>
+>
+> ### Additions
+>
+>> #### **Unit Testing** `src\ServerScriptService\UnitTests`
+>> - Full-fledged unit testing for most implementations.
+>> - Support for both server/client tests, useful mainly for Networking.
+>
+>> #### **Promises** `src\ReplicatedStorage\Sawdust\__impl\promise`
+>> - Simply a promise system modeled after NodeJS.
+>> - You can chain together andThen(), catch with catch(), and of course final()
+>
+>> #### **Utilities** `src\ReplicatedStorage\Sawdust\__impl\util\*`
+>> - **"Debounce"** allows easy creation of debounces with specified times.
+>> - **"EnumMap"** allows the developer to "map" out Enums, converting them into human-readable strings, and back.
+>> - **"States"** provides a dynamic interface where you can give objects states, with smart handling.
+>> - **"Timer"** can run functions in a wrapped heartbeat where you can start, stop, and resume the internal connection.
+>> - **"UUID"** simply provides a more intuitive UUID generator with much more customization.
+>
+> ### Changes
+>
+> - `Sawdust.lua` Made exports more human readable 😢
+> - `Sawdust.lua` Okay nvm I just redid the layout
+>
+> ### Fixes
+>
+> - `__impl\networking` Fixed SawdustEvent:connect() not returning the connection, and improper typechecking.
+>
+
+---
+
+> ## [1.0.2] - 2025-06-17
 > Dependency-injected service implementation with support for runtime injections & dependencies.
 >
 > ### Additions
@@ -29,7 +61,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > `Sawdust.lua` Changed the way implementations get passed through Sawdust main module.
 > `README.md` 
 
----
+
 
 > ## [1.0.1] - 2025-06-17
 > New content delivery implementation with support for preloading assets, and efficent memory & caching practices.

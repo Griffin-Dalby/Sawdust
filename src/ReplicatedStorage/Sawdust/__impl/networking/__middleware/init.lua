@@ -18,6 +18,13 @@
     - args: Dictionary exposing the data being passed to it's destination.
             You can modify this to change what the other end will recieve
             from the specific request.
+    - res: Same as args, except for the result of the called event if it had
+           return data, so practically just functions on the client...
+
+           **IT'S IMPORTANT TO NOTE!**
+           When data is being returned to the client, the first value returned
+           in the tuple is always going to be the exposed pipeline, then the
+           rest of the values get returned after the pipeline.
 
     - halted: If true, the event will not be sent to it's destination.
     - errorMessage: If provided, explains reason for halting.
@@ -32,9 +39,9 @@ local pipeline = {}
 pipeline.__index = pipeline
 
 type self_middle_pipeline = {}
-export type SawdustNetworkingMiddlewarePipeline = typeof(setmetatable({} :: self_middle_pipeline, pipeline))
+export type SawdustPipeline = typeof(setmetatable({} :: self_middle_pipeline, pipeline))
 
-function pipeline.new(phase: string, args: {[number]: any}) : SawdustNetworkingMiddlewarePipeline
+function pipeline.new(phase: string, args: {[number]: any}) : SawdustPipeline
     local self = setmetatable({} :: self_middle_pipeline, pipeline)
 
     self.args = phase == 'before' and args or nil
@@ -48,12 +55,20 @@ function pipeline.new(phase: string, args: {[number]: any}) : SawdustNetworkingM
     return self
 end
 
-function pipeline:setArguments(args: {[number]: any}) : boolean
+function pipeline:setArguments(args: {[number]: any}, ...) : boolean
     if self.writeLock then warn(`[{script.Name}] WriteLock enabled! Cannot set args.`) return false end
-    self.args = args; return true end
+    
+    --> Support tuple & table
+    local fixArgs
+    if typeof(args) ~= 'table' then
+        fixArgs = {...}
+        table.insert(fixArgs, 1, args)
+    end
+
+    self.args = fixArgs or args end
 
 function pipeline:setResult(res: {[number]: any}): boolean
-    self.res = res; return true end
+    self.res = res end
 
 function pipeline:setHalted(halted: boolean) : boolean
     if self.writeLock then warn(`[{script.Name}] WriteLock enabled! Cannot halt.`) return false end
@@ -64,7 +79,7 @@ function pipeline:setError(message: string) : boolean
     self.errorMessage = message; return true end
 
 function pipeline:getArguments() : ...any
-    return self.args end
+    return unpack(self.args) end
 function pipeline:getResult(): {[number]: any}
     return self.res end
 function pipeline:isHalted() : boolean
@@ -80,7 +95,7 @@ middleware.__index = middleware
 
 type _registered_func_ = {
     order: number,
-    callback: (SawdustNetworkingMiddlewarePipeline) -> SawdustNetworkingMiddlewarePipeline
+    callback: (SawdustPipeline) -> SawdustPipeline
 }
 
 type self = {
@@ -106,8 +121,9 @@ function middleware.new() : SawdustNetworkingMiddleware
 end
 
 --[[ Middleware:use(phase: string, order: number, callback: (pipeline) -> pipeline)
-    Registers "callback" to be used through the middleware. ]]
-function middleware:use(phase: string, order: number, callback: (SawdustNetworkingMiddlewarePipeline) -> SawdustNetworkingMiddlewarePipeline)
+    Registers "callback" to be used through the middleware.
+    If the "order" is already used, it'll be replaced. ]]
+function middleware:use(phase: string, order: number, callback: (SawdustPipeline) -> SawdustPipeline)
     assert(self.__registry[phase], `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
     local registeredFunc = {} :: _registered_func_
 
@@ -117,7 +133,12 @@ function middleware:use(phase: string, order: number, callback: (SawdustNetworki
         return pipeline
     end
 
-    table.insert(self.__registry[phase], registeredFunc)
+    if self.__registry[phase][order] then
+        self.__registry[phase][order] = registeredFunc
+    else
+        table.insert(self.__registry[phase], registeredFunc)
+    end
+    
     table.sort(self.__registry[phase], function(a, b)
         return a.order < b.order
     end)
@@ -125,8 +146,8 @@ end
 
 --[[ Middleware:run(phase: string)
     Only to be called internally for the event lifecycle.
-    Please don't call thin unless you have a good reason! ]]
-function middleware:run(phase: string, args: {[number]: any}): SawdustNetworkingMiddlewarePipeline
+    Please don't call this unless you have a good reason! ]]
+function middleware:run(phase: string, args: {[number]: any}): SawdustPipeline
     assert(self.__registry[phase], `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
 
     local runphase = self.__registry[phase]

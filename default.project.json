@@ -6,6 +6,15 @@
       "$className": "ReplicatedStorage",
       "Sawdust": {
         "$path": "src/ReplicatedStorage/Sawdust"
+      },
+      "Packages": {
+        "$path": "Packages"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "sawdustTests": {
+        "$path": "tests"
       }
     }
   }

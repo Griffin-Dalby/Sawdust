@@ -1,9 +1,12 @@
 # 🌲 Sawdust Framework
+![Made for Roblox](https://img.shields.io/badge/Made%20for-Roblox-red?logo=roblox)
+![Lua](https://img.shields.io/badge/Powered%20by-Lua-yellow)
+![GPLv3](https://img.shields.io/badge/License-GPLv3-blue)
 
 Sawdust is a lightweight, modular framework for Roblox developers who want clarity, control, and smart abstractions, without the bloat 😉
 
-> 💖 Built with love by **Griffin Dalby**
-> 🛠 Designed for efficient, easy to read and use code with a clean structure for those who hate to read docs
+> 💖 Built with love by **Griffin Dalby**<br>
+> 🛠 Designed for efficient, easy-to-read, and easy-to-use code - made for devs who hate reading docs.
 
 ---
 
@@ -19,7 +22,7 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
   Efficient asset delivery with preload batching and efficient caching.
 
 - 📣 **Signal Emitters**
-  Embeddable event-like behavior for use within Services or general-purpose OOP modules.
+  Embeddable event behavior for services or general-purpose modules.
 
 - 📜 **Cache API**
   Stackable cache management built for structure, and speed.
@@ -27,13 +30,13 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
 - 🧹 **Maid Utility**
   Clean up anything, connections, callbacks, instances, all with tag-based logic.
 
+- ✈ **And much, much more planned**
+  I hope to get as much quality of life features as possible.
+
 - 🌳 **Lignin**
   Lignin is a plugin being developed to aid even further with sawdust development.
   You'll be able to gradually create networking channels and events/functions, and many more things
   All of these will create automatic type metadata for a dynamic feeling typechecking experience including assetIds and networking event names.
-
-- ✈ **And much, much more planned**
-  I hope to get as much quality of life features as possible.
 
 ---
 
@@ -73,8 +76,6 @@ local cache = sawdust.cache
 ### Build a Service
 ```lua
 --> In ServerScriptService.SawdustServices
-
-local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
 
 local builder = sawdust.builder
 local services = sawdust.services
@@ -116,14 +117,12 @@ services:startAll() --> :start() all services
 
 ### Networking Middleware
 ```lua
-local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
-
-local networking = sawdust.networking
+local networking = sawdust.core.networking
 local channel = networking.getChannel('ExampleChannel') --> Sawdust\Events\ExampleChannel
 
-channel.TestEvent:fire() --> Sawdust\Events\ExampleChannel:FireClient() or :FireServer(), this is handled dynamically.
+channel.TestEvent:fire('Hello, world!') --> Sawdust\Events\ExampleChannel:FireClient() or :FireServer(), this is handled dynamically.
 channel.TestEvent:connect(function(player: Player, message: string)
-    print
+    print(`Player {player.Name} told us "{message}"`)
 end) --> If you have a RemoteFunction, now you can connect multiple callbacks to it.
 --> WARNING: You CAN do it on server, but remember, RemoteFunctions returning to the server period isn't a good idea.
 
@@ -144,24 +143,45 @@ end)
 
 ---
 
-## 📖 Documentation
-I do hate documentation, and this library is being built to not need it as much as possible. In spite of this, I'm making one and it'll be released publicly on pages soon. Until then, check the [Changelog](CHANGELOG.md) for detailed module additions and improvements.
+## 🧪 Tests
+I've built unit tests for sawdust and [all of the implementations]("This may not be ALL implementations at time of reading, I may still be working on some."), you can read more about this
 
 ---
 
-## 🧪 Modules
+## 📖 Documentation
+I do hate documentation, and this library is being built to be independent of documentation, however one is being built but not yet published. <br>
+Until it's finished, check the [Changelog](CHANGELOG.md) for detailed module additions and improvements.
 
+---
+
+## 📚 Modules
+
+#### Services
 | Module | Description |
 | ------ | ----------- |
 | ```builder``` | Service definition w/ injections & dependencies |
 | ```services``` | Service resolver, runner, and state tracker |
-| ```cdn``` | Asset delivery w/ preload features |
+
+#### Core
+| Module | Description |
+| ------ | ----------- |
 | ```networking``` | Middleware & event channels |
+| ```promise``` | Promise system modeled after NodeJS |
+| ```signal``` | Simple event emitter system |
 | ```cache``` | Fast, structured memory management |
-| ```signal``` | Simple vent emitter system |
-| ```util\maid``` | Cleanup utility for tagged objects |
+| ```cdn``` | Asset delivery w/ preload features |
+
+#### Util
+| Module | Description |
+| ------ | ----------- |
+| ```maid``` | Cleanup utility for tagged objects |
+| ```debounce``` | Timed and interactable debounces |
+| ```enum_map``` | "Maps" enums to human readable, and back. |
+| ```states```| Simple dynamic state management |
+| ```timer```| Heartbeat wrapper w/ decay and start/stop control |
+| ```uuid``` | Customizable UUID generator |
 
 ---
 
 ## 📜 License
-This framework complies with GNU GPL 3.0 or later.
+This library complies with GNU-GPL-3.0-or-later.
