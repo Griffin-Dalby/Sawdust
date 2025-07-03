@@ -5,8 +5,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-> ## [1.1.0] - 2025-06-
->
+> ## [1.1.0] - 2025-07-02
+> #### **THIS IS STILL BEING DEVELOPED!**
 >
 > ### Additions
 >
@@ -17,6 +17,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 >> #### **Promises** `src\ReplicatedStorage\Sawdust\__impl\promise`
 >> - Simply a promise system modeled after NodeJS.
 >> - You can chain together andThen(), catch with catch(), and of course final()
+>
+>> #### **Animation** `src\ReplicatedStorage\Sawdust\__impl\animation`
+>> 
 >
 >> #### **Utilities** `src\ReplicatedStorage\Sawdust\__impl\util\*`
 >> - **"Debounce"** allows easy creation of debounces with specified times.
@@ -33,6 +36,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > ### Fixes
 >
 > - `__impl\networking` Fixed SawdustEvent:connect() not returning the connection, and improper typechecking.
+> - `__impl\builder` Fixed issues w/ init/injection & pipeline
+> - `__internal\__service_manager` Fixed issues w/ runtime
 >
 
 ---

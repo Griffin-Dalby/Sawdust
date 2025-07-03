@@ -93,7 +93,7 @@ function event:fire(...): SawdustPipeline
     local success, pipeline = pcall(self.middleware.run, self.middleware, 'before', args)
     if not success then
         warn(`[{script.Name}] "Before" middleware error: {pipeline}`)
-        return
+        return pipeline
     end
 
     args = pipeline:getArguments()
@@ -103,7 +103,7 @@ function event:fire(...): SawdustPipeline
     if halted then
         warn(`[{script.Name}] "Before" middleware halted event call! ({self.attachedEvent.Parent.Name}.{self.attachedEvent.Name})`)
         warn(`[{script.Name}] {errorMsg or 'No message was provided.'}`)
-        return
+        return pipeline
     end
 
     --> Fire event

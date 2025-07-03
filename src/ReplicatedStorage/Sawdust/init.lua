@@ -35,6 +35,8 @@ if __is_dev then
 end
 
 --> Commit
+local animation = require(__impl.animation)
+
 local networking = require(__impl.networking)
 local builder = require(__impl.builder)
 local promise = require(__impl.promise)
@@ -46,15 +48,17 @@ local cdn = require(__impl.cdn)
 --]] Sawdust
 local sawdust = {} :: {
 	services: __service_manager.SawdustSVCManager,
-	builder: typeof(__impl.builder),
+	builder: typeof(builder),
+
+	animation: typeof(animation),
 
 	core: {
-		networking: typeof(__impl.networking),
-		promise: typeof(__impl.promise),
-		signal: typeof(__impl.signal),
-		cache: typeof(__impl.cache),
-		util: typeof(__impl.util),
-		cdn: typeof(__impl.cdn)
+		networking: typeof(networking),
+		promise: typeof(promise),
+		signal: typeof(signal),
+		cache: typeof(cache),
+		util: typeof(util),
+		cdn: typeof(cdn)
 	},
 }
 
@@ -64,6 +68,11 @@ sawdust.builder = builder --> Expose service builder
 export type SawdustSVCManager = __service_manager.SawdustSVCManager --> Expose SVCManager type
 export type SawdustSVCInjection = builder.SawdustSVCInjection --> Expose SVCInjection type
 export type SawdustService = builder.SawdustService --> Expose service type
+
+--[[ ANIMATION ]]--
+sawdust.animation = animation
+export type CFAnimBuilder = animation.CFAnimBuilder
+export type CFAnimTimeline = animation.CFAnimTimeline
 
 --[[ CORE ]]--
 local core = {}

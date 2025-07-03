@@ -61,18 +61,16 @@ function svcManager:_resolve(id: string)
     for _, depName in ipairs(builder.dependencies) do
         deps[depName] = self:_resolve(depName) end
 
-    local instance = {}
-    if builder.initFn then
-        local returned = builder.initFn(instance, deps)
+    if builder._initfn then
+        local returned = builder._initfn(builder, deps)
         for _, injection in pairs(builder.injections.init) do
-            injection:run(instance, deps) end
-        if returned then instance = returned end
+            injection:run(builder, deps) end
     end
 
-    self._instances[id] = instance
+    self._instances[id] = builder
     self._states[id] = 'ready'
 
-    return instance
+    return builder
 end
 
 --[[ svcManager:_start(id: string)
@@ -84,11 +82,11 @@ function svcManager:_start(id: string)
         return end
     
     local builder = self._registry[id]
-    if builder.startFn then
-        local returned = builder.startFn(instance)
+    if builder._startfn then
+        local returned = builder._startfn(instance)
+        if returned then self._instances[id] = returned end
         for _, injection in pairs(builder.injections.start) do
             injection:run(instance) end
-        if returned then self._instances[id] = returned end
     end
 end
 

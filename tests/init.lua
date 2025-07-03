@@ -25,5 +25,5 @@ return function ()
     end
 
     print('Running tests...\n')
-    testEZ.TestBootstrap:run({script.core})
+    testEZ.TestBootstrap:run({script.core, script.animation})
 end

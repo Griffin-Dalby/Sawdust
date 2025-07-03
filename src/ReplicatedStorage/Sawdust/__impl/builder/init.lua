@@ -44,8 +44,8 @@ builder.__index = builder
 type self = {
     id: string,
 
-    initFn: (...any) -> ...any,
-    startFn: (...any) -> ...any,
+    _initfn: (...any) -> ...any,
+    _startfn: (...any) -> ...any,
 
     injections: {
         init: {SawdustSVCInjection},
@@ -64,8 +64,8 @@ function builder.new(id: string): SawdustService
 
     self.id = id
 
-    self.initFn = function() end
-    self.startFn = function() end
+    self._initfn = function() end
+    self._startfn = function() end
 
     self.injections = {
         init = {},
@@ -87,14 +87,14 @@ end
 --[[ builder:init(fn)
     Attaches a function into the initalize runtime ]]
 function builder:init(fn: (...any) -> ...any)
-    self.initFn = fn
+    self._initfn = fn
     return self
 end
 
 --[[ builder:start(fn)
     Attaches a function into the start runtime ]]
 function builder:start(fn: (...any) -> ...any)
-    self.startFn = fn
+    self._startfn = fn
     return self
 end
 
@@ -106,7 +106,7 @@ function builder:method(name: string, callback: (self, ...any) -> ...any)
         return self end
 
     self[name] = function(...)
-        callback(self, ...) end
+        return callback(self, ...) end
     return self
 end
 
@@ -115,7 +115,7 @@ end
 function builder:inject(phase: string, fn: (...any) -> ...any)
     if not self.injections[phase] then
         warn(`[{script.Name}] Invalid injection phase "{phase or '<none provided>'}"`)
-        return end
+        return self end
 
     local inj = injection.new(fn)
     table.insert(self.injections[phase], inj)

@@ -79,7 +79,7 @@ function pipeline:setError(message: string) : boolean
     self.errorMessage = message; return true end
 
 function pipeline:getArguments() : ...any
-    return unpack(self.args) end
+    return self.args end
 function pipeline:getResult(): {[number]: any}
     return self.res end
 function pipeline:isHalted() : boolean
