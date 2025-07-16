@@ -15,11 +15,16 @@ local root = script.Parent.Parent
 --> Definition
 type __sawdustSettings = {
 	global: {
-		debug: boolean
+		debug: boolean,
+		version: number,
 	},
 	
 	networking: {
 		fetchFolder: Folder,
+
+		minCompressionSize: number,
+		dictionaryUpdateInterval: number,
+		maxDictionarySize: number,
 	},
 	
 	content: {
@@ -48,11 +53,18 @@ export type SawdustSettings = __sawdustSettings
 
 --> Settings
 __settings.global = {
-	debug = true
+	debug = true,
+	version = 4,
 }
 
 __settings.networking = {
-	fetchFolder = root.Events
+	--> Basic fetch
+	fetchFolder = root.Events,
+
+	--> DNCL
+	minCompressionSize = 50,
+	dictionaryUpdateInterval = 10,
+	maxDictionarySize = 1000
 }
 
 __settings.content = {

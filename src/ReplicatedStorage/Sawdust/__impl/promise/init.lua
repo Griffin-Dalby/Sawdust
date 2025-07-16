@@ -47,7 +47,7 @@ end
 --[[ promise.new(callback: (resolve: anyFunction, reject: anyFunction))
     Creates a new async function, and lets developers call resolve() or
     reject() to return data through two different paths. ]]
-function promise.new(callback: (anyFunction)): SawdustPromise
+function promise.new(callback: (resolve: anyFunction, reject: anyFunction) -> nil): SawdustPromise
     local self = setmetatable({
         _state = 'pending',
         _value = {},

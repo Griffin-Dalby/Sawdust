@@ -24,14 +24,21 @@ local __service_manager = require(__internal.__service_manager)
 local __impl = script.__impl
 local __is_dev = game:GetService('RunService'):IsStudio()
 
---> Check Integrity
-if __is_dev then
-	for _, module: ModuleScript in pairs(__impl:GetChildren()) do
-		if not module:IsA('ModuleScript') then continue end
+for _, module: ModuleScript in pairs(__impl:GetChildren()) do
+	if not module:IsA('ModuleScript') then continue end
 
+	--> Check for Init
+	local initModule = module:FindFirstChild('__init')
+	if initModule then
+		require(initModule)()
+	end
+
+	--> Check Integrity
+	if __is_dev then
 		local ok, res = pcall(require, module)
 		assert(ok, `[{script.Name}] Implementation "{module.Name}" is broken!\n{res}`)
 	end
+
 end
 
 --> Commit
@@ -80,11 +87,11 @@ sawdust.core = core
 
 --]] NETWORKING
 core.networking = networking
-export type SawdustEvent = networking.SawdustEvent
-export type SawdustChannel = networking.SawdustChannel
-export type SawdustMiddleware = networking.SawdustMiddleware
-export type SawdustPipeline = networking.SawdustPipeline
-export type SawdustConnection = networking.SawdustConnection
+-- export type SawdustEvent = networking.SawdustEvent
+-- export type SawdustChannel = networking.SawdustChannel
+-- export type SawdustMiddleware = networking.SawdustMiddleware
+-- export type SawdustPipeline = networking.SawdustPipeline
+-- export type SawdustConnection = networking.SawdustConnection
 
 
 --]] PROMISES

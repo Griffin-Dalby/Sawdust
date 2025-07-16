@@ -6,20 +6,27 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ---
 
 > ## [1.1.0] - 2025-07-02
-> #### **THIS IS STILL BEING DEVELOPED!**
+> Most notably, an all new networking system, also a whole truckload of new utilities, 3D animation tools, and promises.
+> Both the Networking Rewrite and Promises follow a Node.JS style, with networking resembling Express.
 >
 > ### Additions
 >
->> #### **Unit Testing** `src\ServerScriptService\UnitTests`
->> - Full-fledged unit testing for most implementations.
->> - Support for both server/client tests, useful mainly for Networking.
+>> #### **Networking Protocol** `src\ReplicatedStorage\Sawdust\__impl\networking`
+>> - Instead of remote functions, I've created a new protocol specifically for this networking module
+>> - This protocol allows simple server-client communication using req and res like express.
+>> - It has been designed with efficency in mind, minimizing overhead as much as possible while allowing the same, flexible, secure behavior.
+>> - Final note, the invocation actually utilizes the in-house sawdust promises released in this update as well, resolving and rejecting depending on what the other side returns. The server can also invoke multiple clients and get responses from each.
+>
+>> #### **Networking Middleware & Pipeline** `src\ReplicatedStorage\Sawdust\__impl\networking\middleware`
+>> - The middleware & pipeline behavior is very similar to the old, it works the exact same, except it will be tailored towards the new protocol and the data being presented in that format.
 >
 >> #### **Promises** `src\ReplicatedStorage\Sawdust\__impl\promise`
 >> - Simply a promise system modeled after NodeJS.
 >> - You can chain together andThen(), catch with catch(), and of course final()
 >
 >> #### **Animation** `src\ReplicatedStorage\Sawdust\__impl\animation`
->> 
+>> - I've included the start of CFAnim, a module allowing you to dynamically "plan" rigs and then animate them using CFrames to make procedual animations, however this may become its own module as it doesn't quite fit my vision.
+>> - I also plan to create a "scene" module that can create simple environment animations or act as a full-fledged animation suite with full control over scenes all with programming.
 >
 >> #### **Utilities** `src\ReplicatedStorage\Sawdust\__impl\util\*`
 >> - **"Debounce"** allows easy creation of debounces with specified times.
@@ -35,7 +42,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 >
 > ### Fixes
 >
-> - `__impl\networking` Fixed SawdustEvent:connect() not returning the connection, and improper typechecking.
 > - `__impl\builder` Fixed issues w/ init/injection & pipeline
 > - `__internal\__service_manager` Fixed issues w/ runtime
 >

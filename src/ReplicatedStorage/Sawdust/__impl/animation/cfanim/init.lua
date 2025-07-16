@@ -326,7 +326,6 @@ function animator:play()
 
         if allDone then
             self:cancel() --> Finished!
-            print('finished')
         end
     end)
 end

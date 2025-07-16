@@ -16,7 +16,7 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
   Build, inject, and manage services with dependency resolution.
 
 - 🔗 **Smart Networking**
-  Middleware, wrapped connections & event calls, all with a clean channel-based structure.
+  Networking w/ a custom protocol for secure returns from each side, all with a friendly interface.
 
 - 📦 **CDN System**
   Efficient asset delivery with preload batching and efficient caching.
@@ -73,6 +73,50 @@ local cache = sawdust.cache
 
 ## 🚀 Quick Start
 
+### Network from server <-> client
+```lua
+--> In StarterCharacterScripts.Mechanics
+
+local networking = sawdust.core.networking
+local mechanics = networking.getChannel('mechanics')
+
+mechanics.skill:useMiddleware('after', 1, function(pipeline)
+    --> I'll fill this all out soon I just want to push this for the rodev game jam tmr I love this module
+end)
+
+mechanics.skill:with() --> Returns a new call
+    :headers('use')
+    :data('fireball', mousePosition)
+    :timeout(4)
+    :invoke() --> Returns a promise
+        :finally(function(req)
+            local headers, data = req.headers, req.data
+            local didUse = (data[1]==true)
+
+
+        end)
+        :catch(function(issue)
+            warn('Issue with skill: fireball')
+            warn(issue)
+        end)
+
+```
+
+```lua
+--> In ServerScriptService.Mechanics
+
+local networking = sawdust.core.networking
+local mechanics = networking.getChannel('mechanics')
+
+mechanics.skill:handle(function(req, res)
+    local headers, data = req.headers, req.data
+
+    res.setHeaders('success')
+    res.setData('Whatever you\\\'d need')
+    res.send() --> Send the data and headers set
+end)
+```
+
 ### Build a Service
 ```lua
 --> In ServerScriptService.SawdustServices
@@ -114,34 +158,6 @@ services:startAll() --> :start() all services
 --]]
 
 ```
-
-### Networking Middleware
-```lua
-local networking = sawdust.core.networking
-local channel = networking.getChannel('ExampleChannel') --> Sawdust\Events\ExampleChannel
-
-channel.TestEvent:fire('Hello, world!') --> Sawdust\Events\ExampleChannel:FireClient() or :FireServer(), this is handled dynamically.
-channel.TestEvent:connect(function(player: Player, message: string)
-    print(`Player {player.Name} told us "{message}"`)
-end) --> If you have a RemoteFunction, now you can connect multiple callbacks to it.
---> WARNING: You CAN do it on server, but remember, RemoteFunctions returning to the server period isn't a good idea.
-
-channel.TestEvent.middleware:use('before', 1, function(pipeline)
-    pipeline:setArguments(...) --> You can modify the arguments being passed before the event gets fired to destination.
-
-    pipeline:setHalted(true|false) --> You can "halt" it, meaning the event wont be fired
-    pipeline:setErrorMessage('Error Message') --> If you halt it, you should set the error message for debugging.
-end)
-
-channel.TestEvent.middleware:use('after', 1, function(pipeline)
-    pipeline:setResult(...) --> Like before, you can modify the result of a RemoteFunction before its passed to where it needs to go.
-
-    pipeline:setHalted(true|false) --> Same story, it just wont be passed.
-    pipeline:setErrorMessage('Error Message') --> Exact same story.
-end)
-```
-
----
 
 ## 🧪 Tests
 I've built unit tests for sawdust and [all of the implementations]("This may not be ALL implementations at time of reading, I may still be working on some."), you can read more about this
