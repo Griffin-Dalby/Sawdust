@@ -12,28 +12,28 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
 
 ## ✨ Features
 
-- 💉 **Service Injection System**  
+- 💉 **Service Injection System**<br>
   Build, inject, and manage services with dependency resolution.
 
-- 🔗 **Smart Networking**
+- 🔗 **Smart Networking**<br>
   Networking w/ a custom protocol for secure returns from each side, all with a friendly interface.
 
-- 📦 **CDN System**
+- 📦 **CDN System**<br>
   Efficient asset delivery with preload batching and efficient caching.
 
-- 📣 **Signal Emitters**
+- 📣 **Signal Emitters**<br>
   Embeddable event behavior for services or general-purpose modules.
 
-- 📜 **Cache API**
+- 📜 **Cache API**<br>
   Stackable cache management built for structure, and speed.
 
-- 🧹 **Maid Utility**
+- 🧹 **Maid Utility**<br>
   Clean up anything, connections, callbacks, instances, all with tag-based logic.
 
-- ✈ **And much, much more planned**
+- ✈ **And much, much more planned**<br>
   I hope to get as much quality of life features as possible.
 
-- 🌳 **Lignin**
+- 🌳 **Lignin**<br>
   Lignin is a plugin being developed to aid even further with sawdust development.
   You'll be able to gradually create networking channels and events/functions, and many more things
   All of these will create automatic type metadata for a dynamic feeling typechecking experience including assetIds and networking event names.
