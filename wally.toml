@@ -2,7 +2,7 @@
 name = "griffin-dalby/sawdust"
 version = "1.2.4"
 registry = "https://github.com/UpliftGames/wally-index"
-license = "GPL-3.0-or-later"
+license = "Apache2"
 realm = "shared"
 
 exclude = [

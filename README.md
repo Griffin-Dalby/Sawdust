@@ -1,7 +1,7 @@
 # 🌲 Sawdust Framework
 ![Made for Roblox](https://img.shields.io/badge/Made%20for-Roblox-red?logo=roblox)
-![Lua](https://img.shields.io/badge/Powered%20by-Lua-yellow)
-![GPLv3](https://img.shields.io/badge/License-GPLv3-blue)
+![LuaU](https://img.shields.io/badge/Powered%20by-LuaU-yellow)
+![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)
 
 Sawdust is a lightweight, modular framework for Roblox developers who want clarity, control, and smart abstractions, without the bloat 😉
 
@@ -181,7 +181,7 @@ Until it's finished, check the [Changelog](CHANGELOG.md) for detailed module add
 #### Core
 | Module | Description |
 | ------ | ----------- |
-| ```networking``` | Middleware & event channels |
+| ```networking``` | Networking system modeled after NodeJS' Express |
 | ```promise``` | Promise system modeled after NodeJS |
 | ```signal``` | Simple event emitter system |
 | ```cache``` | Fast, structured memory management |
@@ -200,4 +200,5 @@ Until it's finished, check the [Changelog](CHANGELOG.md) for detailed module add
 ---
 
 ## 📜 License
-This library complies with GNU-GPL-3.0-or-later.
+Sawdust is licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).<br>
+Contributions are welcome! While not required by the license, if you would like to improve Sawdust or find bugs, please consider contributing or filing a issue report, it means a lot more than you think <3

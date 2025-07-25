@@ -1,18 +1,31 @@
 --[[
 	
-	Sawdust Module
+	Sawdust Framework
 	
 	Griffin E. Dalby
 	6/12/25
 	
-	"Sawdust" is a collection of modules that I use,
-	all combined in one, easy to use, streamlined module.
+	"Sawdust" is a collection of modules that I built to purposefully
+	abstract and implement new, rich features that I wish previously
+	existed in the Roblox/LuaU engine.
 	
-	It's all extremley modular and takes advantage of types
-	as much as humanly possible for the easiest possible
-	programming experience.
+	The main goal for this framework is modularity and developer
+	experience, I'll take advantage of type / typechecking as much
+	as possible for the smoothest possible usage.
 	
 --]]
+
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+
+--     http://www.apache.org/licenses/LICENSE-2.0
+
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
 
 --]] Internals
 local __internal = script.__internal
