@@ -63,6 +63,13 @@ function cache:getValue(...)
     return unpack(found)
 end
 
+--[[ cache:hasEntry(entry: any)
+    Checks if the current cache has an entry for "entry". ]]
+function cache:hasEntry(entry: any) : boolean
+    if not entry then warn(`[Sawdust.{script.Name}] Trying to check for an entry without a key!`); return false end
+    return self.contents[entry] ~= nil
+end
+
 --[[ cache:getContents()
     Returns a copy of all values within the current cache. ]]
 function cache:getContents()

@@ -1,10 +1,9 @@
 [package]
 name = "griffin-dalby/sawdust"
-version = "1.2.0"
+version = "1.2.3"
 registry = "https://github.com/UpliftGames/wally-index"
 license = "GPL-3.0-or-later"
 realm = "shared"
-
 
 [dependencies]
 testez = "roblox/testez@0.4.1"

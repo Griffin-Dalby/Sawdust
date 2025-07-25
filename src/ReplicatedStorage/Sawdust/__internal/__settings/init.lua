@@ -21,10 +21,6 @@ type __sawdustSettings = {
 	
 	networking: {
 		fetchFolder: Folder,
-
-		minCompressionSize: number,
-		dictionaryUpdateInterval: number,
-		maxDictionarySize: number,
 	},
 	
 	content: {
@@ -53,25 +49,20 @@ export type SawdustSettings = __sawdustSettings
 
 --> Settings
 __settings.global = {
-	debug = true,
+	debug = false,
 	version = 4,
 }
 
 __settings.networking = {
 	--> Basic fetch
 	fetchFolder = root.Events,
-
-	--> DNCL
-	minCompressionSize = 50,
-	dictionaryUpdateInterval = 10,
-	maxDictionarySize = 1000
 }
 
 __settings.content = {
 	fetchFolder = root.Content,
 	debug = {
-		cdn = true,
-		preload = true
+		cdn = false,
+		preload = false
 	}
 }
 

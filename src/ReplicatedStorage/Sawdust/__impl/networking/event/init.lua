@@ -121,14 +121,16 @@ function call:setFilterType(filterType: 'include'|'exclude')
 
 --[[ call:data(...)
     Sets the send data of this call. ]]
-function call:data(tbl: {any: any}, second, ...)
-    if tbl and typeof(tbl) == 'table' then
-        self._data = tbl
-    else
-        local args = {...}
-        table.insert(args, 1, second)
+function call:data(...)
+    local args = {...}
+    
+    if #args == 1 and type(args[1]) == 'table' then --> Table argument
+        self._data = args[1]
+    elseif #args > 0 then --> Multiple arguments or single non-table argument
         self._data = args
-    end
+    else --> No arguments
+        self._data = {} end
+
     return self end
 
 --[[ call:headers(string)
@@ -280,8 +282,9 @@ function call:invoke() : promise.SawdustPromise
                 --> Reject
                 if countTbl(returnedData) >= expectedReturns then
                     return end --> Expectations met
+                    
                 warn(`[{script.Name}] Request ({self.__event.Parent.Name}.{self.__event.name}) timed out after {self._timeout} seconds!`)
-                reject(returnedData) --> Return incomplete data
+                reject(countTbl(returnedData)>0 and returnedData or 'timeout') --> Return incomplete data
             end
         end)
         resolver = function(rawData: {})

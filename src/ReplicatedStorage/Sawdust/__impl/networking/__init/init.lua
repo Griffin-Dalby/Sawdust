@@ -55,8 +55,6 @@ return function ()
                     data = player
                     
                 end
-
-                print(data)
 				
                 if not data or typeof(data) ~= 'table' then return end --> Table check
                 if not data[1] or data[1] ~= __settings.global.version then return end --> Sawdust protocol check
@@ -76,7 +74,7 @@ return function ()
                     eventTable:setValue(returnId, nil) --> Remove resolver
 
                     return 
-                end  --> Type 3 is for data returns
+                end --> Type 3 is for data returns
 
                 --> Run connections
                 for eventId: string, connection: types.NetworkingConnection in pairs(eventTable:getContents()) do

@@ -90,7 +90,14 @@ function connection:run(rawData: {})
     res.setHeaders = function(headers: string) --> Sets headers
         resData.headers = headers end
     res.setData = function(...) --> Sets data
-        resData.data = {...} end
+        local args = {...}
+    
+        if #args == 1 and type(args[1]) == 'table' then --> Table argument
+            resData.data = args[1]
+        elseif #args > 0 then --> Multiple arguments or single non-table argument
+            resData.data = args
+        else --> No arguments
+            resData.data = {} end end
 
     res.send = function() --> Sends response
         if resData.closed then

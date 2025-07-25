@@ -42,11 +42,11 @@ export type SawdustCDNPreloader = __preload.SawdustCDNPreloader
 --[[ provider.new()
     Constructor function for the CDN provider. ]]
 function provider.getProvider(providerName: string) : SawdustCDNProvider
-    local _providers = cdnCache:findTable('_providers')
+    local _providers = cdnCache:hasEntry('_providers') 
+        and cdnCache:findTable('_providers')
+        or cdnCache:createTable('_providers')
 
-    if not _providers then _providers = cdnCache:createTable('_providers') end
     local _cached_provider = _providers:getValue(providerName)
-
     if _cached_provider then
         return _cached_provider  end
 
@@ -67,11 +67,11 @@ end
     Retrieves an asset from the CDN by its AssetID.
     Returns a table with metadata or an Instance if found. ]]
 function provider:getAsset(assetId: string) : SawdustCDNReturnTemplate | Instance
-    local _assets = cdnCache:findTable('_assets')
+    local _assets = cdnCache:hasEntry('_assets') 
+        and cdnCache:findTable('_assets')
+        or cdnCache:createTable('_assets')
 
-    if not _assets then _assets = cdnCache:createTable('_assets') end
     local _cached_asset = _assets:getValue(`{self.provider.Name}.{assetId}`)
-
     if _cached_asset then
         if __settings.global.debug and __settings.content.debug.cdn then
             print(`[{script.Name}] Fetched cached asset for "{self.provider.Name}.{assetId}"`) end
