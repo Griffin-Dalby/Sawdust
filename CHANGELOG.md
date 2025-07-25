@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-> ## [1.1.0] - 2025-07-02
+> ## [1.1.0] - 2025-07-16
 > Most notably, an all new networking system, also a whole truckload of new utilities, 3D animation tools, and promises.
 > Both the Networking Rewrite and Promises follow a Node.JS style, with networking resembling Express.
 >
