@@ -292,7 +292,7 @@ function call:invoke() : promise.SawdustPromise
             if resolvedReqId ~= requestId then
                 warn(`[{script.Name}] Resolver called with mismatched request ID! Expected {requestId}, got {resolvedReqId}`)
                 return end
-
+            
             local response = {
                 headers = rawData[4],
                 data = rawData[5],
@@ -308,9 +308,9 @@ function call:invoke() : promise.SawdustPromise
                 
             clean() --> Clean up
             
-            if typeof(pipeline:getData()) == 'table' then
-                returnedData = pipeline:getData() end
-            resolve(returnedData) --> Resolve promise
+            -- if typeof(pipeline:getData()) == 'table' then
+            --     returnedData = pipeline:getData() end
+            resolve(returnedData.data) --> Resolve promise
         end
 		thisCache:setValue(
             requestId,

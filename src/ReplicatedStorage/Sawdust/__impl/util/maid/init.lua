@@ -61,12 +61,12 @@ function wrapper:clean()
     local itype = typeof(self.wrappedI)
     local task = tasks[itype]
 
+    if doDebug then
+        print(formatError('clean', `Cleaned up {itype=='Instance' and `"{self.wrappedI.Name}"` or 'wrapped instance.'} (Type: {itype})`)) end
+
     task(self.wrappedI)
     table.clear(self.tags)
     table.clear(self)
-
-    if debug then
-        print(formatError('clean', `Cleaned up {itype=='Instance' and `"{self.wrappedI.Name}"` or 'wrapped instance.'} (Type: {itype})`)) end
 end
 
 function wrapper:addTag(tag: string)
@@ -78,7 +78,7 @@ function wrapper:addTag(tag: string)
     if tagExists then return false end
 
     table.insert(self.tags, tag)
-    if debug then
+    if doDebug then
         local itype = typeof(self.wrappedI)
         print(formatError('addTag', `Tag "{tag}" added to {itype=='Instance' and self.wrappedI.Name or 'wrapped instance'}.`)) end
     return true
@@ -89,7 +89,7 @@ function wrapper:hasTag(tag: string)
     assert(self.wrappedI, formatError('hasTag', 'Wrapped instance missing instance reference!'))
     assert(tag, formatError('hasTag', 'Tag argument [1] missing!'))
 
-    if debug then
+    if doDebug then
         local itype = typeof(self.wrappedI)
         print(formatError('hasTag', `Checked if {itype=='Instance' and `"{self.wrappedI.Name}"` or 'wrapped instance'} has tag "{tag}" (Result: {table.find(self.tags, tag)})`)) end
     return table.find(self.tags, tag) ~= nil
@@ -104,7 +104,7 @@ function wrapper:removeTag(tag: string)
     local iTag = table.find(self.tags, tag)
     if iTag then
         table.remove(self.tags, iTag)
-        if debug then
+        if doDebug then
             print(formatError('removeTag', `Removed tag "{tag}" from {itype=='Instance' and `"{self.wrappedI.Name}"` or 'wrapped instance.'}`)) end
         return true end
     
@@ -139,7 +139,7 @@ function maid:add(item: any)
     local wrapped = wrapper.wrap(item)
     self.tracked[item] = wrapped
 
-    if debug then
+    if doDebug then
         print(formatError('add', `Now tracking {(typeof(item)=='Instance') and `"{item.Name}"` or 'new instance'} for Maid instance.`)) end
 end
 

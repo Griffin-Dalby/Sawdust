@@ -7,10 +7,7 @@ realm = "shared"
 
 exclude = [
     "build",
-    "tests",
     "util",
-    "*.md",
-    ".gitignore",
 ]
 
 [dependencies]
