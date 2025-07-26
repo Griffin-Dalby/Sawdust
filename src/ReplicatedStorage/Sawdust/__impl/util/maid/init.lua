@@ -33,6 +33,8 @@ tasks['Instance'] = function(instance: Instance)
 tasks['function'] = function(f: () -> nil)
     f() end
 
+tasks['nil'] = function() end
+
 --]] Maid Wrapper
 local wrapper = {}
 wrapper.__index = wrapper
