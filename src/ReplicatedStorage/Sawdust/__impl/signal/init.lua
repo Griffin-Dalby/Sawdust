@@ -67,6 +67,8 @@ function signal.new(emitter: SawdustEmitter) : SawdustSignal
         table.clear(self)
     end
 
+    emitter.signals[self.uuid] = self
+
     return self
 end
 
@@ -75,6 +77,20 @@ function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection
     self.connections[connection.uuid] = connection
 
     return connection
+end
+
+function signal:fire(...)
+    local args = {...}
+    for connectionUUID: string, connection: (...any) -> nil in pairs(self.connections) do
+        local s, e = pcall(function()
+            connection(unpack(args))
+        end)
+
+        if s then
+            warn(`[{script.Name}] Failure while firing sawdust signal!`)
+            error(e)
+        end
+    end
 end
 
 function signal:destroy()
@@ -104,6 +120,16 @@ end
 function emitter:newSignal() : SawdustSignal
     local newSignal = signal.new(self)
     return newSignal
+end
+
+--[[ emitter:destroy()
+    Destroys all signals and renders emitter unusable. ]]
+function emitter:destroy()
+    for _, signal: SawdustSignal in pairs(self.signals) do
+        signal:destroy() end
+        
+    table.clear(self.signals)
+    table.clear(self)
 end
 
 return emitter
