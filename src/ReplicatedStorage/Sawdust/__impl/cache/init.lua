@@ -66,7 +66,7 @@ end
 --[[ cache:hasEntry(entry: any)
     Checks if the current cache has an entry for "entry". ]]
 function cache:hasEntry(entry: any) : boolean
-    if not entry then warn(`[Sawdust.{script.Name}] Trying to check for an entry without a key!`); return false end
+    if not entry then error(`[Sawdust.{script.Name}] Trying to check for an entry without a key!`); return false end
     return self.contents[entry] ~= nil
 end
 
@@ -80,7 +80,7 @@ end
     Sets the value of key "key" to "value".
     Setting a value to "nil" is a valid way to delete data. ]]
 function cache:setValue(key: any, value: any)
-    if not key then warn(`[Sawdust.{script.Name}] Trying to set value without a key!`); return end
+    if not key then error(`[Sawdust.{script.Name}] Trying to set value without a key!`); return end
 
     self.contents[key] = value
 end
@@ -89,7 +89,7 @@ end
     Creates a table within the cache, basically having caches in caches. ]]
 function cache:createTable(tableKey: any)
     if self.contents[tableKey] then
-        warn(`[{script.Name}] Conflict while creating new Table!`)
+        error(`[{script.Name}] Conflict while creating new Table!`)
         return end
     
     local pseudoCache = setmetatable({} :: self, cache)
@@ -105,10 +105,10 @@ end
    Finds a specified table, returning it as if it were another cache. ]]
 function cache:findTable(tableKey: any) : SawdustCache
     if not tableKey or not self.contents[tableKey] then
-        warn(`[{script.Name}] Unable to find table w/ name "{tableKey or '<none provided>'}"!`)
+        error(`[{script.Name}] Unable to find table w/ name "{tableKey or '<none provided>'}"!`)
         return end
     if typeof(self.contents) ~= 'table' then
-        warn(`[{script.Name}] Attempted to find table w/ name "{tableKey}", and it was a {typeof(self.contents)}!`)
+        error(`[{script.Name}] Attempted to find table w/ name "{tableKey}", and it was a {typeof(self.contents)}!`)
         return end
 
     return self.contents[tableKey] :: SawdustCache
