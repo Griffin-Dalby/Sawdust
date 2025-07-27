@@ -136,6 +136,7 @@ end
 --[[ maid:add(item: any?)
     Adds *item* to this Maid instance. ]]
 function maid:add(item: any)
+    if not item then return end
     if self.tracked[item] then return end
 
     local wrapped = wrapper.wrap(item)
