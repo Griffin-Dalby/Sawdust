@@ -54,7 +54,7 @@ function provider.getProvider(providerName: string) : SawdustCDNProvider
     
     self.provider = __settings.content.fetchFolder:FindFirstChild(providerName)
     if not self.provider then
-        warn(`[{script.Name}] Provider '{providerName}' not found in content folder.`) 
+        error(`[{script.Name}] Provider '{providerName}' not found in content folder.`) 
         return end 
     
     self.preload = __preload.new(self.provider)
@@ -79,7 +79,7 @@ function provider:getAsset(assetId: string) : SawdustCDNReturnTemplate | Instanc
 
     local foundAsset = self.provider:FindFirstChild(assetId) :: Instance
     if not foundAsset then
-        warn(`[{script.Name}] Failed to locate asset "{assetId or '<no ID provided>'}" in provider "{self.provider.Name}"!`)
+        error(`[{script.Name}] Failed to locate asset "{assetId or '<no ID provided>'}" in provider "{self.provider.Name}"!`)
         return end
 
     local isMetadata = foundAsset:IsA('ModuleScript')
