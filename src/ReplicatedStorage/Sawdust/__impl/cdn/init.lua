@@ -94,7 +94,8 @@ function provider:getAsset(assetId: string) : SawdustCDNReturnTemplate | Instanc
     end
 
     _assets:setValue(`{self.provider.Name}.{assetId}`, isMetadata and assetData or foundAsset)
-    print(`[{script.Name}] Fetched & saved asset "{self.provider.Name}.{assetId}" to cache.`)
+    if __settings.global.debug and __settings.content.debug.cdn then
+        print(`[{script.Name}] Fetched & saved asset "{self.provider.Name}.{assetId}" to cache.`) end
 
     return assetData
 end
