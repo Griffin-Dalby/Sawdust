@@ -79,6 +79,16 @@ function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection
     return connection
 end
 
+function signal:once(callback: (...any) -> nil) : SawdustSignalConnection
+    local connection
+    connection = self:connect(function(...)
+        callback(...)
+        self.connections[connection.uuid] = nil
+    end)
+
+    return connection
+end
+
 function signal:fire(...)
     local args = {...}
     for connectionUUID: string, connection: (...any) -> nil in pairs(self.connections) do
