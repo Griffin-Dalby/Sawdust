@@ -100,4 +100,17 @@ function provider:getAsset(assetId: string) : SawdustCDNReturnTemplate | Instanc
     return assetData
 end
 
+--[[ provider:getAllAssets() : table
+    Retrives all assets in the current provider. ]]
+function provider:getAllAssets() : {}
+    local assets = {}
+    for _, child in pairs(self.provider:GetChildren()) do
+        if child.Name:sub(1,2)=='__' then continue end
+
+        assets[child.Name] = self:getAsset(child.Name)
+    end
+
+    return assets
+end
+
 return provider
