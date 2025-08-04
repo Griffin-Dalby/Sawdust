@@ -37,6 +37,9 @@ export type SawdustCache = typeof(setmetatable({} :: self, cache))
 --[[ cache.findCache(cacheName: string!)
     Finds a cache table w/ "cacheName". ]]
 function cache.findCache(cacheName: string): SawdustCache
+    assert(cacheName, `.findCache() missing argument 1! (cacheName)`)
+    assert(type(cacheName)=='string', `.findCache() argument 1 type mismatch! (expected string, got {type(cacheName)}!)`)
+
     if __cache[cacheName] then
         return __cache[cacheName]  end
 
@@ -52,12 +55,16 @@ end
 --[[ cache:getValue(keys: ...string)
     Fetches multiple or singular values from the current cache. ]]
 function cache:getValue(...)
+    assert(self, `:getValue() called without a targeted cache!`)
+
     local keys = {...} :: {[number]: string}
     local found = {}
     
     for i, key in pairs(keys) do
         local value = self.contents[key]
-        if value then found[i] = value end
+        assert(value, `:getValue() couldn't find entry "{key} @ {i}"!`)
+
+        found[i] = value
     end
 
     return unpack(found)
@@ -66,13 +73,15 @@ end
 --[[ cache:hasEntry(entry: any)
     Checks if the current cache has an entry for "entry". ]]
 function cache:hasEntry(entry: any) : boolean
-    if not entry then error(`[Sawdust.{script.Name}] Trying to check for an entry without a key!`); return false end
+    assert(self, `:hasEntry() called without a targeted cache!`)
+    assert(entry, `:hasEntry() missing argument 1! (entry)`)
     return self.contents[entry] ~= nil
 end
 
 --[[ cache:getContents()
     Returns a copy of all values within the current cache. ]]
 function cache:getContents()
+    assert(self, `:getContents() called without a targeted cache!`)
     return table.clone(self.contents)
 end
 
@@ -80,7 +89,8 @@ end
     Sets the value of key "key" to "value".
     Setting a value to "nil" is a valid way to delete data. ]]
 function cache:setValue(key: any, value: any)
-    if not key then error(`[Sawdust.{script.Name}] Trying to set value without a key!`); return end
+    assert(self, `:setValue() called without a targeted cache!`)
+    assert(key, `:setValue() missing argument 1! (key)`)
 
     self.contents[key] = value
 end
@@ -88,9 +98,9 @@ end
 --[[ cache:createTable(tableKey: any)
     Creates a table within the cache, basically having caches in caches. ]]
 function cache:createTable(tableKey: any)
-    if self.contents[tableKey] then
-        error(`[{script.Name}] Conflict while creating new Table!`)
-        return end
+    assert(self, `:createTable() called without a targeted cache!`)
+    assert(tableKey, `:createTable() missing argument 1! (tableKey)`)
+    assert(not self.contents[tableKey], `:createTable() conflict while creating a new table!`)
     
     local pseudoCache = setmetatable({} :: self, cache)
 
@@ -104,14 +114,23 @@ end
 --[[ cache:findTable(tableKey: any)
    Finds a specified table, returning it as if it were another cache. ]]
 function cache:findTable(tableKey: any) : SawdustCache
-    if not tableKey or not self.contents[tableKey] then
-        error(`[{script.Name}] Unable to find table w/ name "{tableKey or '<none provided>'}"!`)
-        return end
-    if typeof(self.contents) ~= 'table' then
-        error(`[{script.Name}] Attempted to find table w/ name "{tableKey}", and it was a {typeof(self.contents)}!`)
-        return end
+    assert(self, `:findTable() called without a targeted cache!`)
+    assert(tableKey, `:findTable() missing argument 1! (tableKey)`)
+    assert(self.contents[tableKey], `:findTable() unable to find table w/ name "{tableKey}"!`)
+    assert(type(self.contents)=='table', `:findTable() located value is a {type(self.contents)}, not a table!`)
 
     return self.contents[tableKey] :: SawdustCache
+end
+
+--[[ cache:deleteTable(tableKey: any)
+    Finds & deletes the specified table. ]]
+function cache:deleteTable(tableKey: any) : SawdustCache
+    assert(self, `:deleteTable() called without a targeted cache!`)
+    assert(tableKey, `:deleteTable() missing argument 1! (tableKey)`)
+    assert(self.contents[tableKey], `:deleteTable() unable to find table w/ name "{tableKey}"!`)
+    assert(type(self.contents)=='table', `:deleteTable() located value is a {type(self.contents)}, not a table!`)
+
+    self.contents[tableKey] = nil
 end
 
 return cache
