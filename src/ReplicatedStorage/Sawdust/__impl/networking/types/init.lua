@@ -110,11 +110,11 @@ export type ConnectionRequest = {
 
 }
 export type ConnectionResult  = {
-    append: (key: string, value: any) -> nil,
-    close: () -> nil,
     headers: (headers: string) -> nil,
     data: (...any) -> nil,
+    append: (key: string, value: any) -> nil,
     send: () -> nil,
+    reject: () -> nil,
 }
 
 function connection:run(rawData: {})

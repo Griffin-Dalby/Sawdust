@@ -317,7 +317,14 @@ function call:invoke() : promise.SawdustPromise
             
             -- if typeof(pipeline:getData()) == 'table' then
             --     returnedData = pipeline:getData() end
-            resolve(returnedData.data) --> Resolve promise
+
+            if type(returnedData) == 'table' then
+                resolve(returnedData.data) --> Resolve (there must be custom error handling)
+            else
+                if returnedData.headers == '__rejected__' then
+                    reject(returnedData.data) else
+                    resolve(returnedData.data) end
+            end
         end
 		thisCache:setValue(
             requestId,

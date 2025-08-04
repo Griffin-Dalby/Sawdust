@@ -81,34 +81,39 @@ function connection:run(rawData: {})
     local resData = {
         returnId = (eventType==2 and returnId) and returnId or nil,
 
-        headers = {},
+        headers = '',
         data = {},
 	}
 
-    res.append = function(key: string, value: any) --> Append data to response data
-        resData.data[key] = value end
-    res.close = function() --> Close response
-        resData = {closed = true} end
-
     res.headers = function(headers: string) --> Sets headers
+        assert(resData.closed==nil, `attempt to set headers on a closed request!`)
         resData.headers = headers end
     res.data = function(...) --> Sets data
+        assert(resData.closed==nil, `attempt to set data on a closed request!`)
         local args = {...}
-    
-        if #args == 1 and type(args[1]) == 'table' then --> Table argument
-            resData.data = args[1]
-        elseif #args > 0 then --> Multiple arguments or single non-table argument
-            resData.data = args
-        else --> No arguments
-            resData.data = {} end end
-
+            
+        if #args == 1 and type(args[1]) == 'table' then
+                              resData.data = args[1]    --> Table
+        elseif #args > 0 then resData.data = args       --> Tuple
+        else                  resData.data = {} end end --> None
+    res.append = function(key: string, value: any) --> Append data to response data
+        assert(resData.closed==nil, `attempt to append to a closed request!`)
+        resData.data[key] = value end
+                
     res.send = function() --> Sends response
-        if resData.closed then
-            return end
+        assert(resData.closed==nil, `attempt to send a closed request!`)
+        resData.closed = true
 
         self.returnCall(req.caller, resData)
 	end
-	
+    res.reject = function() --> Reject response
+        assert(resData.closed==nil, `attempt to reject to a closed request!`)
+        resData.closed = true
+
+        resData.headers = '__rejected__'
+        self.returnCall(req.caller, resData)
+    end
+
 	--> Register return
 	if resData.returnId then
 		requestCache:setValue(resData.returnId, {
