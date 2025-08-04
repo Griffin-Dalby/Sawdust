@@ -65,8 +65,8 @@ local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
 local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
 
 local services = sawdust.services
-local networking = sawdust.networking
-local cache = sawdust.cache
+local networking = sawdust.core.networking
+local maid = sawdust.util.maid
 ```
 
 ---
