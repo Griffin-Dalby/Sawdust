@@ -48,6 +48,20 @@ function countTbl(t)
     return i
 end
 
+function compileTableArgs(...)
+    local args = {...}
+
+    if #args==1 and type(args[1]) == 'table' then
+        args = args[1] --> Table argument
+    elseif #args > 0 then
+        args = args    --> Multiple arguments, or single non-table argument.
+    else
+        args = nil     --> No arguments
+    end
+
+    return args
+end
+
 --]] Event Call
 local call = {}
 call.__index = call
@@ -92,11 +106,12 @@ function call:broadcastGlobally()
 
 --[[ call:broadcastTo(targetData)
     Sets the targets of this call. ]]
-function call:broadcastTo(targets: {Player})
+function call:broadcastTo(...)
     -- if not isServer then
     --     warn(`[{script.Name}] Can't access broadcast functions on client!`)
 	--     return end
 	
+    local targets = compileTableArgs(unpack{...})
 	if not targets then return self end
 
     self._globalBroadcast = nil
@@ -122,15 +137,7 @@ function call:setFilterType(filterType: 'include'|'exclude')
 --[[ call:data(...)
     Sets the send data of this call. ]]
 function call:data(...)
-    local args = {...}
-    
-    if #args == 1 and type(args[1]) == 'table' then --> Table argument
-        self._data = args[1]
-    elseif #args > 0 then --> Multiple arguments or single non-table argument
-        self._data = args
-    else --> No arguments
-        self._data = {} end
-
+    self._data = compileTableArgs(unpack{...}) or {}
     return self end
 
 --[[ call:headers(string)
