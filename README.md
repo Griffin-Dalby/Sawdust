@@ -40,37 +40,6 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
 
 ---
 
-## 🧠 Philosophy
-
-Sawdust is designed to:
-- Give **maximum control** to the developer
-- Encourage **clean runtime logic**
-- Reduce **boilerplate**
-- Promote **discoverabiliy** via tooling & naming clarity
-- Minimize documentation checks
-
-You get **injection + dependency** management without losing Luau's flexibility.
-
----
-
-## 🚚 Installation
-
-1. Drop the Sawdust folder into `ReplicatedStorage`
-2. Access it on server or client via:
-```lua
-local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
-```
-3. Access the implementations like:
-```lua
-local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
-
-local services = sawdust.services
-local networking = sawdust.core.networking
-local maid = sawdust.util.maid
-```
-
----
-
 ## 🚀 Quick Start
 
 ### Network from server <-> client
@@ -156,8 +125,40 @@ services:startAll() --> :start() all services
     'Method was called, message: "I called the function from ExampleService!"'
 
 --]]
-
 ```
+
+---
+
+## 🧠 Philosophy
+
+Sawdust is designed to:
+- Give **maximum control** to the developer
+- Encourage **clean runtime logic**
+- Reduce **boilerplate**
+- Promote **discoverabiliy** via tooling & naming clarity
+- Minimize documentation checks
+
+You get **injection + dependency** management without losing Luau's flexibility.
+
+---
+
+## 🚚 Installation
+
+1. Drop the Sawdust folder into `ReplicatedStorage`
+2. Access it on server or client via:
+```lua
+local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
+```
+3. Access the implementations like:
+```lua
+local sawdust = require(game:GetService('ReplicatedStorage').Sawdust)
+
+local services = sawdust.services
+local networking = sawdust.core.networking
+local maid = sawdust.util.maid
+```
+
+---
 
 ## 🧪 Tests
 I've built unit tests for sawdust and [all of the implementations]("This may not be ALL implementations at time of reading, I may still be working on some."), you can read more about this
