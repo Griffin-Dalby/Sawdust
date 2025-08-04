@@ -66,7 +66,10 @@ function connection:run(rawData: {})
     --> Create req
     local req: types.ConnectionRequest = {}
 
-    req.caller = rawData.caller
+    local foundCaller = Players:GetPlayerByUserId(rawData.caller)
+    assert(foundCaller, `:run() failed to find caller! ({foundCaller.UserId})`)
+
+    req.caller = foundCaller
     req.headers = rawData[4]
     req.data = rawData[5]
 
@@ -87,9 +90,9 @@ function connection:run(rawData: {})
     res.close = function() --> Close response
         resData = {closed = true} end
 
-    res.setHeaders = function(headers: string) --> Sets headers
+    res.headers = function(headers: string) --> Sets headers
         resData.headers = headers end
-    res.setData = function(...) --> Sets data
+    res.data = function(...) --> Sets data
         local args = {...}
     
         if #args == 1 and type(args[1]) == 'table' then --> Table argument

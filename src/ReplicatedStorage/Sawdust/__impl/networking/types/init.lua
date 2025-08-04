@@ -112,8 +112,8 @@ export type ConnectionRequest = {
 export type ConnectionResult  = {
     append: (key: string, value: any) -> nil,
     close: () -> nil,
-    setHeaders: (headers: string) -> nil,
-    setData: (...any) -> nil,
+    headers: (headers: string) -> nil,
+    data: (...any) -> nil,
     send: () -> nil,
 }
 
