@@ -130,9 +130,10 @@ export type SawdustCache = cache.SawdustCache
 
 --]] UTIL
 core.util = util
-export type SawdustMaid    = util.SawdustMaid
-export type SawdustTimer   = util.SawdustTimer
-export type SawdustEnumMap = util.SawdustEnumMap
+export type SawdustMaid     = util.SawdustMaid
+export type SawdustTimer    = util.SawdustTimer
+export type SawdustEnumMap  = util.SawdustEnumMap
+export type DebounceTracker = util.DebounceTracker
 
 
 --]] CDN
@@ -142,4 +143,4 @@ export type SawdustCDNPreloader      = cdn.SawdustCDNPreloader
 export type SawdustCDNReturnTemplate = cdn.SawdustCDNReturnTemplate
 
 
-return sawdust
+return sawdust :: typeof(sawdust)

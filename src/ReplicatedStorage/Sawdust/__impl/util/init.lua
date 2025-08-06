@@ -34,4 +34,9 @@ util.maid = maid
 export type SawdustMaid = maid.SawdustMaid
 
 
+
+util.debounce = debounce
+export type DebounceTracker = debounce.DebounceTracker
+
+
 return util
