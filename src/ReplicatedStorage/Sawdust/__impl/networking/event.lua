@@ -21,6 +21,7 @@ local isServer   = runService:IsServer()
 --> Networking logic
 local middleware = require(script.Parent.middleware)
 local connection = require(script.Parent.connection)
+local router = require(script.Parent.router)
 local types = require(script.Parent.types)
 
 --> Sawdust implementations
@@ -90,6 +91,7 @@ function call.new(event: types.NetworkingEvent) : types.NetworkingCall
 end
 
 --> Call broadcast settings
+--#region
 
 --[[ call:broadcastGlobally()
     This call will be sent to all players in this server. ]]
@@ -130,9 +132,10 @@ function call:setFilterType(filterType: 'include'|'exclude')
     assert(filterType)
 
     self._filterType = filterType
-    return self end
+    return self end --#endregion
 
 --> Call arguments
+--#region
 
 --[[ call:data(...)
     Sets the send data of this call. ]]
@@ -160,7 +163,7 @@ function call:setReturnId(returnId: string)
         return self end
 
     self._returnId = returnId
-    return self end
+    return self end --#endregion
 
 --> Finalize
 function call:fire() : types.NetworkingPipeline
@@ -379,10 +382,17 @@ end
 function event:with() : types.NetworkingCall
     return call.new(self) end
 
-function event:handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any)
+function event:handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any) : types.NetworkingConnection
     local newConn = connection.new(callback, self)
     self.__connections[newConn.connectionId] = newConn
     connectionCache:findTable(self.__event):setValue(newConn.connectionId, newConn)
+    
+    return newConn
+end
+
+function event:route() : types.NetworkingRouter
+    local newRoute = router.new(self)
+    return newRoute
 end
 
 function event:useMiddleware(phase: string, order: number, callback: (pipeline: types.NetworkingPipeline) -> nil, msettings: {protected: boolean})

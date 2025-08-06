@@ -1,3 +1,4 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 --[[
 
     Sawdust Networking Types
@@ -176,10 +177,12 @@ local router = {}
 router.__index = router
 
 export type self_router = {
-
+    __routes: {[string]: (req: ConnectionRequest, res: ConnectionResult) -> nil},
+    __listener: NetworkingConnection
 }
 export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
 
-
+function router:on(intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil): NetworkingRouter end
+function router:destroy() end
 
 return types
