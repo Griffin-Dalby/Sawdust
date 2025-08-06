@@ -57,7 +57,7 @@ end
 --> Commit
 local animation = require(__impl.animation)
 
-local networking = require(__impl.networking)
+local networking = require(__impl.networking); local networking_types = require(__impl.networking.types)
 local builder = require(__impl.builder)
 local promise = require(__impl.promise)
 local signal = require(__impl.signal)
@@ -85,13 +85,13 @@ local sawdust = {} :: {
 --[[ SERVICES ]]--
 sawdust.services = __service_manager.new() --> Create services
 sawdust.builder = builder --> Expose service builder
-export type SawdustSVCManager = __service_manager.SawdustSVCManager --> Expose SVCManager type
+export type SawdustSVCManager   = __service_manager.SawdustSVCManager --> Expose SVCManager type
 export type SawdustSVCInjection = builder.SawdustSVCInjection --> Expose SVCInjection type
-export type SawdustService = builder.SawdustService --> Expose service type
+export type SawdustService      = builder.SawdustService --> Expose service type
 
 --[[ ANIMATION ]]--
 sawdust.animation = animation
-export type CFAnimBuilder = animation.CFAnimBuilder
+export type CFAnimBuilder  = animation.CFAnimBuilder
 export type CFAnimTimeline = animation.CFAnimTimeline
 
 --[[ CORE ]]--
@@ -100,11 +100,15 @@ sawdust.core = core
 
 --]] NETWORKING
 core.networking = networking
--- export type SawdustEvent = networking.SawdustEvent
--- export type SawdustChannel = networking.SawdustChannel
--- export type SawdustMiddleware = networking.SawdustMiddleware
--- export type SawdustPipeline = networking.SawdustPipeline
--- export type SawdustConnection = networking.SawdustConnection
+export type NetworkingChannel    = networking_types.NetworkingChannel
+export type NetworkingCall       = networking_types.NetworkingCall
+export type NetworkingEvent      = networking_types.NetworkingEvent
+export type NetworkingConnection = networking_types.NetworkingConnection
+export type NetworkingMiddleware = networking_types.NetworkingMiddleware
+export type NetworkingPipeline   = networking_types.NetworkingPipeline
+export type NetworkingRouter     = networking_types.NetworkingRouter
+export type ConnectionRequest    = networking_types.ConnectionRequest
+export type ConnectionResult     = networking_types.ConnectionResult
 
 
 --]] PROMISES
@@ -114,8 +118,8 @@ export type SawdustPromise = promise.SawdustPromise
 
 --]] SIGNAL
 core.signal = signal
-export type SawdustEmitter = signal.SawdustEmitter
-export type SawdustSignal = signal.SawdustSignal
+export type SawdustEmitter          = signal.SawdustEmitter
+export type SawdustSignal           = signal.SawdustSignal
 export type SawdustSignalConnection = signal.SawdustSignalConnection
 
 
@@ -126,15 +130,15 @@ export type SawdustCache = cache.SawdustCache
 
 --]] UTIL
 core.util = util
-export type SawdustMaid = util.SawdustMaid
-export type SawdustTimer = util.SawdustTimer
+export type SawdustMaid    = util.SawdustMaid
+export type SawdustTimer   = util.SawdustTimer
 export type SawdustEnumMap = util.SawdustEnumMap
 
 
 --]] CDN
 core.cdn = cdn
-export type SawdustCDNProvider = cdn.SawdustCDNProvider
-export type SawdustCDNPreloader = cdn.SawdustCDNPreloader
+export type SawdustCDNProvider       = cdn.SawdustCDNProvider
+export type SawdustCDNPreloader      = cdn.SawdustCDNPreloader
 export type SawdustCDNReturnTemplate = cdn.SawdustCDNReturnTemplate
 
 

@@ -88,6 +88,8 @@ function event:with() : NetworkingCall
 end
 function event:handle(callback: (req: ConnectionRequest, res: ConnectionResult) -> nil)
 end
+function event:route() : NetworkingRouter
+end
 function event:useMiddleware(phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> nil, msettings: {protected: boolean})
 end
 
