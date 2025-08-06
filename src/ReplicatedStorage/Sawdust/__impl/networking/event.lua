@@ -81,7 +81,7 @@ function call.new(event: types.NetworkingEvent) : types.NetworkingCall
 
     --> Call data
     self._data = {}
-    self._headers = ''
+    self._intent = ''
 
     self._timeout = 5
     self._returnId = nil
@@ -140,13 +140,13 @@ function call:data(...)
     self._data = compileTableArgs(unpack{...}) or {}
     return self end
 
---[[ call:headers(string)
-    Sets the headers of this call. ]]
-function call:headers(string: string)
-    self._headers = string
+--[[ call:intent(intent: string)
+    Sets the intent of this call. ]]
+function call:intent(intent: string)
+    self._intent = intent
     return self end
 
---[[ call:timeout(seconds)
+--[[ call:timeout(seconds: number)
     Setings the request timeout in seconds. ]]
 function call:timeout(seconds: number)
     self._timeout = seconds
@@ -174,7 +174,7 @@ function call:fire() : types.NetworkingPipeline
         warn(`[{script.Name}] {pipeline or 'No message was provided.'}`)
         return pipeline end
 
-    local headers, data = pipeline:getHeaders(), pipeline:getData()
+    local intent, data = pipeline:getIntent(), pipeline:getData()
     local halted, errorMsg = pipeline:isHalted(), pipeline:getError()
 
     if halted then
@@ -187,7 +187,7 @@ function call:fire() : types.NetworkingPipeline
         [1] = __settings.global.version, --> Version
         [2] = self._returnId and 3 or 1, --> Event type, 1 for "Fire", 2 for "Invoke", 3 for "Response"
         [3] = self._returnId,
-        [4] = headers,
+        [4] = intent,
         [5] = data, }
     
     local __request
@@ -245,7 +245,7 @@ function call:invoke() : promise.SawdustPromise
         warn(`[{script.Name}] {pipeline or 'No message was provided.'}`)
         return pipeline end
 
-    local headers, data = pipeline:getHeaders(), pipeline:getData()
+    local intent, data = pipeline:getIntent(), pipeline:getData()
     local halted, errorMsg = pipeline:isHalted(), pipeline:getError()
 
     if halted then
@@ -259,7 +259,7 @@ function call:invoke() : promise.SawdustPromise
         [1] = __settings.global.version,
         [2] = 2,
         [3] = requestId,
-        [4] = headers,
+        [4] = intent,
 		[5] = data}
 	
 	requestCache:setValue(requestId, {
@@ -301,7 +301,7 @@ function call:invoke() : promise.SawdustPromise
                 return end
             
             local response = {
-                headers = rawData[4],
+                intent = rawData[4],
                 data = rawData[5],
             } :: types.ConnectionRequest
             if isServer then
@@ -321,7 +321,7 @@ function call:invoke() : promise.SawdustPromise
             if type(returnedData) == 'table' then
                 resolve(returnedData.data) --> Resolve (there must be custom error handling)
             else
-                if returnedData.headers == '__rejected__' then
+                if returnedData.intent == '__rejected__' then
                     reject(returnedData.data) else
                     resolve(returnedData.data) end
             end

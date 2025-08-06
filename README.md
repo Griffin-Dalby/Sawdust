@@ -54,12 +54,12 @@ mechanics.skill:useMiddleware('after', 1, function(pipeline)
 end)
 
 mechanics.skill:with() --> Returns a new call
-    :headers('use')
+    :intent('use')
     :data('fireball', mousePosition)
     :timeout(4)
     :invoke() --> Returns a promise
         :finally(function(req)
-            local headers, data = req.headers, req.data
+            local intent, data = req.intent, req.data
             local didUse = (data[1]==true)
 
 
@@ -78,11 +78,11 @@ local networking = sawdust.core.networking
 local mechanics = networking.getChannel('mechanics')
 
 mechanics.skill:handle(function(req, res)
-    local headers, data = req.headers, req.data
+    local intent, data = req.intent, req.data
 
-    res.setHeaders('success')
-    res.setData('Whatever you\\\'d need')
-    res.send() --> Send the data and headers set
+    res.intent('success')
+    res.data('Whatever you\'d need')
+    res.send() --> Send the data back
 end)
 ```
 

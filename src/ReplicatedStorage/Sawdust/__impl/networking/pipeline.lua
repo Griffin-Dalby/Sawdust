@@ -32,7 +32,7 @@ function pipeline.new(phase: string, call: types.NetworkingCall) : types.Network
     local self = setmetatable({} :: types.self_pipeline, pipeline)
 
     self.phase = phase
-    self.headers = call._headers
+    self.intent = call._intent
     self.data = call._data
 
     self.halted = false
@@ -41,8 +41,8 @@ function pipeline.new(phase: string, call: types.NetworkingCall) : types.Network
     return self
 end
 
-function pipeline:setHeaders(headers: string)
-    self.headers = headers
+function pipeline:setIntent(intent: string)
+    self.intent = intent
     return true end
 function pipeline:setData(data: {any}, ...): boolean
     local fixData
@@ -58,8 +58,8 @@ function pipeline:setHalted(halted: boolean): boolean
 function pipeline:setError(message: string) : boolean
     self.errorMsg = message; return true end
 
-function pipeline:getHeaders(): ...any
-    return self.headers end
+function pipeline:getIntent(): ...any
+    return self.intent end
 function pipeline:getData(): {any}
     return self.data end
 function pipeline:isHalted(): boolean

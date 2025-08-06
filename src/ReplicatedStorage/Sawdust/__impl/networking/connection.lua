@@ -53,7 +53,7 @@ function connection.new(callback: (req: types.ConnectionRequest, res: types.Conn
     self.returnCall = function(caller: number, data: {})
         event:with()
             :broadcastTo(caller and Players:GetPlayerByUserId(caller) or nil)
-            :headers(data.headers)
+            :intent(data.intent)
             :data(unpack(data.data))
             :setReturnId(data.returnId)
             :fire()
@@ -70,7 +70,7 @@ function connection:run(rawData: {})
     assert(foundCaller, `:run() failed to find caller! ({foundCaller.UserId})`)
 
     req.caller = foundCaller
-    req.headers = rawData[4]
+    req.intent = rawData[4]
     req.data = rawData[5]
 
     --> Create res
@@ -81,13 +81,13 @@ function connection:run(rawData: {})
     local resData = {
         returnId = (eventType==2 and returnId) and returnId or nil,
 
-        headers = '',
+        intent = '',
         data = {},
 	}
 
-    res.headers = function(headers: string) --> Sets headers
-        assert(resData.closed==nil, `attempt to set headers on a closed request!`)
-        resData.headers = headers end
+    res.intent = function(intent: string) --> Sets intent
+        assert(resData.closed==nil, `attempt to set intent on a closed request!`)
+        resData.intent = intent end
     res.data = function(...) --> Sets data
         assert(resData.closed==nil, `attempt to set data on a closed request!`)
         local args = {...}
@@ -110,7 +110,7 @@ function connection:run(rawData: {})
         assert(resData.closed==nil, `attempt to reject to a closed request!`)
         resData.closed = true
 
-        resData.headers = '__rejected__'
+        resData.intent = '__rejected__'
         self.returnCall(req.caller, resData)
     end
 

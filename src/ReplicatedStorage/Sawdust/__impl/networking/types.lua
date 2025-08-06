@@ -51,7 +51,7 @@ export type self_call = {
 
     --> Call data
     _data: {},
-    _headers: string,
+    _intent: string,
     _timeout: number,
 }
 export type NetworkingCall = typeof(setmetatable({} :: self_call, call))
@@ -61,7 +61,7 @@ function call:broadcastTo(targets: {Players}?): NetworkingCall end
 function call:setFilterType(filterType: 'include'|'exclude'): NetworkingCall  end
 
 function call:data(...): NetworkingCall end
-function call:headers(string): NetworkingCall end
+function call:intent(intent: string): NetworkingCall end
 function call:timeout(seconds: number): NetworkingCall end
 
 function call:fire(): NetworkingPipeline end
@@ -90,7 +90,7 @@ end
 function event:useMiddleware(phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> nil, msettings: {protected: boolean})
 end
 
---> Connection
+--> Connection 
 local connection = {}
 connection.__index = connection
 
@@ -105,12 +105,12 @@ export type self_connection = {
 export type NetworkingConnection = typeof(setmetatable({} :: self_connection, connection))
 export type ConnectionRequest = {
     caller: Player?,
-    headers: string,
+    intent: string,
     data: {any: any},
 
 }
 export type ConnectionResult  = {
-    headers: (headers: string) -> nil,
+    intent: (intent: string) -> nil,
     data: (...any) -> nil,
     append: (key: string, value: any) -> nil,
     send: () -> nil,
@@ -153,7 +153,7 @@ pipeline.__index = pipeline
 
 export type self_pipeline = {
     phase: string,
-    headers: string,
+    intent: string,
     data: {any},
 
     halted: boolean,
@@ -161,14 +161,25 @@ export type self_pipeline = {
 }
 export type NetworkingPipeline = typeof(setmetatable({} :: self_pipeline, pipeline))
 
-function pipeline:setHeaders(headers: string): boolean end
+function pipeline:setIntent(intent: string): boolean end
 function pipeline:setData(args: {any}, ...): boolean end
 function pipeline:setHalted(halted: boolean): boolean end
 
-function pipeline:getHeaders(): string end
+function pipeline:getIntent(): string end
 function pipeline:getData(): {any} end
 function pipeline:isHalted() : boolean end
 function pipeline:getError() : string? end
 function pipeline:getPhase(): string end
+
+--> Intent Router
+local router = {}
+router.__index = router
+
+export type self_router = {
+
+}
+export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
+
+
 
 return types
