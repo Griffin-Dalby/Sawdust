@@ -63,10 +63,10 @@ function router:on(intent: string, callback: (req: types.ConnectionRequest, res:
     self.__routes[intent] = callback
 end
 
---[[ router:destroy()
+--[[ router:discard()
     This will properly clean up the internal listener connection,
     and ]]
-function router:destroy()
+function router:discard()
     assert(self, `Attempt to call :destroy() without constructing router!`)
 
     self.__listener:disconnect()

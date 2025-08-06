@@ -58,7 +58,7 @@ function signal.new(emitter: SawdustEmitter) : SawdustSignal
     self.uuid = `_sawdust_signal_{https:GenerateGUID(false)}`
     self.connections = {}
 
-    self.__destroy = function()
+    self.__discard = function()
         emitter.signals[self.uuid] = nil
 
         for _, signal : SawdustSignalConnection in pairs(self.connections) do
@@ -103,8 +103,8 @@ function signal:fire(...)
     end
 end
 
-function signal:destroy()
-    self.__destroy() end
+function signal:discard()
+    self.__discard() end
 
 --]] Emitter
 local emitter = {}
@@ -132,11 +132,11 @@ function emitter:newSignal() : SawdustSignal
     return newSignal
 end
 
---[[ emitter:destroy()
+--[[ emitter:discard()
     Destroys all signals and renders emitter unusable. ]]
-function emitter:destroy()
+function emitter:discard()
     for _, signal: SawdustSignal in pairs(self.signals) do
-        signal:destroy() end
+        signal:discard() end
         
     table.clear(self.signals)
     table.clear(self)

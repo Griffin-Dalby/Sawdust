@@ -41,17 +41,21 @@ function debounce.newTracker() : DebounceTracker
     return self
 end
 
---[[ debounce:track(debounceId: string, lifetime: number, cleanup: () -> nil)
+--[[ debounce:track(debounceId: string, lifetime: number, cleanup: (exists: boolean) -> nil)
     This will add $debounceId to the tracked list for the $lifetime.
-    After the lifetime, $cleanup will be called.]]
-function debounce:track(debounceId: string, lifetime: number, cleanup: () -> nil)
+
+    After the lifetime, $cleanup will be called. The "exists" argument
+    dictates if the tracked debounce existed after the total lifetime. ]]
+function debounce:track(debounceId: string, lifetime: number, cleanup: (exists: boolean) -> nil)
     assert(self, `Attempt to :track() without constructing.`)
     assert(not self.__tracked[debounceId], `Attempt to track "{debounceId}" while it's already being tracked!`) --// TODO: Review & refactor error severity
 
     self.__tracked[debounceId] = true
     task.delay(lifetime, function()
+        if not self.__tracked[debounceId] then cleanup(false); return end
+
         self.__tracked[debounceId] = nil
-        if cleanup then cleanup() end
+        if cleanup then cleanup(true) end
     end)
 end
 
@@ -69,6 +73,15 @@ function debounce:check(debounceId: string) : boolean
     assert(self, `Attempt to :check() without constructing.`)
 
     return (self.__tracked[debounceId]==true)
+end
+
+--[[ debounce:discard()
+    Properly cleans up all debounces. ]]
+function debounce:discard()
+    for debounceId: string in pairs(self.__tracked) do
+        self:cancel(debounceId) end
+
+    table.clear(self)
 end
 
 return debounce

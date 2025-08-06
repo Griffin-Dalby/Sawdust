@@ -33,6 +33,24 @@ tasks['Instance'] = function(instance: Instance)
 tasks['function'] = function(f: () -> nil)
     f() end
 
+tasks['table'] = function(table: {})
+    if typeof(table.discard) == 'function' then    --> Default Sawdust Deconstructor
+        table:discard()
+    elseif typeof(table.disconnect) == 'function' then --> Sawdust's Networking/Signal Event
+        table:disconnect()
+    elseif typeof(table.cancel) == 'function' then --> Sawdust's Timer Utility
+        table:cancel()
+
+
+    elseif typeof(table.Destroy) == 'function' then --> Malparsed Roblox Instance
+        table:Destroy()
+    elseif typeof(table.Disconnect) == 'function' then --> Malparsed Roblox Connection
+        table:Disconnect()
+    else
+        error(`Unrecognized cleanup table!`)
+    end
+end
+
 tasks['nil'] = function() end
 
 --]] Maid Wrapper
