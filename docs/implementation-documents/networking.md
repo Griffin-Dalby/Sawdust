@@ -1,8 +1,8 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
-# Sawdust Networking Implementation
+# Networking
 
 I'm personally very proud of this implementation, and I think you'll come to love it as well! It was heavily inspired by Node's [ExpressJS](https://expressjs.com/) module in the way you handle events, as for firing events, I was heavily inspired by Node's [Axios](https://axios-http.com/). Basically, the best of both syntaxes, in a networking suite that can be as simple or advanced as you want.
 
