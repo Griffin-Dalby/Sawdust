@@ -163,11 +163,8 @@ local maid = sawdust.util.maid
 ## 🧪 Tests
 I've built unit tests for sawdust and [all of the implementations]("This may not be ALL implementations at time of reading, I may still be working on some."), you can read more about this
 
----
-
 ## 📖 Documentation
-I do hate documentation, and this library is being built to be independent of documentation, however one is being built but not yet published. <br>
-Until it's finished, check the [Changelog](CHANGELOG.md) for detailed module additions and improvements.
+You can find full documentation & quick start examples + implementation tutorials [Here!](https://griffin-dalby.github.io/Sawdust/)
 
 ---
 
