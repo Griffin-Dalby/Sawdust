@@ -10,4 +10,42 @@ The **Networking** implementation is a very expressive, custom RPC layer built o
 
 To understand what a "Channel" is, you need to know how Sawdust handles file structures.
 
-What you'll find in a fresh Sawdust installation, are two folders named "Events" and "Assets"
+What you'll find in a fresh Sawdust installation, are two folders named **"Events"** and **"Assets"**. Locate & open the `Sawdust.__internal.__settings.lua` module, and find the Networking settings. It'll look something like this:
+
+```lua
+__settings.networking = {
+    fetchFolder = root.Events,
+}
+```
+
+Whatever `fetchFolder` is set to, is where Sawdust will search for Channels.
+
+Now finally, what actually is a Channel? Well, it's simply a wrapper for any folder that is parented to the `fetchFolder`, that allows you to further locate events! Making a new channel is very simple, seriously just make a new folder under the `fetchFolder`, name it whatever, and there's your new channel!
+
+```lua
+local sawdust = require(path.to.sawdust)
+local networking = sawdust.core.networking
+
+--[[ File Structure:
+    Sawdust -
+      events -
+        mechanics -
+          abilities: event
+          movement: event
+        replication -
+          abilities: event
+        game -
+          round: event
+
+      assets - *CDN Folder*
+--]]
+
+local mechanics_channel   = networking.getChannel('mechanics') --> This is how you fetch a Channel
+local replication_channel = networking.getChannel('replication')
+local game_channel        = networking.getChannel('game')
+
+local abilities_event       = mechanics_channel.abilities --> This is how you fetch an Event
+local abilities_replication = replication_channel.abilities
+local round_event           = game_channel.round
+
+```

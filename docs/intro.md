@@ -36,6 +36,6 @@ This unfortunately has not been compiled yet. If this is an urgent need, please 
 
 **Sawdust** is a collection of implementations (modules) I've built into an ecosystem, with many impressive, efficient, and smart abstractions, you can give LuaU the expressive syntax developers deserve.
 
-A lot of the implementations I've wrote are reminiscent of Node.JS, with my custom networking layer resembling Express, or that promise chaining directly inspired by async Node functions.
+A lot of the implementations I've wrote are reminiscent of Node.JS, with my custom networking layer resembling Express, or promise chaining directly inspired by async Node functions.
 
 In the side bar, you'll find `Implementation Tutorials`, and `Documentation`. If you want a guided experience walking through Sawdust, look through the Tutorials; but if you want to dive straight into the technical aspects opt for Documentation.

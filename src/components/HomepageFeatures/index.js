@@ -4,32 +4,35 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Modern, expressive Syntax.',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        <strong>Sawdust</strong> was built from the ground-up with developer experience and
+        hassle-free usage in mind. A lot of the syntax you'll find in Sawdust
+        is reminiscient of Node.JS.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Efficient & Smart Abstractions',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        I've spent time testing and constantly evolving my implementations, integrating
+        efficient practices in everyday actions. Internally, there is a lot of caching
+        and lifetime tracking going on.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Call To Contribute',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Have a great idea? Is a certain feature annoying you? Did you find a bug, or even
+        a way to improve library efficiency? I'd love for you to help contribute! Either
+        by genuinely contributing to <a href="#" onClick={()=>{window.open('https://github.com/Griffin-Dalby/Sawdust/','_blank')}}>this repo</a>, or <a href="#" onClick={()=>{window.open('https://github.com/Griffin-Dalby/Sawdust/issues','_blank')}}>filing a Issue report</a>
       </>
     ),
   },
