@@ -44,8 +44,16 @@ local mechanics_channel   = networking.getChannel('mechanics') --> This is how y
 local replication_channel = networking.getChannel('replication')
 local game_channel        = networking.getChannel('game')
 
-local abilities_event       = mechanics_channel.abilities --> This is how you fetch an Event
+local abilities_event       = mechanics_channel.abilities --> This is how you fetch a Wrapped Event
 local abilities_replication = replication_channel.abilities
 local round_event           = game_channel.round
 
 ```
+
+## RPC Layer
+
+Internally, I've built a form of an RPC layer over Roblox's RemoteEvents. I won't go too in depth on this here, but if you'd like more info, check out the networking documentation.
+
+When the Networking implementation initalizes, it'll go through the `fetchFolder` and automatically bind all found events to my custom networking handler, and it'll also wrap the events; this wrapped event is what you'll access to handle and send data.
+
+As you've seen in the above chunk of code, you can access this wrapped event through: `channel.event`. Simple enough hopefully.
