@@ -28,13 +28,13 @@ Than you can easily access sawdust through **ReplicatedStorage.Sawdust**.
 
 ### GitHub Release
 
-**Note: This could be slightly outdated, however I will do my best to ensure it is up to date.**
+*Note: This could be slightly outdated, however I will do my best to ensure it is up to date.*
 
 Alternatively, you can download the `.rbxm` from the [GitHub release page](https://github.com/Griffin-Dalby/Sawdust/releases), and import it into your project's `ReplicatedStorage`.
 
 ### Compile w/ Rojo | **!! Potentially Unstable !!**
 
-**Note: You must have the Rojo Studio Plugin!**
+*Note: You must have the Rojo Studio Plugin!*
 
 If you'd want the most current features for Sawdust, you can clone the Github repo, and serve Sawdust, like so:
 
@@ -43,6 +43,8 @@ git clone https://github.com/Griffin-Dalby/Sawdust.git
 cd Sawdust
 rojo serve
 ```
+
+Then connect in studio, and sawdust will appear in your `ReplicatedStorage`.
 
 ## What is Sawdust?
 
