@@ -26,11 +26,23 @@ sawdust = "griffin-dalby/sawdust@1.3.0"
 
 Than you can easily access sawdust through **ReplicatedStorage.Sawdust**.
 
-### Roblox Toolbox Module
+### GitHub Release
 
-Alternatively, you can simply get Sawdust out of the toolbox, and add it to your project's `ReplicatedStorage`.
+**Note: This could be slightly outdated, however I will do my best to ensure it is up to date.**
 
-This unfortunately has not been compiled yet. If this is an urgent need, please file a Issue report & contact me! *(Contact info can be found on this website.)*
+Alternatively, you can download the `.rbxm` from the [GitHub release page](https://github.com/Griffin-Dalby/Sawdust/releases), and import it into your project's `ReplicatedStorage`.
+
+### Compile w/ Rojo | **!! Potentially Unstable !!**
+
+**Note: You must have the Rojo Studio Plugin!**
+
+If you'd want the most current features for Sawdust, you can clone the Github repo, and serve Sawdust, like so:
+
+```bash
+git clone https://github.com/Griffin-Dalby/Sawdust.git
+cd Sawdust
+rojo serve
+```
 
 ## What is Sawdust?
 
