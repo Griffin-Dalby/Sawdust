@@ -32,7 +32,7 @@ Than you can easily access sawdust through **ReplicatedStorage.Sawdust**.
 
 Alternatively, you can download the `.rbxm` from the [GitHub release page](https://github.com/Griffin-Dalby/Sawdust/releases), and import it into your project's `ReplicatedStorage`.
 
-### Compile w/ Rojo | **!! Potentially Unstable !!**
+### Compile w/ Rojo | *!! Potentially Unstable !!*
 
 *Note: You must have the Rojo Studio Plugin!*
 
