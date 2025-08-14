@@ -42,9 +42,9 @@ tasks['table'] = function(table: {})
         table:cancel()
 
 
-    elseif typeof(table.Destroy) == 'function' then --> Malparsed Roblox Instance
+    elseif typeof(table.Destroy) == 'function' then --> Maltyped Roblox Instance
         table:Destroy()
-    elseif typeof(table.Disconnect) == 'function' then --> Malparsed Roblox Connection
+    elseif typeof(table.Disconnect) == 'function' then --> Maltyped Roblox Connection
         table:Disconnect()
     else
         error(`Unrecognized cleanup table!`)
