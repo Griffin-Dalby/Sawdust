@@ -28,7 +28,7 @@ type self = {
 export type DebounceTracker = typeof(setmetatable({} :: self, debounce))
 
 --]] Setup Shared
-if not debounceCache:getValue('shared') then
+if not debounceCache:hasEntry('shared') then
     local sharedTracker = debounce.newTracker()
     debounce.shared = sharedTracker end
 
