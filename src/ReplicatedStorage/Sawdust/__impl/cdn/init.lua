@@ -71,8 +71,10 @@ function provider:getAsset(assetId: string) : SawdustCDNReturnTemplate | Instanc
         and cdnCache:findTable('_assets')
         or cdnCache:createTable('_assets')
 
-    local _cached_asset = _assets:getValue(`{self.provider.Name}.{assetId}`)
-    if _cached_asset then
+    local asset_id = `{self.provider.Name}.{assetId}`
+    if _assets:hasEntry(asset_id) then
+        local _cached_asset = _assets:getValue(asset_id)
+
         if __settings.global.debug and __settings.content.debug.cdn then
             print(`[{script.Name}] Fetched cached asset for "{self.provider.Name}.{assetId}"`) end
         return _cached_asset end
