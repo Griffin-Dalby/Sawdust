@@ -50,9 +50,9 @@ function connection.new(callback: (req: types.ConnectionRequest, res: types.Conn
         event.__connections[self.connectionId] = nil
     end
 
-    self.returnCall = function(caller: number, data: {})
+    self.returnCall = function(caller: Player, data: {})
         event:with()
-            :broadcastTo(caller and Players:GetPlayerByUserId(caller) or nil)
+            :broadcastTo(caller and caller or nil)
             :intent(data.intent)
             :data(unpack(data.data))
             :setReturnId(data.returnId)
@@ -66,8 +66,8 @@ function connection:run(rawData: {})
     --> Create req
     local req: types.ConnectionRequest = {}
 
-    local foundCaller = Players:GetPlayerByUserId(rawData.caller)
-    assert(foundCaller, `:run() failed to find caller! ({foundCaller.UserId})`)
+	local foundCaller = rawData.caller and Players:GetPlayerByUserId(rawData.caller) or nil
+	assert((rawData.caller and foundCaller or true), `:run() failed to find caller! ({foundCaller and foundCaller.UserId or '<none provided>'})`)
 
     req.caller = foundCaller
     req.intent = rawData[4]
@@ -96,9 +96,9 @@ function connection:run(rawData: {})
                               resData.data = args[1]    --> Table
         elseif #args > 0 then resData.data = args       --> Tuple
         else                  resData.data = {} end end --> None
-    res.append = function(value: any) --> Append data to response data
+    res.append = function(key: string, value: any) --> Append data to response data
         assert(resData.closed==nil, `attempt to append to a closed request!`)
-        table.insert(resData.data, value) end
+        resData.data[key] = value end
                 
     res.send = function() --> Sends response
         assert(resData.closed==nil, `attempt to send a closed request!`)

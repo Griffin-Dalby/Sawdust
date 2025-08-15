@@ -49,7 +49,7 @@ return function ()
             local function protocol(player: Player, data: {}) --> Actual function for connections.
                 --> Verify is sawdust event
                 if typeof(player) ~= 'table' then
-                    data.caller = player.UserId
+                    data.caller = player
                     player = nil
                 else
                     data = player

@@ -204,7 +204,7 @@ function call:fire() : types.NetworkingPipeline
     if isServer then
         --> Check for return
 		if self._returnId then
-            self.__event:FireClient(players:GetPlayerByUserId(__request.caller), finalData)
+            self.__event:FireClient(__request.caller, finalData)
 
             return pipeline
         end
