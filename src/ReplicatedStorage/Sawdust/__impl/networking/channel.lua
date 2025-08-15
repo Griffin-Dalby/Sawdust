@@ -38,7 +38,7 @@ function channel.get(channelName: string, settings: types.ChannelSettings) : typ
     assert(channelName, `Missing channelName argument!`)
 
     --> Cache check
-    local channelInCache = networkingCache:getValue(channelName)
+    local channelInCache = networkingCache:hasEntry(channelName)
     if channelInCache then
         if not settings or not settings.returnFresh then
             return channelInCache end
