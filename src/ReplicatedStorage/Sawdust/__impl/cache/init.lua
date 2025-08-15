@@ -62,7 +62,7 @@ function cache:getValue(...)
     
     for i, key in pairs(keys) do
         local value = self.contents[key]
-        assert(value, `:getValue() couldn't find entry "{key} @ {i}"!`)
+        assert(value~=nil, `:getValue() couldn't find entry "{key} @ {i}"!`)
 
         found[i] = value
     end
