@@ -46,9 +46,8 @@ function provider.getProvider(providerName: string) : SawdustCDNProvider
         and cdnCache:findTable('_providers')
         or cdnCache:createTable('_providers')
 
-    local _cached_provider = _providers:getValue(providerName)
-    if _cached_provider then
-        return _cached_provider  end
+    if _providers:hasEntry(providerName) then
+        return _providers:getValue(providerName) end
 
     local self = setmetatable({} :: self, provider)
     
