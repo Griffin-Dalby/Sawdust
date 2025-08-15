@@ -27,12 +27,11 @@ type self = {
 }
 export type DebounceTracker = typeof(setmetatable({} :: self, debounce))
 
---]] Setup Shared
-if not debounceCache:hasEntry('shared') then
-    local sharedTracker = debounce.newTracker()
-    debounce.shared = sharedTracker end
-
 --]] Debounce Functions
+
+--[[ debounce.newTracker(): DebounceTracker
+    This will construct a new DebounceTracker, where you can :track(), 
+    :cancel(), and :check(). ]]
 function debounce.newTracker() : DebounceTracker
     local self = setmetatable({} :: self, debounce)
 
@@ -40,6 +39,11 @@ function debounce.newTracker() : DebounceTracker
 
     return self
 end
+
+--]] Setup Shared
+if not debounceCache:hasEntry('shared') then
+    local sharedTracker = debounce.newTracker()
+    debounce.shared = sharedTracker end
 
 --[[ debounce:track(debounceId: string, lifetime: number, cleanup: (exists: boolean) -> nil)
     This will add $debounceId to the tracked list for the $lifetime.
