@@ -56,4 +56,18 @@ Internally, I've built a form of an RPC layer over Roblox's RemoteEvents. I won'
 
 When the Networking implementation initalizes, it'll go through the `fetchFolder` and automatically bind all found events to my custom networking handler, and it'll also wrap the events; this wrapped event is what you'll access to handle and send data.
 
-As you've seen in the above chunk of code, you can access this wrapped event through: `channel.event`. Simple enough hopefully.
+As you've seen in the above chunk of code, you can access this wrapped event through: `channel.event`. Simple enough hopefully. You can learn more in [Networking Documentation](../implementation-docs/networking.md)
+
+## Calling / Invoking Events
+
+I've developed the call interface to reflect Axios' syntax as much as possible without losing the Roblox feel. I truly believe it's really intuitive.
+
+`events` provide a `:call()` interface, from here, you can call these settings:
+- `:broadcastGlobally()` **[SERVER]** - Sets broadcast target to all
+- `:broadcastTo(players: ...|{Player})` **[SERVER]** - Sets broadcast targets to specific players, can be a table or a tuple
+- `:setFilterType(filter: 'include'|'exclude')` **[SERVER]** - When the event is fired, include will send the data to the targets, while exclude will send it to everybody but the targets.
+- `:data(...)` - Sets the downstream body data to a tuple argument.
+- `:intent(intent: string)` - Sets the intent of the call.
+- `:timeout(seconds: number)` - Sets the timeout length *(only for invocation)*
+- `:fire()` - Compiles all data, fires, and forgets.
+- `:invoke()` - Compiles all data, fires, and returns a promise for return data.
