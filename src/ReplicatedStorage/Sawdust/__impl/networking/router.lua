@@ -58,7 +58,7 @@ function router:on(intent: string, callback: (req: types.ConnectionRequest, res:
 
     assert(intent, `:on() argument 1 missing! (intent: string)`)
     assert(callback, `:on() argument 2 missing! (callback: (req, res) -> nil )`)
-    assert(not self._routes[intent], `Router already has a route for intent "{intent}!"`)
+    assert(not self.__routes[intent], `Router already has a route for intent "{intent}!"`)
 
     self.__routes[intent] = callback
 end
