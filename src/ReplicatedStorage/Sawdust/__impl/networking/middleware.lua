@@ -30,8 +30,14 @@ middleware.__index = middleware
     "Middleware" provides a environment allowing developers to inject
     code into the event lifecycle, exposing access to the "pipeline"
     where you can further modify information about the call ]]
-function middleware.new() : types.NetworkingMiddleware
+function middleware.new(locked_phases: {}) : types.NetworkingMiddleware
     local self = setmetatable({} :: types.self_middleware, middleware)
+
+    self.__locked_phases = locked_phases or {}
+    for i in pairs(self.__locked_phases) do
+        if not table.find({'before', 'after'}, i) then
+            error(`invalid phase lock "{i}"!`); return end
+    end
 
     self.__registry = {
         __internal = {
@@ -51,6 +57,11 @@ end
     *phase. If the order's already in use, it'll be replaced by this
     one unless it's protected. ]]
 function middleware:use(phase: string, order: number, callback: (types.NetworkingPipeline) -> types.NetworkingPipeline, args: {internal: boolean, protected: boolean})
+    --> Check phase-lock
+    if table.find(self.__locked_phases, phase) then
+        error(`attempt to use a locked phase "{phase}"!`)
+        return end
+
     --> Find registrar
     args = args or {
         internal = false,
