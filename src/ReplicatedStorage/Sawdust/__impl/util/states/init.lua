@@ -16,3 +16,5 @@
 --]] Variables
 --]] Functions
 --]] Implementation
+
+return {}
