@@ -26,7 +26,7 @@ export type TweenEnvironment = typeof(setmetatable({} :: self, environment))
 
 --[[ environment.new()
     Generates a new, empty environment. ]]
-function environment.new()
+function environment.new() : TweenEnvironment
     local self = setmetatable({} :: self, environment)
 
     self.info = controller.new()

@@ -19,7 +19,7 @@ export type EnvironmentController = typeof(setmetatable({} :: self, controller))
 
 --[[ controller.new()
     Generates a generic controller for the tween environment ]]
-function controller.new()
+function controller.new() : EnvironmentController
     local self = setmetatable({} :: self, controller)
 
     self.values = {}
