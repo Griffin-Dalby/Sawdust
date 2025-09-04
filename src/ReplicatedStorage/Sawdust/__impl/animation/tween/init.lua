@@ -36,4 +36,10 @@ function tween_m.newTrack(ui_element: UIBase) : TweenTrack
     return self
 end
 
+--[[ tween_m:timeline()
+    This creates a new timeline. ]]
+function tween_m:timeline()
+    
+end
+
 return tween_m
