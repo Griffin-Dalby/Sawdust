@@ -66,7 +66,7 @@ function connection:run(rawData: {})
     --> Create req
     local req: types.ConnectionRequest = {}
 
-	local foundCaller = rawData.caller and Players:GetPlayerByUserId(rawData.caller) or nil
+	local foundCaller = rawData.caller-- and Players:GetPlayerByUserId(rawData.caller) or nil
 	assert((rawData.caller and foundCaller or true), `:run() failed to find caller! ({foundCaller and foundCaller.UserId or '<none provided>'})`)
 
     req.caller = foundCaller
