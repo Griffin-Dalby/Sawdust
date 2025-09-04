@@ -34,9 +34,9 @@ function middleware.new(locked_phases: {}) : types.NetworkingMiddleware
     local self = setmetatable({} :: types.self_middleware, middleware)
 
     self.__locked_phases = locked_phases or {}
-    for i in pairs(self.__locked_phases) do
-        if not table.find({'before', 'after'}, i) then
-            error(`invalid phase lock "{i}"!`); return end
+    for i, v in pairs(self.__locked_phases) do
+        if not table.find({'before', 'after'}, v) then
+            error(`invalid phase lock "{v}"!`); return end
     end
 
     self.__registry = {
