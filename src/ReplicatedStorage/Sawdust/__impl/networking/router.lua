@@ -37,7 +37,7 @@ router.__index = router
 function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
     local self = setmetatable({} :: types.self_router, router)
 
-    self.middleware = middleware.new{'before'} --] Lock "before" phase
+    self.__middleware = middleware.new{'before'} --] Lock "before" phase
 
     self.__routes = {}
     self.__listener = event:handle(function(req, res)
@@ -45,8 +45,8 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         if (not self.__routes[intent]) and (not self.__on_any) then return end
 
         local return_pipeline: types.NetworkingPipeline = pcall(
-            self.middleware.run,
-            self.middleware, 'after',
+            self.__middleware.run,
+            self.__middleware, 'after',
             {_intent = intent, _data = req.data})
             
         req.data = return_pipeline:getData()
@@ -74,20 +74,22 @@ end
     
     "activated" refers to when this event is called, and one of the
     routes are intended inside of the object. ]]
-function router:useMiddleware(order: number, callback: (pipeline: types.NetworkingPipeline) -> nil)
+function router:useMiddleware(order: number, callback: (pipeline: types.NetworkingPipeline) -> nil) : types.NetworkingRouter
     self.__middleware:use('after', order, callback,
         { protected = false })
+    return self
 end
 
 --[[ router:onAny(callback: (req, res) -> nil)
     Chainable function that will route any call to the remote despite
     intent to the provided callback. ]]
-function router:onAny(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil)
+function router:onAny(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
     assert(self, `Attempt to call :onAny() without constructing router!`)
 
     assert(callback, `:onAny() argument 1 missing! (callback: (req, res) -> nil)`)
 
     self.__on_any = callback
+    return self
 end
 
 --[[ router:on(intent: string, callback: (req, res) -> nil)
@@ -104,6 +106,7 @@ function router:on(intent: string, callback: (req: types.ConnectionRequest, res:
     assert(not self.__routes[intent], `Router already has a route for intent "{intent}!"`)
 
     self.__routes[intent] = callback
+    return self
 end
 
 --[[ router:discard()
