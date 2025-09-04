@@ -185,6 +185,10 @@ export type self_router = {
 export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
 
 function router:on(intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil): NetworkingRouter end
+function router:onAny(callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) end
+function router:useMiddleware(order: number, callback: (pipeline: NetworkingPipeline) -> nil)
+    
+end
 function router:discard() end
 
 return types
