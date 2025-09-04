@@ -1,0 +1,113 @@
+--[[
+
+    SawdustState Transition Interface
+
+    Griffin Dalby
+    2025.09.04
+
+    This module will provide an interface for the transition manager for states.
+
+--]]
+
+--]] Services
+--]] Modules
+local __type = require(script.Parent.Parent.types)
+
+--]] Interface
+local transition = {}
+transition.__index = transition
+
+--[[ transition.new() : StateTransition
+    This creates a new, blank transition data builder. ]]
+function transition.new(targets: {}) : __type.StateTransition
+    local self = setmetatable({} :: __type.self_transition, transition)
+
+    --]] Parse targets
+    local t_from: __type.SawdustState, t_to: __type.SawdustState =
+        unpack(targets)
+
+    assert(t_from, `malformed targets table! Failed to find t_from.`)
+    assert(t_to, `malformed targets table! Failed to find t_to.`)
+
+    --]] Build self
+    self.__fetch_state = function(target_id: 'from'|'to') : __type.SawdustState?
+            if target_id == 'from' then return t_from
+        elseif target_id == 'to'   then return t_to
+        else   error(`attempt to locate target w/ invalid target_id "{target_id}"!`) end
+    end
+
+    self.__fetch_machine = function() : __type.StateMachine
+        return t_from.machine() end
+
+    self.conditions = {}
+
+    return self
+end
+
+--[[ LOGIC ]]--
+function transition:runTransition()
+    local machine = self.__fetch_machine() :: __type.StateMachine
+    machine:switchState(self.__fetch_state('to').name)
+end
+
+function transition:runConditionals()
+    local do_transition = false
+    for _, condition_data in pairs(self.conditions) do
+        if condition_data.type ~= 'custom' then continue end
+        do_transition = condition_data.conditional(self.__fetch_state('from').environment)
+    
+        if do_transition then break end
+    end
+
+    if do_transition then
+        self:runTransition() end
+end
+
+function transition:eventCalled(event_id: string)
+    for _, condition_data in pairs(self.conditions) do
+        if condition_data.type ~= 'event' then continue end
+        if condition_data.conditional ~= event_id then continue end
+            
+        self:runTransition()
+    end
+end
+
+--[[ CONDITIONS ]]--
+--#region
+
+--[[ transition:when(conditional: (env) -> boolean)
+    This will add a new condition where the result of the provided callback
+    dictates if the transition occurs. ]]
+function transition:when(conditional: (env: __type.StateEnvironment) -> boolean)
+    local condition_data = {}
+    condition_data.type = 'custom'
+    condition_data.conditional = conditional
+
+    table.insert(self.conditions, condition_data)
+end
+
+--[[ transition:on(event_id: string)
+    This will add a new condition awaiting an event call within the state
+    machine. ]]
+function transition:on(event_id: string)
+    local condition_data = {}
+    condition_data.type = 'event'
+    condition_data.conditional = event_id
+
+    table.insert(self.conditions, condition_data)
+end
+
+--[[ transition:after(time: number)
+    This will add a new condition that will wait a certain time, then
+    run. ]]
+function transition:after(time: number)
+    local condition_data = {}
+    condition_data.type = 'time'
+    condition_data.conditional = time
+
+    table.insert(self.conditions, condition_data)
+end
+
+--#endregion
+
+return transition
