@@ -14,19 +14,60 @@ local types = {}
 --[[ STATE ]]--
 --#region
 local state = {}
+state.__index = state
 
-export type self_state = {}
+export type StateEnvironment = { --] Fill with packaged env data
+    total_state_time: number, --] Total time in this state
+}
+
+export type self_state = {
+    name: string,
+    machine: () -> StateMachine,
+
+    env: StateEnvironment,
+
+    hooks: {
+        enter:  { (env: StateEnvironment) -> nil },
+        exit:   { (env: StateEnvironment) -> nil },
+
+        update: { (env: StateEnvironment, delta_time: number) -> nil }
+    },
+
+    transitions: {
+
+    }
+
+}
 export type SawdustState = typeof(setmetatable({} :: self_state, state))
 
 function state.new(state_machine: StateMachine, state_name: string) : SawdustState end
 
 --#endregion
 
+--[[ TRANSITION ]]--
+--#region
+local transition = {}
+transition.__index = transition
+
+export type self_transition = {
+    __fetch: ('from'|'to') -> SawdustState?,
+
+    conditions: {}
+}
+export type StateTransition = typeof(setmetatable({} :: self_transition, transition))
+
+function transition.new() : StateTransition end
+
+--#endregion
+
 --[[ MACHINE ]]--
 --#region
 local machine = {}
+machine.__index = machine
 
 export type self_machine = {
+    state: SawdustState?,
+
     states: {
         [string] : SawdustState
     }
