@@ -44,11 +44,19 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         local intent = req.intent
         if (not self.__routes[intent]) and (not self.__on_any) then return end
 
-        local return_pipeline: types.NetworkingPipeline = pcall(
+        local success, return_pipeline: types.NetworkingPipeline = pcall(
             self.__middleware.run,
             self.__middleware, 'after',
             {_intent = intent, _data = req.data})
             
+        if not success then
+            error(`failed to run middleware for router!`)
+            if return_pipeline and type(return_pipeline) == 'string' then
+                warn(`provided error message: {return_pipeline}`)
+            end
+            return
+        end
+
         req.data = return_pipeline:getData()
         req.intent = return_pipeline:getIntent()
 
@@ -60,9 +68,11 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
                 return end
         end
 
-        self.__routes[intent](req, res)
-        if self.__on_any then
-            self.__on_any(req, res) end
+        if self.__routes[intent] then
+            self.__routes[intent](req, res)
+        elseif self.__on_any then
+            self.__on_any(req, res)
+        end
     end)
 
     return self
