@@ -96,9 +96,9 @@ function connection:run(rawData: {})
                               resData.data = args[1]    --> Table
         elseif #args > 0 then resData.data = args       --> Tuple
         else                  resData.data = {} end end --> None
-    res.append = function(key: string, value: any) --> Append data to response data
+    res.append = function(value: any) --> Append data to response data
         assert(resData.closed==nil, `attempt to append to a closed request!`)
-        resData.data[key] = value end
+        table.insert(resData.data, value) end
                 
     res.send = function() --> Sends response
         assert(resData.closed==nil, `attempt to send a closed request!`)
