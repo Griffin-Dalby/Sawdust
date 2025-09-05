@@ -58,12 +58,17 @@ function state:transition(state_name: string) : StateTransition end
 local transition = {}
 transition.__index = transition
 
+export type TransitionConditionData = {
+    type: string,
+    conditional: string|number|(env: StateEnvironment)->boolean
+}
+
 export type self_transition = {
     __fetch_state: ('from'|'to') -> SawdustState?,
     __fetch_machine: StateMachine,
     __priority: number,
 
-    conditions: {},
+    conditions: { TransitionConditionData },
 }
 export type StateTransition = typeof(setmetatable({} :: self_transition, transition))
 
