@@ -131,6 +131,7 @@ end
 --#region
 
 function state:transition(state_name: string) : __type.StateTransition
+    assert(state_name~=self.name, `cannot map transition to same state!`)
     assert(not self.transitions[state_name], `transition {self.name} -> {state_name} is already mapped!`)
     
     local machine = self.machine() :: __type.StateMachine
