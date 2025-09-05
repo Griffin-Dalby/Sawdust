@@ -40,11 +40,13 @@ function transition.new(targets: {}) : __type.StateTransition
         return t_from.machine() end
 
     self.conditions = {}
+    self.priority = 1
 
     return self
 end
 
 --[[ LOGIC ]]--
+--#region
 function transition:runTransition()
     local machine = self.__fetch_machine() :: __type.StateMachine
     machine:switchState(self.__fetch_state('to').name)
@@ -73,8 +75,20 @@ function transition:eventCalled(event_id: string)
     end
 end
 
+--#endregion
+
 --[[ CONDITIONS ]]--
 --#region
+
+--[[ transition:priority(priority: number)
+    This will set the priority of this transition, higher numbers will
+    be called first. ]]
+function transition:priority(priority: number)
+    assert(priority, `attempt to set priority to nil!`)
+    assert(type(priority)=='number', `attempt to set priority to invalid type! (Provided: {type(priority)}, Expected a number.)`)
+
+    self.priority = priority
+end
 
 --[[ transition:when(conditional: (env) -> boolean)
     This will add a new condition where the result of the provided callback
