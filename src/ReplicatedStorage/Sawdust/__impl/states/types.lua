@@ -25,7 +25,7 @@ export type self_state = {
     name: string,
     machine: () -> StateMachine,
 
-    env: StateEnvironment,
+    environment: StateEnvironment,
 
     hooks: {
         enter:  { (env: StateEnvironment) -> nil },
@@ -94,7 +94,9 @@ export type self_machine = {
     c_state: SawdustState?,
     states: {
         [string] : SawdustState
-    }
+    },
+
+    environment: {}
 }
 export type StateMachine = typeof(setmetatable({} :: self_machine, machine))
 
