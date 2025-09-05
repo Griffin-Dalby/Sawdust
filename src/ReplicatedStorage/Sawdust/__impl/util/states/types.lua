@@ -66,6 +66,14 @@ export type StateTransition = typeof(setmetatable({} :: self_transition, transit
 
 function transition.new() : StateTransition end
 
+function transition:runTransition() end
+function transition:runConditionals() end
+function transition:eventCalled(event_id: string) end
+
+function transition:when(conditional: (env: StateEnvironment) -> boolean) : StateTransition end
+function transition:on(event_id: string) : StateTransition end
+function transition:after(time: number) : StateTransition end
+
 --#endregion
 
 --[[ MACHINE ]]--
