@@ -59,8 +59,14 @@ function machine:event(event_name: string)
     assert(self.c_state, `attempt to fire event to an inactive state machine.`)
 
     local prioritized_list = {}
+    local pl_check_list = {}
     for _, transition: __type.StateTransition in pairs(self.c_state.transitions) do
-        prioritized_list[transition.__priority] = transition end
+        if pl_check_list[transition.__priority] then
+            error(`there are multiple transitions @ priority {tostring(transition.__priority)}!`)
+            break end
+            
+        pl_check_list[transition.__priority] = true
+        table.insert(prioritized_list, transition) end
     table.sort(prioritized_list, function(a, b)
         return a.__priority > b.priority end)
 

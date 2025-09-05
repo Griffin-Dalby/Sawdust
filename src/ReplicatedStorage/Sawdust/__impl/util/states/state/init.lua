@@ -85,11 +85,14 @@ function state:entered() : boolean
         self.__update:Disconnect() end
 
     local prioritized_list = {}
+    local pl_check_list = {}
     for _, transition : __type.StateTransition in pairs(self.transitions) do
-        if prioritized_list[transition.__priority] then
+        if pl_check_list[transition.__priority] then
             error(`there are multiple transitions @ priority {tostring(transition.__priority)}!`)
             break end
-        prioritized_list[transition.__priority] = transition
+            
+        pl_check_list[transition.__priority] = true
+        table.insert(prioritized_list, transition)
     end
     table.sort(prioritized_list, function(a, b)
         return a.__priority > b.priority end)
