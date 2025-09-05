@@ -78,24 +78,30 @@ local sawdust = {} :: {
 		promise: typeof(promise),
 		signal: typeof(signal),
 		cache: typeof(cache),
-		util: typeof(util),
 		cdn: typeof(cdn)
 	},
+
+	util: typeof(util)
 }
 
 --[[ SERVICES ]]--
+--#region
 sawdust.services = __service_manager.new() --> Create services
 sawdust.builder = builder --> Expose service builder
 export type SawdustSVCManager   = __service_manager.SawdustSVCManager --> Expose SVCManager type
 export type SawdustSVCInjection = builder.SawdustSVCInjection --> Expose SVCInjection type
 export type SawdustService      = builder.SawdustService --> Expose service type
+--#endregion
 
 --[[ ANIMATION ]]--
+--#region
 sawdust.animation = animation
 export type CFAnimBuilder  = animation.CFAnimBuilder
 export type CFAnimTimeline = animation.CFAnimTimeline
+--#endregion
 
 --[[ CORE ]]--
+--#region
 local core = {}
 sawdust.core = core
 
@@ -138,19 +144,21 @@ core.cache = cache
 export type SawdustCache = cache.SawdustCache
 
 
---]] UTIL
-core.util = util
-export type SawdustMaid     = util.SawdustMaid
-export type SawdustTimer    = util.SawdustTimer
-export type SawdustEnumMap  = util.SawdustEnumMap
-export type DebounceTracker = util.DebounceTracker
-
-
 --]] CDN
 core.cdn = cdn
 export type SawdustCDNProvider       = cdn.SawdustCDNProvider
 export type SawdustCDNPreloader      = cdn.SawdustCDNPreloader
 export type SawdustCDNReturnTemplate = cdn.SawdustCDNReturnTemplate
 
+--#endregion
+
+--[[ UTIL ]]--
+--#region
+sawdust.util = util
+export type SawdustMaid     = util.SawdustMaid
+export type SawdustTimer    = util.SawdustTimer
+export type SawdustEnumMap  = util.SawdustEnumMap
+export type DebounceTracker = util.DebounceTracker
+--#endregion
 
 return sawdust :: typeof(sawdust)
