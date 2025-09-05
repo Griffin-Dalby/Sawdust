@@ -30,6 +30,7 @@ function machine.create() : __type.StateMachine
 
     self.c_state = nil
     self.states = {}
+    self.environment = {}
 
     return self
 end

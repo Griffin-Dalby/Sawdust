@@ -32,6 +32,7 @@ function state.new(state_machine: __type.StateMachine, state_name: string) : __t
 
     --]] Setup State
     self.environment = {}
+    self.environment.shared = state_machine.environment
 
     self.hooks = {
         enter = {},
