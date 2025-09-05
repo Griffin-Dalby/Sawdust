@@ -42,6 +42,14 @@ export type SawdustState = typeof(setmetatable({} :: self_state, state))
 
 function state.new(state_machine: StateMachine, state_name: string) : SawdustState end
 
+function state:hook(to: string, callback: (env: StateEnvironment) -> nil) end
+function state:unhook(id: string) end
+
+function state:entered() : boolean end
+function state:exited() : boolean end
+
+function state:transition(state_name: string) : StateTransition end
+
 --#endregion
 
 --[[ TRANSITION ]]--
