@@ -61,6 +61,7 @@ function transition:runConditionals()
 
     if do_transition then
         self:runTransition() end
+    return do_transition
 end
 
 function transition:eventCalled(event_id: string)
@@ -78,34 +79,37 @@ end
 --[[ transition:when(conditional: (env) -> boolean)
     This will add a new condition where the result of the provided callback
     dictates if the transition occurs. ]]
-function transition:when(conditional: (env: __type.StateEnvironment) -> boolean)
+function transition:when(conditional: (env: __type.StateEnvironment) -> boolean) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'custom'
     condition_data.conditional = conditional
 
     table.insert(self.conditions, condition_data)
+    return self
 end
 
 --[[ transition:on(event_id: string)
     This will add a new condition awaiting an event call within the state
     machine. ]]
-function transition:on(event_id: string)
+function transition:on(event_id: string) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'event'
     condition_data.conditional = event_id
 
     table.insert(self.conditions, condition_data)
+    return self
 end
 
 --[[ transition:after(time: number)
     This will add a new condition that will wait a certain time, then
     run. ]]
-function transition:after(time: number)
+function transition:after(time: number) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'time'
     condition_data.conditional = time
 
     table.insert(self.conditions, condition_data)
+    return self
 end
 
 --#endregion
