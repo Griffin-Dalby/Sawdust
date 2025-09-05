@@ -67,12 +67,16 @@ function transition:runConditionals()
 end
 
 function transition:eventCalled(event_id: string)
+    local do_transition = false
     for _, condition_data in pairs(self.conditions) do
         if condition_data.type ~= 'event' then continue end
         if condition_data.conditional ~= event_id then continue end
             
         self:runTransition()
+        do_transition = true; break
     end
+
+    return do_transition
 end
 
 --#endregion
