@@ -60,12 +60,13 @@ function machine:switchState(state_name: string)
     local state_locked = false
     if self.state then
         --> Cleanup last state
-
+        state_locked = not self.state:exited()
     end
     if state_locked then
         return end
 
     self.state = self.states[state_name]
+    self.state:entered()
 end
 
 --#endregion
