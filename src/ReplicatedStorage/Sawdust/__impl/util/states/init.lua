@@ -28,7 +28,7 @@ machine.__index = machine
 function machine.create() : __type.StateMachine
     local self = setmetatable({} :: __type.self_machine, machine)
 
-    self.state = nil
+    self.c_state = nil
     self.states = {}
 
     return self
@@ -58,15 +58,15 @@ function machine:switchState(state_name: string)
     assert(self.states[state_name], `attempt to switch to an invalid state "{state_name}"!`)
 
     local state_locked = false
-    if self.state then
+    if self.c_state then
         --> Cleanup last state
-        state_locked = not self.state:exited()
+        state_locked = not self.c_state:exited()
     end
     if state_locked then
         return end
 
-    self.state = self.states[state_name]
-    self.state:entered()
+    self.c_state = self.states[state_name]
+    self.c_state:entered()
 end
 
 --#endregion
