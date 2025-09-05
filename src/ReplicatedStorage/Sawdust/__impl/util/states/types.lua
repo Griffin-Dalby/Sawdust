@@ -18,6 +18,7 @@ state.__index = state
 
 export type StateEnvironment = { --] Fill with packaged env data
     total_state_time: number, --] Total time in this state
+    shared: {},               --] Shared data located in machine
 }
 
 export type self_state = {
