@@ -117,7 +117,7 @@ export type ConnectionResult  = {
     data: (...any) -> nil,
     append: (key: string, value: any) -> nil,
     send: () -> nil,
-    reject: () -> nil,
+    reject: (message: string) -> nil,
 }
 
 function connection:run(rawData: {})

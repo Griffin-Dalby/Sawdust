@@ -106,11 +106,13 @@ function connection:run(rawData: {})
 
         self.returnCall(req.caller, resData)
 	end
-    res.reject = function() --> Reject response
+    res.reject = function(message: string) --> Reject response
         assert(resData.closed==nil, `attempt to reject to a closed request!`)
         resData.closed = true
 
         resData.intent = '__rejected__'
+        if message then
+            resData.data = { message } end
         self.returnCall(req.caller, resData)
     end
 
