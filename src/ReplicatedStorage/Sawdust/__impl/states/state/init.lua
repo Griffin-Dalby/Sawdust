@@ -16,6 +16,9 @@ local runService = game:GetService('RunService')
 local __type = require(script.Parent.types)
 local transition = require(script.transition)
 
+--]] Functions
+function count_tbl(t: {}) local i=0; for _ in t do i+=1 end; return i end
+
 --]] Interface
 local state = {}
 state.__index = state
@@ -95,9 +98,13 @@ function state:entered() : boolean
         table.insert(prioritized_list, transition)
     end
     table.sort(prioritized_list, function(a, b)
-        return a.__priority > b.priority end)
+        return a.__priority > b.__priority end)
 
     self.__update = runService.Heartbeat:Connect(function(delta)
+        if not self.environment then
+            warn(`[{script.Name}] Environment was cleared, it has been rebuilt. (State ID: {self.name})`)
+            self.environment = {}
+            self.environment.shared = self.machine().environment end
         self.environment.total_state_time+=delta
 
         --] Run Update Hooks
@@ -108,7 +115,7 @@ function state:entered() : boolean
 
         --] Run Transition Conditions
         local did_transition = false
-        for priority: number, i_transition: __type.StateTransition in pairs(prioritized_list) do
+        for priority: number, i_transition: __type.StateTransition in ipairs(prioritized_list) do
             did_transition = i_transition:runConditionals()
             if did_transition then break end
         end
@@ -154,7 +161,7 @@ function state:transition(state_name: string) : __type.StateTransition
     assert(found_state, `failed to find state "{state_name}" inside state machine!`)
     local new_transition = transition.new{self, found_state}
     self.transitions[state_name] = new_transition
-    new_transition:priority(#self.transitions)
+    new_transition:priority(count_tbl(self.transitions))
 
     return new_transition
 end

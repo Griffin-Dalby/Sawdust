@@ -68,10 +68,10 @@ function machine:event(event_name: string)
         pl_check_list[transition.__priority] = true
         table.insert(prioritized_list, transition) end
     table.sort(prioritized_list, function(a, b)
-        return a.__priority > b.priority end)
+        return a.__priority > b.__priority end)
 
     local do_transition = false
-    for priority: number, transition: __type.StateTransition in pairs(prioritized_list) do
+    for priority: number, transition: __type.StateTransition in ipairs(prioritized_list) do
         do_transition = transition:eventCalled(event_name)
         if do_transition then break end
     end
