@@ -50,21 +50,23 @@ end
 
 --[[ state:hook(to: string, callback: (env: StateEnvironment) -> nil)
     This will hook a function to a specific lifecycle event. ]]
-function state:hook(to: string, callback: (env: __type.StateEnvironment) -> nil)
+function state:hook(to: string, callback: (env: __type.StateEnvironment) -> nil) : __type.SawdustState
     assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
     assert(callback, `:hook() missing argument #2! This is what will be linked, if you meant to unhook it run :unhook().`)
 
     local compiled_hook = { callback }
     self.hooks[to] = compiled_hook
+    return self
 end
 
 --[[ state:unhook(id: string)
     This will unhook a function from a specific lifecycle event. ]]
-function state:unhook(id: string)
+function state:unhook(id: string) : __type.SawdustState
     assert(id, `:unhook() missing argument #1! This is the ID to unhook.`)
     assert(self.hooks[id][1], `hook @ "{id}" isn't linked!`)
 
     self.hooks[id] = {}
+    return self
 end
 
 --#endregion
@@ -129,7 +131,7 @@ end
 --#region
 
 function state:transition(state_name: string) : __type.StateTransition
-    assert(not self.transitions, `transition {self.name} -> {state_name} is already mapped!`)
+    assert(not self.transitions[state_name], `transition {self.name} -> {state_name} is already mapped!`)
     
     local machine = self.machine() :: __type.StateMachine
     local found_state = machine.states[state_name] :: __type.SawdustState
