@@ -10,8 +10,11 @@
 --]]
 
 --]] Services
+local runService = game:GetService('RunService')
+
 --]] Modules
 local __type = require(script.Parent.types)
+local transition = require(script.transition)
 
 --]] Interface
 local state = {}
@@ -66,21 +69,64 @@ end
 
 --#endregion
 
---[[ INTERNAL CONTROLLER ]]--
+--[[ HOOK EVENTS ]]--
 --#region
 
 --[[ state:entered()
-    This will trigger the "entered" lifecycle for this state, and started the
+    This will trigger the "entered" lifecycle for this state, and start the
     update loop. ]]
-function state:entered()
-    
+function state:entered() : boolean
+    self.environment.total_state_time = 0
+
+    if self.__update then
+        self.__update:Disconnect() end
+
+    local update_hook = self.hooks.update[1]
+    if update_hook then
+        self.__update = runService.Heartbeat:Connect(function(delta)
+            self.environment.total_state_time+=delta
+            update_hook(self.environment, delta)
+        end)
+    end
+
+    local enter_hook = self.hooks.enter[1]
+    if enter_hook then
+        enter_hook(self.environment) end
+
+    return true
 end
 
 --[[ state:exited()
     This will trigger the "exited" lifecycle for this state, and stop the
     update loop. ]]
-function state:exited()
+function state:exited() : boolean
+    if self.__update then
+        self.__update:Disconnect()
+        self.__update = nil end
+
+    local exit_hook = self.hooks.exit[1]
+    if exit_hook then
+        exit_hook(self.environment) end
+
+    return true
+end
+
+--#endregion
+
+--[[ TRANSITIONS ]]--
+--#region
+
+function state:transition(state_name: string) : __type.StateTransition
+    assert(not self.transitions, `transition {self.name} -> {state_name} is already mapped!`)
     
+    local machine = self.machine() :: __type.StateMachine
+    local found_state = machine.states[state_name] :: __type.SawdustState
+
+    assert(found_state, `failed to find state "{state_name}" inside state machine!`)
+    local new_transition = transition.new{self, found_state}
+    self.transitions[state_name] = new_transition
+
+    return new_transition
 end
 
 --#endregion
