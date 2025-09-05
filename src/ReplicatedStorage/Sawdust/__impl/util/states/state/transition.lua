@@ -40,7 +40,7 @@ function transition.new(targets: {}) : __type.StateTransition
         return t_from.machine() end
 
     self.conditions = {}
-    self.priority = 1
+    self.__priority = 1
 
     return self
 end
@@ -83,11 +83,12 @@ end
 --[[ transition:priority(priority: number)
     This will set the priority of this transition, higher numbers will
     be called first. ]]
-function transition:priority(priority: number)
+function transition:priority(priority: number) : __type.StateTransition
     assert(priority, `attempt to set priority to nil!`)
     assert(type(priority)=='number', `attempt to set priority to invalid type! (Provided: {type(priority)}, Expected a number.)`)
 
-    self.priority = priority
+    self.__priority = priority
+    return self
 end
 
 --[[ transition:when(conditional: (env) -> boolean)

@@ -59,9 +59,11 @@ local transition = {}
 transition.__index = transition
 
 export type self_transition = {
-    __fetch: ('from'|'to') -> SawdustState?,
+    __fetch_state: ('from'|'to') -> SawdustState?,
+    __fetch_machine: StateMachine,
+    __priority: number,
 
-    conditions: {}
+    conditions: {},
 }
 export type StateTransition = typeof(setmetatable({} :: self_transition, transition))
 
@@ -71,6 +73,7 @@ function transition:runTransition() end
 function transition:runConditionals() end
 function transition:eventCalled(event_id: string) end
 
+function transition:priority(priority: number) : StateTransition end
 function transition:when(conditional: (env: StateEnvironment) -> boolean) : StateTransition end
 function transition:on(event_id: string) : StateTransition end
 function transition:after(time: number) : StateTransition end

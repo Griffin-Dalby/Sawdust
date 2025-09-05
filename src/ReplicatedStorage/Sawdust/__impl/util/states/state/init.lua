@@ -84,6 +84,14 @@ function state:entered() : boolean
     if self.__update then
         self.__update:Disconnect() end
 
+    local ordered_transitions = {}
+    for _, transition : __type.StateTransition in pairs(self.transitions) do
+        if ordered_transitions[transition.__priority] then
+            error(`there are multiple transitions @ priority {tostring(transition.__priority)}!`)
+            break end
+        ordered_transitions[transition.__priority] = transition
+    end
+
     self.__update = runService.Heartbeat:Connect(function(delta)
         self.environment.total_state_time+=delta
 
@@ -95,7 +103,7 @@ function state:entered() : boolean
 
         --] Run Transition Conditions
         local did_transition = false
-        for _, i_transition: __type.StateTransition in pairs(self.transitions) do
+        for priority: number, i_transition: __type.StateTransition in pairs(ordered_transitions) do
             did_transition = i_transition:runConditionals()
             if did_transition then break end
         end
@@ -141,6 +149,7 @@ function state:transition(state_name: string) : __type.StateTransition
     assert(found_state, `failed to find state "{state_name}" inside state machine!`)
     local new_transition = transition.new{self, found_state}
     self.transitions[state_name] = new_transition
+    new_transition:priority(#self.transitions)
 
     return new_transition
 end
