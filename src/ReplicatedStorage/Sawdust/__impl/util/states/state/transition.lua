@@ -55,8 +55,12 @@ end
 function transition:runConditionals()
     local do_transition = false
     for _, condition_data in pairs(self.conditions) do
-        if condition_data.type ~= 'custom' then continue end
-        do_transition = condition_data.conditional(self.__fetch_state('from').environment)
+        if condition_data.type == 'custom' then
+            do_transition = condition_data.conditional(self.__fetch_state('from').environment)
+        elseif condition_data.type == 'time' then
+            local t_from = self.__fetch_state('from') :: __type.SawdustState
+            do_transition = t_from.env.total_state_time >= condition_data.conditional
+        end
     
         if do_transition then break end
     end
