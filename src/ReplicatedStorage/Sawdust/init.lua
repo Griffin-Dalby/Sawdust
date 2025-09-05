@@ -61,6 +61,7 @@ local networking = require(__impl.networking); local networking_types = require(
 local builder = require(__impl.builder)
 local promise = require(__impl.promise)
 local signal = require(__impl.signal)
+local states = require(__impl.states); local states_types = require(__impl.states.types)
 local cache = require(__impl.cache)
 local util = require(__impl.util)
 local cdn = require(__impl.cdn)
@@ -121,6 +122,15 @@ core.signal = signal
 export type SawdustEmitter          = signal.SawdustEmitter
 export type SawdustSignal           = signal.SawdustSignal
 export type SawdustSignalConnection = signal.SawdustSignalConnection
+
+--]] STATE MACHINE
+core.states = states
+export type StateMachine    = states_types.StateMachine
+export type SawdustState    = states_types.SawdustState
+export type StateTransition = states_types.StateTransition
+
+export type StateEnvironment        = states_types.StateEnvironment
+export type TransitionConditionData = states_types.TransitionConditionData
 
 
 --]] CACHE
