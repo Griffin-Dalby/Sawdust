@@ -114,4 +114,10 @@ function provider:getAllAssets() : {}
     return assets
 end
 
+--[[ provider:hasAsset(asset_id: string) : boolean
+    Returns the existence of an asset w/ a specific id. ]]
+function provider:hasAsset(asset_id: string) : boolean
+    return self.provider:FindFirstChild(asset_id) ~= nil
+end
+
 return provider
