@@ -82,12 +82,20 @@ function state:entered() : boolean
         self.__update:Disconnect() end
 
     local update_hook = self.hooks.update[1]
-    if update_hook then
-        self.__update = runService.Heartbeat:Connect(function(delta)
-            self.environment.total_state_time+=delta
-            update_hook(self.environment, delta)
-        end)
-    end
+    self.__update = runService.Heartbeat:Connect(function(delta)
+        self.environment.total_state_time+=delta
+
+        --] Run Update Hook
+        if update_hook then
+            update_hook(self.environment, delta) end
+
+        --] Run Transition Conditions
+        local did_transition = false
+        for _, i_transition: __type.StateTransition in pairs(self.transitions) do
+            did_transition = i_transition:runConditionals()
+            if did_transition then break end
+        end
+    end)
 
     local enter_hook = self.hooks.enter[1]
     if enter_hook then
