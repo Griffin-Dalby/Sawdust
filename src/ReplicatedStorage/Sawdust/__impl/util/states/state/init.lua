@@ -81,13 +81,14 @@ function state:entered() : boolean
     if self.__update then
         self.__update:Disconnect() end
 
-    local update_hook = self.hooks.update[1]
     self.__update = runService.Heartbeat:Connect(function(delta)
         self.environment.total_state_time+=delta
 
-        --] Run Update Hook
-        if update_hook then
-            update_hook(self.environment, delta) end
+        --] Run Update Hooks
+        if #self.hooks.update>0 then
+            for _, update_hook in pairs(self.hooks.update) do
+                update_hook(self.environment, delta) end
+        end
 
         --] Run Transition Conditions
         local did_transition = false
@@ -97,9 +98,10 @@ function state:entered() : boolean
         end
     end)
 
-    local enter_hook = self.hooks.enter[1]
-    if enter_hook then
-        enter_hook(self.environment) end
+    if #self.hooks.enter>0 then
+        for _, enter_hook in pairs(self.hooks.enter) do
+            enter_hook(self.environment) end
+    end
 
     return true
 end
@@ -112,9 +114,11 @@ function state:exited() : boolean
         self.__update:Disconnect()
         self.__update = nil end
 
-    local exit_hook = self.hooks.exit[1]
-    if exit_hook then
-        exit_hook(self.environment) end
+    if #self.hooks.exit>0 then
+        for _, exit_hook in pairs(self.hooks.exit) do
+            exit_hook(self.environment)
+        end 
+    end
 
     return true
 end
