@@ -51,6 +51,26 @@ function machine:state(state_name: string) : __type.SawdustState
     return new_state
 end
 
+--[[ machine:event(event_name: string)
+    Fires an event, which will pass it along to the current state. ]]
+function machine:event(event_name: string)
+    assert(event_name, `attempt to fire event with nil event_name!`)
+    assert(type(event_name) == 'string', `event_name is a "{type(event_name)}", but it was expected to be a string!`)
+    assert(self.c_state, `attempt to fire event to an inactive state machine.`)
+
+    local prioritized_list = {}
+    for _, transition: __type.StateTransition in pairs(self.c_state.transitions) do
+        prioritized_list[transition.__priority] = transition end
+    table.sort(prioritized_list, function(a, b)
+        return a.__priority > b.priority end)
+
+    local do_transition = false
+    for priority: number, transition: __type.StateTransition in pairs(prioritized_list) do
+        do_transition = transition:eventCalled(event_name)
+        if do_transition then break end
+    end
+end
+
 --[[ machine:switchState(state_name: string)
     This will switch this machine's state to state_name. ]]
 function machine:switchState(state_name: string)
