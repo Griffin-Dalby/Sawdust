@@ -95,6 +95,7 @@ export type StateMachine = typeof(setmetatable({} :: self_machine, machine))
 
 function machine.new() : StateMachine end
 function machine:state(state_name: string) : SawdustState end
+function machine:event(event_name: string) end
 function machine:switchState(state_name: string) end
 
 --#endregion
