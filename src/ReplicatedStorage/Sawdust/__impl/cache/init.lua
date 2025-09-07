@@ -54,7 +54,7 @@ end
 
 --[[ cache:getValue(keys: ...string)
     Fetches multiple or singular values from the current cache. ]]
-function cache:getValue(...)
+function cache:getValue(...) : any...
     assert(self, `:getValue() called without a targeted cache!`)
 
     local keys = {...} :: {[number]: string}
@@ -80,7 +80,7 @@ end
 
 --[[ cache:getContents()
     Returns a copy of all values within the current cache. ]]
-function cache:getContents()
+function cache:getContents() : {[string]: any}
     assert(self, `:getContents() called without a targeted cache!`)
     return table.clone(self.contents)
 end
@@ -97,7 +97,7 @@ end
 
 --[[ cache:createTable(tableKey: any)
     Creates a table within the cache, basically having caches in caches. ]]
-function cache:createTable(tableKey: any)
+function cache:createTable(tableKey: any) : SawdustCache
     assert(self, `:createTable() called without a targeted cache!`)
     assert(tableKey, `:createTable() missing argument 1! (tableKey)`)
     assert(not self.contents[tableKey], `:createTable() conflict while creating a new table!`)
@@ -124,7 +124,7 @@ end
 
 --[[ cache:deleteTable(tableKey: any)
     Finds & deletes the specified table. ]]
-function cache:deleteTable(tableKey: any) : SawdustCache
+function cache:deleteTable(tableKey: any)
     assert(self, `:deleteTable() called without a targeted cache!`)
     assert(tableKey, `:deleteTable() missing argument 1! (tableKey)`)
     assert(self.contents[tableKey], `:deleteTable() unable to find table w/ name "{tableKey}"!`)
