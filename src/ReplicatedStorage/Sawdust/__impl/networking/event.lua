@@ -95,7 +95,7 @@ end
 
 --[[ call:broadcastGlobally()
     This call will be sent to all players in this server. ]]
-function call:broadcastGlobally()
+function call:broadcastGlobally() : types.NetworkingCall
     -- if not isServer then
     --     warn(`[{script.Name}] Can't access broadcast functions on client!`)
     --     return end
@@ -108,7 +108,7 @@ function call:broadcastGlobally()
 
 --[[ call:broadcastTo(targetData)
     Sets the targets of this call. ]]
-function call:broadcastTo(...)
+function call:broadcastTo(...) : types.NetworkingCall
     -- if not isServer then
     --     warn(`[{script.Name}] Can't access broadcast functions on client!`)
 	--     return end
@@ -124,7 +124,7 @@ function call:broadcastTo(...)
 
 --[[ call:setFilterType(filterType)
     Sets the filter type of this call. ]]
-function call:setFilterType(filterType: 'include'|'exclude')
+function call:setFilterType(filterType: 'include'|'exclude') : types.NetworkingCall
     if not isServer then
         warn(`[{script.Name}] Can't access broadcast functions on client!`)
         return end
@@ -139,25 +139,25 @@ function call:setFilterType(filterType: 'include'|'exclude')
 
 --[[ call:data(...)
     Sets the send data of this call. ]]
-function call:data(...)
+function call:data(...) : types.NetworkingCall
     self._data = compileTableArgs(unpack{...}) or {}
     return self end
 
 --[[ call:intent(intent: string)
     Sets the intent of this call. ]]
-function call:intent(intent: string)
+function call:intent(intent: string) : types.NetworkingCall
     self._intent = intent
     return self end
 
 --[[ call:timeout(seconds: number)
     Setings the request timeout in seconds. ]]
-function call:timeout(seconds: number)
+function call:timeout(seconds: number) : types.NetworkingCall
     self._timeout = seconds
     return self end
 
 --[[ call:setReturnId(returnId: string)
     Sets the return ID of this call for invoke responses. ]]
-function call:setReturnId(returnId: string)
+function call:setReturnId(returnId: string) : types.NetworkingCall
     if not requestCache:getValue(returnId) then
         warn(`[{script.Name}] No request found for return ID: {returnId}`)
         return self end
