@@ -93,10 +93,10 @@ function signal:fire(...)
     local args = {...}
     for connectionUUID: string, connection: (...any) -> nil in pairs(self.connections) do
         local s, e = pcall(function()
-            connection(unpack(args))
+            connection.callback(unpack(args))
         end)
 
-        if s then
+        if not s then
             warn(`[{script.Name}] Failure while firing sawdust signal!`)
             error(e)
         end
