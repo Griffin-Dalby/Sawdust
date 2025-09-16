@@ -1,6 +1,6 @@
 [package]
 name = "griffin-dalby/sawdust"
-version = "1.4.0"
+version = "1.4.1"
 registry = "https://github.com/UpliftGames/wally-index"
 license = "Apache2"
 realm = "shared"
@@ -8,6 +8,10 @@ realm = "shared"
 exclude = [
     "build",
     "util",
+    ".gitignore",
+    "CHANGELOG.md",
+    "README.md",
+    "wally.lock",
 ]
 
 [dependencies]

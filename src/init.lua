@@ -77,6 +77,7 @@ local sawdust = {} :: {
 		networking: typeof(networking),
 		promise: typeof(promise),
 		signal: typeof(signal),
+		states: typeof(states),
 		cache: typeof(cache),
 		cdn: typeof(cdn)
 	},

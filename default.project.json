@@ -5,7 +5,7 @@
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "Sawdust": {
-        "$path": "src/ReplicatedStorage/Sawdust"
+        "$path": "src"
       },
       "Packages": {
         "$path": "Packages"
