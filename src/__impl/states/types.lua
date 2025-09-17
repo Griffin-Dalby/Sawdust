@@ -9,6 +9,8 @@
 
 --]]
 
+local signal = require(script.Parent.Parent.signal)
+
 local types = {}
 
 --[[ STATE ]]--
@@ -36,7 +38,9 @@ export type self_state = {
 
     transitions: {
 
-    }
+    },
+
+    state_updated: signal.SawdustSignal,
 
 }
 export type SawdustState = typeof(setmetatable({} :: self_state, state))

@@ -15,6 +15,8 @@
 local __type = require(script.types)
 local state = require(script.state)
 
+local signal = require(script.Parent.signal)
+
 --]] Settings
 --]] Constants
 --]] Variables
@@ -31,6 +33,9 @@ function machine.create() : __type.StateMachine
     self.c_state = nil
     self.states = {}
     self.environment = {}
+
+    local emitter = signal.new()
+    self.state_updated = emitter:newSignal()
 
     return self
 end
