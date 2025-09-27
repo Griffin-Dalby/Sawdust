@@ -196,4 +196,23 @@ function promise:finally(callback: () -> ()): SawdustPromise
     end)
 end
 
+--[[ promise:wait(timeout: number?) : any...
+    Yields the current thread until this promise resolves/rejects
+    You can modify the timeout time to avoid an infinite yield.
+
+    This will return a success status boolean, as well as an unpacked
+    tuple array of the promise return data. ]]
+function promise:wait(timeout_time: number?)
+    timeout_time = timeout_time or 5
+
+    local did_timeout = false
+    task.delay(timeout_time, function()
+        did_timeout = true; end)
+
+    repeat task.wait(0) until (self._state=='fulfilled' or self._state=='rejected') or did_timeout
+
+    assert(not did_timeout, `promise:wait() timed out after {timeout_time} seconds!`)
+    return (self._state=='fulfilled'), unpack(self._value)
+end
+
 return promise
