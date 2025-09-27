@@ -16,3 +16,6 @@ trace.json
 # Wally
 Packages/
 build/
+
+# Dev Environment
+util/

@@ -1,6 +1,6 @@
 [package]
 name = "griffin-dalby/sawdust"
-version = "1.4.1"
+version = "1.4.2"
 registry = "https://github.com/UpliftGames/wally-index"
 license = "Apache2"
 realm = "shared"
