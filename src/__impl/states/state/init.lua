@@ -18,6 +18,13 @@ local transition = require(script.transition)
 
 --]] Functions
 function count_tbl(t: {}) local i=0; for _ in t do i+=1 end; return i end
+function run_hooks(hook_tbl: {}, ...)
+    for id: string, hooks: {() -> nil} in pairs(hook_tbl) do
+        for _, hook in pairs(hooks) do
+            hook(...)
+        end
+    end
+end
 
 --]] Interface
 local state = {}
@@ -52,24 +59,35 @@ end
 --[[ LIFECYCLE HOOKS ]]--
 --#region
 
---[[ state:hook(to: string, callback: (env: StateEnvironment) -> nil)
-    This will hook a function to a specific lifecycle event. ]]
-function state:hook(to: string, callback: (env: __type.StateEnvironment) -> nil) : __type.SawdustState
-    assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
-    assert(callback, `:hook() missing argument #2! This is what will be linked, if you meant to unhook it run :unhook().`)
+--[[ state:hook(to: string, id: string, callback: (env: StateEnvironment) -> nil)
+    This will hook a function to a specific lifecycle event.
 
-    local compiled_hook = { callback }
-    self.hooks[to] = compiled_hook
+    *to will be searched for in the internal hooks, and if found the *callback
+    will be attached with the specific *id. ]]
+function state:hook(to: string, id: string, callback: (env: __type.StateEnvironment) -> nil) : __type.SawdustState
+    assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
+    assert(id, `:hook() missing argument #2! This is the ID this callback can be pointed to.`)
+    assert(callback, `:hook() missing argument #3! This is what will be linked, if you meant to unhook it run :unhook().`)
+
+    assert(self.hooks[to], `unable to find lifecycle hook "{to}"!`)
+    assert(not self.hooks[to][id], `attempt to overwrite existing lifecycle hook "{id}" in "{id}"!`)
+
+    local compiled_hook = { id, callback }
+    self.hooks[to][id] = compiled_hook
     return self
 end
 
---[[ state:unhook(id: string)
-    This will unhook a function from a specific lifecycle event. ]]
-function state:unhook(id: string) : __type.SawdustState
-    assert(id, `:unhook() missing argument #1! This is the ID to unhook.`)
-    assert(self.hooks[id][1], `hook @ "{id}" isn't linked!`)
+--[[ state:unhook(from: string, id: string)
+    This will unhook a function from a specific lifecycle event.
 
-    self.hooks[id] = {}
+    *from will be searched for in the internal hooks, and if found *id will be
+    searched for inside, and an attempt will be make to unhook the callback. ]]
+function state:unhook(from: string, id: string) : __type.SawdustState
+    assert(from, `:unhook() missing argument #1! This is the ID pointing towards the hook list.`)
+    assert(id, `:unhook() missing argument #2! This is the ID to unhook from the hook list.`)
+    assert(self.hooks[from][id], `hook @ {from}.{id} isn't linked!`)
+
+    self.hooks[from][id] = nil
     return self
 end
 
@@ -109,8 +127,7 @@ function state:entered() : boolean
 
         --] Run Update Hooks
         if #self.hooks.update>0 then
-            for _, update_hook in pairs(self.hooks.update) do
-                update_hook(self.environment, delta) end
+            run_hooks(self.hooks.update, self.environment, delta)
         end
 
         --] Run Transition Conditions
@@ -122,8 +139,7 @@ function state:entered() : boolean
     end)
 
     if #self.hooks.enter>0 then
-        for _, enter_hook in pairs(self.hooks.enter) do
-            enter_hook(self.environment) end
+        run_hooks(self.hooks.enter, self.environment)
     end
 
     return true
@@ -138,9 +154,7 @@ function state:exited() : boolean
         self.__update = nil end
 
     if #self.hooks.exit>0 then
-        for _, exit_hook in pairs(self.hooks.exit) do
-            exit_hook(self.environment)
-        end 
+        run_hooks(self.hooks.exit, self.environment)
     end
 
     return true
