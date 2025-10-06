@@ -56,7 +56,7 @@ Internally, I've built a form of an RPC layer over Roblox's RemoteEvents. I won'
 
 When the Networking implementation initalizes, it'll go through the `fetchFolder` and automatically bind all found events to my custom networking handler, and it'll also wrap the events; this wrapped event is what you'll access to handle and send data.
 
-As you've seen in the above chunk of code, you can access this wrapped event through: `channel.event`. Simple enough hopefully. You can learn more in [Networking Documentation](../implementation-docs/networking.md)
+As you've seen in the above chunk of code, you can access this wrapped event through: `channel.event`. Simple enough hopefully. You can learn more in [Networking Documentation](../../documentation/Core/networking.md)
 
 ## Calling / Invoking Events
 

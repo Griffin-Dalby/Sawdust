@@ -21,7 +21,7 @@ You can do this one of two ways, depending on your scenario:
 If you're using wally, simply add this to your `wally.toml`:
 
 ```toml
-sawdust = "griffin-dalby/sawdust@1.3.0"
+sawdust = "griffin-dalby/sawdust@1.4.2"
 ```
 
 Than you can easily access sawdust through **ReplicatedStorage.Sawdust**.

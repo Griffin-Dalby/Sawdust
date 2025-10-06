@@ -160,4 +160,3 @@ channel.event:route()
 ```
 
 ### Middleware
-
