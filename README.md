@@ -49,8 +49,12 @@ Sawdust is a lightweight, modular framework for Roblox developers who want clari
 local networking = sawdust.core.networking
 local mechanics = networking.getChannel('mechanics')
 
+mechanics.skill:useMiddleware('before', 1, function(pipeline)
+    --> All code in here will be ran BEFORE any :with() connections.
+    print(`.skill called with intent "{pipeline:getIntent()}"!`)
+end)
 mechanics.skill:useMiddleware('after', 1, function(pipeline)
-    --> I'll fill this all out soon I just want to push this for the rodev game jam tmr I love this module
+    --> All code in here will be ran AFTER any :with() connections.
 end)
 
 mechanics.skill:with() --> Returns a new call
@@ -58,15 +62,15 @@ mechanics.skill:with() --> Returns a new call
     :data('fireball', mousePosition)
     :timeout(4)
     :invoke() --> Returns a promise
-        :finally(function(req)
-            local intent, data = req.intent, req.data
+        :finally(function(data)
             local didUse = (data[1]==true)
-
-
         end)
-        :catch(function(issue)
-            warn('Issue with skill: fireball')
-            warn(issue)
+        :catch(function(data)
+            local err = unpack(data)
+            warn(`Server refused to let us use skill!`)
+            if err then
+                warn(`A message was provided: {err}`)
+            end
         end)
 
 ```
@@ -80,8 +84,7 @@ local mechanics = networking.getChannel('mechanics')
 mechanics.skill:handle(function(req, res)
     local intent, data = req.intent, req.data
 
-    res.intent('success')
-    res.data('Whatever you\'d need')
+    res.data(true)
     res.send() --> Send the data back
 end)
 ```
@@ -179,8 +182,9 @@ You can find full documentation & quick start examples + implementation tutorial
 #### Core
 | Module | Description |
 | ------ | ----------- |
-| ```networking``` | Networking system modeled after NodeJS' Express |
+| ```networking``` | RPC-style system modeled after NodeJS' Express & Axios |
 | ```promise``` | Promise system modeled after NodeJS |
+| ```states```| Dynamic state machine for multiple uses |
 | ```signal``` | Simple event emitter system |
 | ```cache``` | Fast, structured memory management |
 | ```cdn``` | Asset delivery w/ preload features |
@@ -191,7 +195,6 @@ You can find full documentation & quick start examples + implementation tutorial
 | ```maid``` | Cleanup utility for tagged objects |
 | ```debounce``` | Timed and interactable debounces |
 | ```enum_map``` | "Maps" enums to human readable, and back. |
-| ```states```| Simple dynamic state management |
 | ```timer```| Heartbeat wrapper w/ decay and start/stop control |
 | ```uuid``` | Customizable UUID generator |
 
