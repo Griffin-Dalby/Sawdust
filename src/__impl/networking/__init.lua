@@ -60,12 +60,13 @@ return function ()
                 if not data[1] or data[1] ~= __settings.global.version then return end --> Sawdust protocol check
                 
                 --> Return protocol
-                if data[2] == 3 then 
+                if data[2] == 3 then
                     local returnId = data[3]
-                    local resolver = eventTable:getValue(returnId)
-                    if not resolver then
+                    if not eventTable:hasEntry(returnId) then
                         warn(`{warnTag} No resolver found for returnId {returnId} in event {eventPath}!`)
                         return end
+
+                    local resolver = eventTable:getValue(returnId)
                     
                     requestCache:setValue(returnId, {
                         caller = data.caller 
@@ -73,7 +74,7 @@ return function ()
                     resolver(data) --> Resolve the returnId with the data
                     eventTable:setValue(returnId, nil) --> Remove resolver
 
-                    return 
+                    return
                 end --> Type 3 is for data returns
 
                 --> Run connections
