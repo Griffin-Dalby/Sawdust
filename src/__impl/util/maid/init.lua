@@ -137,16 +137,18 @@ local maid = {}
 maid.__index = maid
 
 type self = {
-    tracked: {[number]: SawdustMaidWrapper}
+    tracked: {[number]: SawdustMaidWrapper},
+    object: {}
 }
 export type SawdustMaid = typeof(setmetatable({} :: self, maid))
 
 --[[ maid.new()
     Constructor for the Maid instance. ]]
-function maid.new()
+function maid.new(object: {})
     local self = setmetatable({} :: self, maid)
 
     self.tracked = {}
+    self.object = object
 
     return self
 end
@@ -186,10 +188,15 @@ function maid:removeTag(item: any, tag: string)
     return self.tracked[item]:removeTag(tag)
 end
 
---[[ maid:clean(tag: string|nil)
+--[[ maid:clean(tag: string|nil, clean_object: boolean|nil)
     Cleans up everything thats being tracked.
-    If *tag* is provided, it'll only clean everything tracked w/ that tag. ]]
-function maid:clean(tag: string?)
+    If *tag* is provided, it'll only clean everything tracked w/ that tag.
+    
+    Additionally, if clean_object is anything but false, the tag is nil, then
+    the provided object will be deeply disconnected, with each value being
+    nullified & the metatable being cleared. ]]
+function maid:clean(tag: string?, clean_object: boolean?)
+    --> Clean Instances
     for cleanInstance: any, wrappedInstance: SawdustMaidWrapper in pairs(self.tracked) do
         if tag then
             if wrappedInstance:hasTag(tag) then
@@ -198,6 +205,16 @@ function maid:clean(tag: string?)
         else
             wrappedInstance:clean()
         end
+    end
+
+    --> Clean Object
+    if self.object then
+        if tag~=nil then return end
+        if clean_object==false then return end
+        
+        for i in pairs(self.objet) do
+            rawset(self.object, i, nil) end
+        setmetatable(self.object, {})
     end
 end
 
