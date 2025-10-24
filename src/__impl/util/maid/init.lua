@@ -155,13 +155,14 @@ end
     Adds *item* to this Maid instance. ]]
 function maid:add(item: any)
     if not item then return end
-    if self.tracked[item] then return end
+    if self.tracked[item] then return item end
 
     local wrapped = wrapper.wrap(item)
     self.tracked[item] = wrapped
 
     if doDebug then
         print(formatError('add', `Now tracking {(typeof(item)=='Instance') and `"{item.Name}"` or 'new instance'} for Maid instance.`)) end
+    return item
 end
 
 --[[ maid:tag(item: any?, tag: string)
