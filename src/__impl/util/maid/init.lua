@@ -188,14 +188,13 @@ function maid:removeTag(item: any, tag: string)
     return self.tracked[item]:removeTag(tag)
 end
 
---[[ maid:clean(tag: string|nil, clean_object: boolean|nil)
+--[[ maid:clean(tag: string|nil)
     Cleans up everything thats being tracked.
     If *tag* is provided, it'll only clean everything tracked w/ that tag.
     
-    Additionally, if clean_object is anything but false, the tag is nil, then
-    the provided object will be deeply disconnected, with each value being
-    nullified & the metatable being cleared. ]]
-function maid:clean(tag: string?, clean_object: boolean?)
+    Additionally, the provided object will be deeply disconnected, with each
+    value being nullified & the metatable being cleared. ]]
+function maid:clean(tag: string?)
     --> Clean Instances
     for cleanInstance: any, wrappedInstance: SawdustMaidWrapper in pairs(self.tracked) do
         if tag then
@@ -209,10 +208,7 @@ function maid:clean(tag: string?, clean_object: boolean?)
 
     --> Clean Object
     if self.object then
-        if tag~=nil then return end
-        if clean_object==false then return end
-        
-        for i in pairs(self.objet) do
+        for i in pairs(self.object) do
             rawset(self.object, i, nil) end
         setmetatable(self.object, {})
     end
