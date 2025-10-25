@@ -95,13 +95,20 @@ function cache:setValue(key: any, value: any)
     self.contents[key] = value
 end
 
---[[ cache:createTable(tableKey: any)
-    Creates a table within the cache, basically having caches in caches. ]]
-function cache:createTable(tableKey: any) : SawdustCache
+--[[ cache:createTable(tableKey: any, create: boolean?)
+    Creates a table within the cache, basically having caches in caches.
+    
+    safe(false) : If true & the table already exists, it will be returned.
+    Usually this would result in a conflict error. ]]
+function cache:createTable(tableKey: any, safe: boolean?) : SawdustCache
     assert(self, `:createTable() called without a targeted cache!`)
     assert(tableKey, `:createTable() missing argument 1! (tableKey)`)
-    assert(not self.contents[tableKey], `:createTable() conflict while creating a new table!`)
-    
+    if safe then
+        if self.contents[tableKey] then return self.contents[tableKey] end
+    else
+        assert(not self.contents[tableKey], `:createTable() conflict while creating a new table!`)
+    end
+
     local pseudoCache = setmetatable({} :: self, cache)
 
     pseudoCache.cacheName = tableKey
