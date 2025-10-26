@@ -41,8 +41,8 @@ return function ()
         for _, event: RemoteEvent in pairs(category:GetChildren()) do
             local eventPath = `{category.Name}.{event.Name}`
 
-            if not event:IsA('RemoteEvent') then
-                warn(`{warnTag} Instance @ {eventPath} isn't a RemoteEvent!`)
+            if not (event:IsA('RemoteEvent') or event:IsA('UnreliableRemoteEvent')) then
+                warn(`{warnTag} Instance @ {eventPath} isn't a RemoteEvent type!`)
                 return end
 
             local eventTable = connectionCache:createTable(event)
