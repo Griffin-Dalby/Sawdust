@@ -113,7 +113,7 @@ const config = {
               },
               {
                 label: 'Docs',
-                to: '/docs/implementation-docs/intro'
+                to: '/docs/documentation/intro'
               },
             ],
           },
