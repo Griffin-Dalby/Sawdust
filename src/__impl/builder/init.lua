@@ -52,7 +52,8 @@ type self = {
         start: {SawdustSVCInjection}
     },
 
-    dependencies: {[number]: string}
+    dependencies: {[number]: string},
+    meta: {string: {}}
 }
 export type SawdustService = typeof(setmetatable({} :: self, builder))
 
@@ -72,6 +73,7 @@ function builder.new(id: string): SawdustService
         start = {}
     }
 
+    self.meta = {}
     self.dependencies = {}
 
     return self
@@ -120,6 +122,25 @@ function builder:inject(phase: string, fn: (...any) -> ...any)
     local inj = injection.new(fn)
     table.insert(self.injections[phase], inj)
     
+    return self
+end
+
+--[[ builder:loadMeta(meta: Folder)
+    Loads asset metadata from a provided folder, allowing the service to access
+    assets at runtime. ]]
+function builder:loadMeta(meta: Folder)
+    for _, asset: Instance in ipairs(meta:GetChildren()) do
+        if self.meta[asset.Name] then
+            warn(`[{script.Name}:loadMeta()] Cannot override meta asset "{asset.Name}".`)
+        return self end
+
+        if asset:IsA("ModuleScript") then
+            self.meta[asset.Name] = require(asset)
+        else
+            warn(`[{script.Name}:loadMeta()] Unsupported meta asset type "{asset.ClassName}" for asset "{asset.Name}".`)
+        end
+    end
+
     return self
 end
 
