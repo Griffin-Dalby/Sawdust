@@ -47,7 +47,7 @@ export type SawdustState = typeof(setmetatable({} :: self_state, state))
 
 function state.new(state_machine: StateMachine, state_name: string) : SawdustState end
 
-function state:hook(to: string, callback: (env: StateEnvironment) -> nil) : SawdustState end
+function state:hook(to: string, id: string, callback: (env: StateEnvironment) -> nil) : SawdustState end
 function state:unhook(id: string) : SawdustState end
 
 function state:entered() : boolean end
