@@ -25,14 +25,19 @@ local signal = require(script.Parent.signal)
 local machine = {}
 machine.__index = machine
 
---[[ machine.create() : StateMachine
-    Constructor function for the State Machine. ]]
-function machine.create() : __type.StateMachine
-    local self = setmetatable({} :: __type.self_machine, machine)
+--[[ machine.create<TShEnv, TStEnv>() : StateMachine
+    Constructor function for the State Machine.
+        
+    The generic operators TShEnv and TStEnv allows for templating Shared &
+    State-Local environment data, specifically:
+    TShEnv: .shared data
+    TStEnv: per-state data ]]
+function machine.create<TShEnv, TStEnv>() : __type.StateMachine<TShEnv, TStEnv>
+    local self = setmetatable({} :: __type.self_machine<TShEnv, TStEnv>, machine)
 
     self.c_state = nil
     self.states = {}
-    self.environment = {}
+    self.environment = {} :: TShEnv
 
     local emitter = signal.new()
     self.state_updated = emitter:newSignal()
@@ -45,12 +50,12 @@ end
 
 --[[ machine:state(state_name: string)
     This will create a new state & open a handler. ]]
-function machine:state(state_name: string) : __type.SawdustState
+function machine:state<TShEnv, TStEnv>(state_name: string) : __type.SawdustState<TShEnv, TStEnv>
     assert(state_name, `attempt to create state with nil state_name!`)
     assert(type(state_name) == 'string', `state_name is a "{type(state_name)}", but it was expected to be a string!`)
     assert(not self.states[state_name], `attempt to create duplicate state "{state_name}"!`)
 
-    local new_state = state.new(self, state_name)
+    local new_state: __type.SawdustState<TShEnv, TStEnv> = state.new(self, state_name)
     self.states[state_name] = new_state
 
     return new_state

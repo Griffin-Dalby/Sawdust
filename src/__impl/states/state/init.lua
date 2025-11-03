@@ -18,8 +18,8 @@ local transition = require(script.transition)
 
 --]] Functions
 function count_tbl(t: {}) local i=0; for _ in t do i+=1 end; return i end
-function run_hooks(hook_tbl: {}, ...)
-    for id: string, hooks: {() -> nil} in pairs(hook_tbl) do
+function run_hooks(hook_tbl: {[string]: {(env: __type.StateEnvironment<any, any>) -> nil}}, ...)
+    for id: string, hooks in pairs(hook_tbl) do
         for _, hook in pairs(hooks) do
             hook(...)
         end
@@ -32,12 +32,14 @@ state.__index = state
 
 --[[ state.new()
     This will create a new state, and open a handler interface. ]]
-function state.new(state_machine: __type.StateMachine, state_name: string) : __type.SawdustState
-    local self = setmetatable({} :: __type.self_state, state)
+function state.new<TShEnv, TStEnv>(state_machine: __type.StateMachine<TShEnv, TStEnv>,
+        state_name: string) : __type.SawdustState<TShEnv, TStEnv>
+
+    local self = setmetatable({} :: __type.self_state<TShEnv, TStEnv>, state)
 
     --]] Setup Internal
     self.name = state_name
-    self.machine = function() : __type.StateMachine
+    self.machine = function() : __type.StateMachine<TShEnv, TStEnv>
         return state_machine end
 
     --]] Setup State
@@ -64,7 +66,12 @@ end
 
     *to will be searched for in the internal hooks, and if found the *callback
     will be attached with the specific *id. ]]
-function state:hook(to: string, id: string, callback: (env: __type.StateEnvironment) -> nil) : __type.SawdustState
+function state:hook<TShEnv, TStEnv>(
+        to: string,
+        id: string,
+        callback: (env: __type.StateEnvironment<TShEnv, TStEnv>) -> nil
+    ) : __type.SawdustState<TShEnv, TStEnv>
+
     assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
     assert(id, `:hook() missing argument #2! This is the ID this callback can be pointed to.`)
     assert(callback, `:hook() missing argument #3! This is what will be linked, if you meant to unhook it run :unhook().`)
@@ -72,7 +79,9 @@ function state:hook(to: string, id: string, callback: (env: __type.StateEnvironm
     assert(self.hooks[to], `unable to find lifecycle hook "{to}"!`)
     assert(not self.hooks[to][id], `attempt to overwrite existing lifecycle hook "{id}" in "{id}"!`)
 
-    local compiled_hook = { id, callback }
+    local compiled_hook = { id, function(env, ...)
+        callback(env :: __type.StateEnvironment<TShEnv, TStEnv>, ...)
+    end }
     self.hooks[to][id] = compiled_hook
     return self
 end
@@ -82,7 +91,8 @@ end
 
     *from will be searched for in the internal hooks, and if found *id will be
     searched for inside, and an attempt will be make to unhook the callback. ]]
-function state:unhook(from: string, id: string) : __type.SawdustState
+function state:unhook<TShEnv, TStEnv>(from: string, id: string) : __type.SawdustState<TShEnv, TStEnv>
+        
     assert(from, `:unhook() missing argument #1! This is the ID pointing towards the hook list.`)
     assert(id, `:unhook() missing argument #2! This is the ID to unhook from the hook list.`)
     assert(self.hooks[from][id], `hook @ {from}.{id} isn't linked!`)
@@ -165,14 +175,17 @@ end
 --[[ TRANSITIONS ]]--
 --#region
 
-function state:transition(state_name: string) : __type.StateTransition
+function state.transition<TShEnv, TStEnv>(self: __type.StateMachine<TShEnv, TStEnv>,
+        state_name: string) : __type.StateTransition
+
     assert(state_name~=self.name, `cannot map transition to same state!`)
     assert(not self.transitions[state_name], `transition {self.name} -> {state_name} is already mapped!`)
     
-    local machine = self.machine() :: __type.StateMachine
-    local found_state = machine.states[state_name] :: __type.SawdustState
+    local machine = self.machine() :: __type.StateMachine<TShEnv, TStEnv>
+    local found_state = machine.states[state_name] :: __type.SawdustState<TShEnv, TStEnv>
 
     assert(found_state, `failed to find state "{state_name}" inside state machine!`)
+
     local new_transition = transition.new{self, found_state}
     self.transitions[state_name] = new_transition
     new_transition:priority(count_tbl(self.transitions))
