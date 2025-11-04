@@ -25,19 +25,17 @@ local signal = require(script.Parent.signal)
 local machine = {}
 machine.__index = machine
 
---[[ machine.create<TShEnv, TStEnv>() : StateMachine
+--[[ machine.create<TShEnv>() : StateMachine
     Constructor function for the State Machine.
         
-    The generic operators TShEnv and TStEnv allows for templating Shared &
-    State-Local environment data, specifically:
-    TShEnv: .shared data
-    TStEnv: per-state data ]]
-function machine.create<TShEnv, TStEnv>() : __type.StateMachine<TShEnv, TStEnv>
-    local self = setmetatable({} :: __type.self_machine<TShEnv, TStEnv>, machine)
+    The generic operator <TShEnv: {}> allows for enforcing a template
+    for the shared environment table. ]]
+function machine.create<TShEnv>() : __type.StateMachine<TShEnv>
+    local self = setmetatable({} :: __type.self_machine<TShEnv>, machine)
 
     self.c_state = nil
     self.states = {}
-    self.environment = {} :: TShEnv
+    self.environment = {}
 
     local emitter = signal.new()
     self.state_updated = emitter:newSignal()
@@ -55,7 +53,7 @@ function machine:state<TShEnv, TStEnv>(state_name: string) : __type.SawdustState
     assert(type(state_name) == 'string', `state_name is a "{type(state_name)}", but it was expected to be a string!`)
     assert(not self.states[state_name], `attempt to create duplicate state "{state_name}"!`)
 
-    local new_state: __type.SawdustState<TShEnv, TStEnv> = state.new(self, state_name)
+    local new_state = state.new(self, state_name) :: __type.SawdustState<TShEnv, TStEnv>
     self.states[state_name] = new_state
 
     return new_state

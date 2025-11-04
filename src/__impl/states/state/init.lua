@@ -18,11 +18,9 @@ local transition = require(script.transition)
 
 --]] Functions
 function count_tbl(t: {}) local i=0; for _ in t do i+=1 end; return i end
-function run_hooks(hook_tbl: {[string]: {(env: __type.StateEnvironment<any, any>) -> nil}}, ...)
-    for id: string, hooks in pairs(hook_tbl) do
-        for _, hook in pairs(hooks) do
-            hook(...)
-        end
+function run_hooks(hook_tbl: {[string]: {id:string, call:(env: __type.StateEnvironment<any, any>) -> nil}}, ...)
+    for id: string, hook in pairs(hook_tbl) do
+        hook.call(...)
     end
 end
 
@@ -32,19 +30,19 @@ state.__index = state
 
 --[[ state.new()
     This will create a new state, and open a handler interface. ]]
-function state.new<TShEnv, TStEnv>(state_machine: __type.StateMachine<TShEnv, TStEnv>,
+function state.new<TShEnv, TStEnv>(state_machine: __type.StateMachine<TShEnv>,
         state_name: string) : __type.SawdustState<TShEnv, TStEnv>
 
     local self = setmetatable({} :: __type.self_state<TShEnv, TStEnv>, state)
 
     --]] Setup Internal
     self.name = state_name
-    self.machine = function() : __type.StateMachine<TShEnv, TStEnv>
+    self.machine = function() : __type.StateMachine<TShEnv>
         return state_machine end
 
     --]] Setup State
-    self.environment = {}
-    self.environment.shared = state_machine.environment
+    self.environment = {} :: __type.StateEnvironment<TShEnv, TStEnv>
+    self.environment.shared = state_machine.environment :: TShEnv
 
     self.hooks = {
         enter = {},
@@ -79,10 +77,11 @@ function state:hook<TShEnv, TStEnv>(
     assert(self.hooks[to], `unable to find lifecycle hook "{to}"!`)
     assert(not self.hooks[to][id], `attempt to overwrite existing lifecycle hook "{id}" in "{id}"!`)
 
-    local compiled_hook = { id, function(env, ...)
+    local compiled_hook = { id=id, call=function(env, ...)
         callback(env :: __type.StateEnvironment<TShEnv, TStEnv>, ...)
     end }
     self.hooks[to][id] = compiled_hook
+
     return self
 end
 
@@ -136,7 +135,7 @@ function state:entered() : boolean
         self.environment.total_state_time+=delta
 
         --] Run Update Hooks
-        if #self.hooks.update>0 then
+        if count_tbl(self.hooks.update)>0 then
             run_hooks(self.hooks.update, self.environment, delta)
         end
 
@@ -148,7 +147,7 @@ function state:entered() : boolean
         end
     end)
 
-    if #self.hooks.enter>0 then
+    if count_tbl(self.hooks.enter)>0 then
         run_hooks(self.hooks.enter, self.environment)
     end
 
@@ -163,7 +162,7 @@ function state:exited() : boolean
         self.__update:Disconnect()
         self.__update = nil end
 
-    if #self.hooks.exit>0 then
+    if count_tbl(self.hooks.exit)>0 then
         run_hooks(self.hooks.exit, self.environment)
     end
 
@@ -175,14 +174,14 @@ end
 --[[ TRANSITIONS ]]--
 --#region
 
-function state.transition<TShEnv, TStEnv>(self: __type.StateMachine<TShEnv, TStEnv>,
+function state.transition<TShEnv>(self: __type.StateMachine<TShEnv>,
         state_name: string) : __type.StateTransition
 
     assert(state_name~=self.name, `cannot map transition to same state!`)
     assert(not self.transitions[state_name], `transition {self.name} -> {state_name} is already mapped!`)
     
-    local machine = self.machine() :: __type.StateMachine<TShEnv, TStEnv>
-    local found_state = machine.states[state_name] :: __type.SawdustState<TShEnv, TStEnv>
+    local machine = self.machine() :: __type.StateMachine<TShEnv>
+    local found_state = machine.states[state_name] :: __type.SawdustState<TShEnv, any>
 
     assert(found_state, `failed to find state "{state_name}" inside state machine!`)
 

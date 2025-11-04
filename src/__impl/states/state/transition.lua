@@ -36,7 +36,7 @@ function transition.new(targets: {}) : __type.StateTransition
         else   error(`attempt to locate target w/ invalid target_id "{target_id}"!`) end
     end
 
-    self.__fetch_machine = function() : __type.StateMachine<any, any>
+    self.__fetch_machine = function() : __type.StateMachine<any>
         return t_from.machine() end
 
     self.conditions = {}
@@ -48,7 +48,7 @@ end
 --[[ LOGIC ]]--
 --#region
 function transition:runTransition()
-    local machine = self.__fetch_machine() :: __type.StateMachine<any, any>
+    local machine = self.__fetch_machine() :: __type.StateMachine<any>
     machine:switchState(self.__fetch_state('to').name)
 end
 
