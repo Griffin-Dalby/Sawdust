@@ -107,13 +107,20 @@ function connection:run(rawData: {})
         self.returnCall(req.caller, resData)
 	end
     res.reject = function(message: string) --> Reject response
-        assert(resData.closed==nil, `attempt to reject to a closed request!`)
+        assert(resData.closed==nil, `attempt to reject a closed request!`)
         resData.closed = true
 
         resData.intent = '__rejected__'
         if message then
             resData.data = { message } end
         self.returnCall(req.caller, resData)
+    end
+    res.assert = function(condition: boolean, message: string) --> assert() for response
+        assert(resData.closed==nil, `attempt to assert a closed request!`)
+        
+        if not condition then
+            res.reject(message)
+        end
     end
 
 	--> Register return
