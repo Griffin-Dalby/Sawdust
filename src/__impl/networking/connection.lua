@@ -120,7 +120,10 @@ function connection:run(rawData: {})
         
         if not condition then
             res.reject(message)
+            return false
         end
+
+        return true
     end
 
 	--> Register return
