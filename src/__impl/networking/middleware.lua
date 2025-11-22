@@ -30,7 +30,7 @@ middleware.__index = middleware
     "Middleware" provides a environment allowing developers to inject
     code into the event lifecycle, exposing access to the "pipeline"
     where you can further modify information about the call ]]
-function middleware.new(locked_phases: {}) : types.NetworkingMiddleware
+function middleware.new(locked_phases: {}?) : types.NetworkingMiddleware?
     local self = setmetatable({} :: types.self_middleware, middleware)
 
     self.__locked_phases = locked_phases or {}
