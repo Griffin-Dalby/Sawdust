@@ -39,15 +39,17 @@ end
 --[[ svcManager:register(service: SawdustService)
     Registers a service to the Service Manager. ]]
 function svcManager:register(service)
+    -- print(`REGISTERED SVC: {service.id}`)
     self._registry[service.id] = service
 end
 
 --[[ svcManager:_resolve(id: string)
     Resolves a specific service, and invokes the "init" runtime. ]]
 function svcManager:_resolve(id: string) : promise.SawdustPromise
+    -- print(`RESOLVING SVC: {id}`)
     return promise.new(function(resolve, reject)
         if self._instances[id] then
-            return self._instances[id] end
+            resolve(self._instances[id]) end
 
         if self._states[id] == 'init' then
             reject(`Attempt to resolved an already initalizing service!\nThis may be due to a circular dependency, check your dependency tree!`)
@@ -62,7 +64,11 @@ function svcManager:_resolve(id: string) : promise.SawdustPromise
 
         local deps = {}
         for _, depName in ipairs(builder.dependencies) do
-            deps[depName] = self:_resolve(depName) end
+            local s, e = self:_resolve(depName):wait()
+            if s then deps[depName] = e; continue end
+
+            reject(`Failed to load dependency "{depName}", provided error:\n{e}`)
+        end
 
         if builder._initfn then
             local returned = builder._initfn(builder, deps)
@@ -74,13 +80,13 @@ function svcManager:_resolve(id: string) : promise.SawdustPromise
         self._states[id] = 'ready'
 
         resolve(builder)
-        return nil
     end)
 end
 
 --[[ svcManager:_start(id: string)
     Starts a specific resolved service. ]]
 function svcManager:_start(id: string) : promise.SawdustPromise
+    print(`STARTING SVC: {id}`)
     return promise.new(function(resolve, reject)
         local instance = self._instances[id]
         if not instance then
@@ -93,6 +99,7 @@ function svcManager:_start(id: string) : promise.SawdustPromise
             if returned then self._instances[id] = returned end
             for _, injection in pairs(builder.injections.start) do
                 injection:run(instance) end
+            self._states[id] = 'started'
         end
 
         resolve()
@@ -102,7 +109,7 @@ end
 --[[ svcManager:resolveAll()
     Resolves all registered, unresolved services. ]]
 function svcManager:resolveAll(timeout: number?)
-    timeout=timeout or 5
+    timeout=timeout or 3
 
     for name in pairs(self._registry) do
         local s, e = self:_resolve(name):wait(timeout)
@@ -115,7 +122,7 @@ end
 --[[ svcManager:startAll()
     Starts all resolved services. ]]
 function svcManager:startAll(timeout: number?)
-    timeout=timeout or 5
+    timeout=timeout or 3
 
     for name in pairs(self._registry) do
         local s, e = self:_start(name):wait(timeout)
