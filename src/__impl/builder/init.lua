@@ -41,11 +41,11 @@ end
 local builder = {}
 builder.__index = builder
 
-type self = {
+type self<T> = {
     id: string,
 
-    _initfn: (...any) -> ...any,
-    _startfn: (...any) -> ...any,
+    _initfn: (self: T, deps: {}, ...any) -> ...any,
+    _startfn: (self: T, ...any) -> ...any,
 
     injections: {
         init: {SawdustSVCInjection},
@@ -54,13 +54,13 @@ type self = {
 
     dependencies: {[number]: string}
 }
-export type SawdustService = typeof(setmetatable({} :: self, builder))
+export type SawdustService<T> = typeof(setmetatable({} :: self<T>, builder))
 
 --[[ builder.new(id: string)
     Constructor for the builder object.
     Service will be injected into the game w/ the *id*]]
-function builder.new(id: string): SawdustService
-    local self = setmetatable({} :: self, builder)
+function builder.new(id: string): SawdustService<any>
+    local self = setmetatable({} :: self<any>, builder)
 
     self.id = id
 
