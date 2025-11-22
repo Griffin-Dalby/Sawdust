@@ -1,3 +1,4 @@
+--!nocheck
 --[[
 
     State Manager Types
@@ -18,22 +19,22 @@ local types = {}
 local state = {}
 state.__index = state
 
-export type StateEnvironment = { --] Fill with packaged env data
+export type StateEnvironment<TShEnv, TStEnv> = { --] Fill with packaged env data
     total_state_time: number, --] Total time in this state
-    shared: {},               --] Shared data located in machine
-}
+    shared: TShEnv,           --] Shared data located in machine
+} & TStEnv
 
-export type self_state = {
+export type self_state<TShEnv, TStEnv> = {
     name: string,
-    machine: () -> StateMachine,
+    machine: () -> StateMachine<TShEnv>,
 
-    environment: StateEnvironment,
+    environment: StateEnvironment<TShEnv, TStEnv>,
 
     hooks: {
-        enter:  { (env: StateEnvironment) -> nil },
-        exit:   { (env: StateEnvironment) -> nil },
+        enter:  {[string]: { id:string, call:(env: StateEnvironment<TShEnv, TStEnv>) -> nil }},
+        exit:   {[string]: { id:string, call:(env: StateEnvironment<TShEnv, TStEnv>) -> nil }},
 
-        update: { (env: StateEnvironment, delta_time: number) -> nil }
+        update: {[string]: { id:string, call:(env: StateEnvironment<TShEnv, TStEnv>, delta_time: number) -> nil }}
     },
 
     transitions: {
@@ -43,12 +44,19 @@ export type self_state = {
     state_updated: signal.SawdustSignal,
 
 }
-export type SawdustState = typeof(setmetatable({} :: self_state, state))
+export type SawdustState<TShEnv, TStEnv> = typeof(setmetatable({} :: self_state<TShEnv, TStEnv>, state))
 
-function state.new(state_machine: StateMachine, state_name: string) : SawdustState end
+function state.new<TShEnv, TStEnv>(state_machine: StateMachine<TShEnv>, state_name: string) : SawdustState<TShEnv, TStEnv> end
 
-function state:hook(to: string, callback: (env: StateEnvironment) -> nil) : SawdustState end
-function state:unhook(id: string) : SawdustState end
+function state:hook<TShEnv, TStEnv>(
+    to: string,
+    id: string,
+    callback: (env: StateEnvironment<TShEnv, TStEnv>) -> nil
+) : SawdustState<TShEnv, TStEnv> end
+
+function state:unhook<TShEnv, TStEnv>(
+    id: string
+) : SawdustState<TShEnv, TStEnv> end
 
 function state:entered() : boolean end
 function state:exited() : boolean end
@@ -64,12 +72,12 @@ transition.__index = transition
 
 export type TransitionConditionData = {
     type: string,
-    conditional: string|number|(env: StateEnvironment)->boolean
+    conditional: string|number|(env: StateEnvironment<any, any>)->boolean
 }
 
 export type self_transition = {
-    __fetch_state: ('from'|'to') -> SawdustState?,
-    __fetch_machine: StateMachine,
+    __fetch_state: ('from'|'to') -> SawdustState<any, any>?,
+    __fetch_machine: StateMachine<any, any>,
     __priority: number,
 
     conditions: { TransitionConditionData },
@@ -83,7 +91,7 @@ function transition:runConditionals() end
 function transition:eventCalled(event_id: string) end
 
 function transition:priority(priority: number) : StateTransition end
-function transition:when(conditional: (env: StateEnvironment) -> boolean) : StateTransition end
+function transition:when(conditional: (env: StateEnvironment<any, any>) -> boolean) : StateTransition end
 function transition:on(event_id: string) : StateTransition end
 function transition:after(time: number) : StateTransition end
 
@@ -94,18 +102,18 @@ function transition:after(time: number) : StateTransition end
 local machine = {}
 machine.__index = machine
 
-export type self_machine = {
-    c_state: SawdustState?,
+export type self_machine<TShEnv> = {
+    c_state: SawdustState<TShEnv, any>?,
     states: {
-        [string] : SawdustState
+        [string] : SawdustState<TShEnv, any>
     },
 
-    environment: {}
+    environment: TShEnv
 }
-export type StateMachine = typeof(setmetatable({} :: self_machine, machine))
+export type StateMachine<TShEnv> = typeof(setmetatable({} :: self_machine<TShEnv>, machine))
 
-function machine.new() : StateMachine end
-function machine:state(state_name: string) : SawdustState end
+function machine.new<TShEnv>() : StateMachine<TShEnv> end
+function machine:state<TShEnv, TStEnv>(state_name: string) : SawdustState<TShEnv, TStEnv> end
 function machine:event(event_name: string) end
 function machine:switchState(state_name: string) end
 

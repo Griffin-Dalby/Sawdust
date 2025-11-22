@@ -23,20 +23,20 @@ function transition.new(targets: {}) : __type.StateTransition
     local self = setmetatable({} :: __type.self_transition, transition)
 
     --]] Parse targets
-    local t_from: __type.SawdustState, t_to: __type.SawdustState =
+    local t_from: __type.SawdustState<any, any>, t_to: __type.SawdustState<any, any> =
         unpack(targets)
 
     assert(t_from, `malformed targets table! Failed to find t_from.`)
     assert(t_to, `malformed targets table! Failed to find t_to.`)
 
     --]] Build self
-    self.__fetch_state = function(target_id: 'from'|'to') : __type.SawdustState?
+    self.__fetch_state = function(target_id: 'from'|'to') : __type.SawdustState<any, any>?
             if target_id == 'from' then return t_from
         elseif target_id == 'to'   then return t_to
         else   error(`attempt to locate target w/ invalid target_id "{target_id}"!`) end
     end
 
-    self.__fetch_machine = function() : __type.StateMachine
+    self.__fetch_machine = function() : __type.StateMachine<any>
         return t_from.machine() end
 
     self.conditions = {}
@@ -48,13 +48,13 @@ end
 --[[ LOGIC ]]--
 --#region
 function transition:runTransition()
-    local machine = self.__fetch_machine() :: __type.StateMachine
+    local machine = self.__fetch_machine() :: __type.StateMachine<any>
     machine:switchState(self.__fetch_state('to').name)
 end
 
 function transition:runConditionals()
     local do_transition = false
-    local t_from = self.__fetch_state('from') :: __type.SawdustState
+    local t_from = self.__fetch_state('from') :: __type.SawdustState<any, any>
 
     for _, condition_data in pairs(self.conditions) do
         if condition_data.type == 'custom' then
@@ -103,7 +103,7 @@ end
 --[[ transition:when(conditional: (env) -> boolean)
     This will add a new condition where the result of the provided callback
     dictates if the transition occurs. ]]
-function transition:when(conditional: (env: __type.StateEnvironment) -> boolean) : __type.StateTransition
+function transition:when(conditional: (env: __type.StateEnvironment<any, any>) -> boolean) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'custom'
     condition_data.conditional = conditional

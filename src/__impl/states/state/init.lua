@@ -18,6 +18,11 @@ local transition = require(script.transition)
 
 --]] Functions
 function count_tbl(t: {}) local i=0; for _ in t do i+=1 end; return i end
+function run_hooks(hook_tbl: {[string]: {id:string, call:(env: __type.StateEnvironment<any, any>) -> nil}}, ...)
+    for id: string, hook in pairs(hook_tbl) do
+        hook.call(...)
+    end
+end
 
 --]] Interface
 local state = {}
@@ -25,17 +30,19 @@ state.__index = state
 
 --[[ state.new()
     This will create a new state, and open a handler interface. ]]
-function state.new(state_machine: __type.StateMachine, state_name: string) : __type.SawdustState
-    local self = setmetatable({} :: __type.self_state, state)
+function state.new<TShEnv, TStEnv>(state_machine: __type.StateMachine<TShEnv>,
+        state_name: string) : __type.SawdustState<TShEnv, TStEnv>
+
+    local self = setmetatable({} :: __type.self_state<TShEnv, TStEnv>, state)
 
     --]] Setup Internal
     self.name = state_name
-    self.machine = function() : __type.StateMachine
+    self.machine = function() : __type.StateMachine<TShEnv>
         return state_machine end
 
     --]] Setup State
-    self.environment = {}
-    self.environment.shared = state_machine.environment
+    self.environment = {} :: __type.StateEnvironment<TShEnv, TStEnv>
+    self.environment.shared = state_machine.environment :: TShEnv
 
     self.hooks = {
         enter = {},
@@ -52,24 +59,44 @@ end
 --[[ LIFECYCLE HOOKS ]]--
 --#region
 
---[[ state:hook(to: string, callback: (env: StateEnvironment) -> nil)
-    This will hook a function to a specific lifecycle event. ]]
-function state:hook(to: string, callback: (env: __type.StateEnvironment) -> nil) : __type.SawdustState
-    assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
-    assert(callback, `:hook() missing argument #2! This is what will be linked, if you meant to unhook it run :unhook().`)
+--[[ state:hook(to: string, id: string, callback: (env: StateEnvironment) -> nil)
+    This will hook a function to a specific lifecycle event.
 
-    local compiled_hook = { callback }
-    self.hooks[to] = compiled_hook
+    *to will be searched for in the internal hooks, and if found the *callback
+    will be attached with the specific *id. ]]
+function state:hook<TShEnv, TStEnv>(
+        to: string,
+        id: string,
+        callback: (env: __type.StateEnvironment<TShEnv, TStEnv>) -> nil
+    ) : __type.SawdustState<TShEnv, TStEnv>
+
+    assert(to, `:hook() missing argument #1! This is the ID this hook will link to.`)
+    assert(id, `:hook() missing argument #2! This is the ID this callback can be pointed to.`)
+    assert(callback, `:hook() missing argument #3! This is what will be linked, if you meant to unhook it run :unhook().`)
+
+    assert(self.hooks[to], `unable to find lifecycle hook "{to}"!`)
+    assert(not self.hooks[to][id], `attempt to overwrite existing lifecycle hook "{id}" in "{id}"!`)
+
+    local compiled_hook = { id=id, call=function(env, ...)
+        callback(env :: __type.StateEnvironment<TShEnv, TStEnv>, ...)
+    end }
+    self.hooks[to][id] = compiled_hook
+
     return self
 end
 
---[[ state:unhook(id: string)
-    This will unhook a function from a specific lifecycle event. ]]
-function state:unhook(id: string) : __type.SawdustState
-    assert(id, `:unhook() missing argument #1! This is the ID to unhook.`)
-    assert(self.hooks[id][1], `hook @ "{id}" isn't linked!`)
+--[[ state:unhook(from: string, id: string)
+    This will unhook a function from a specific lifecycle event.
 
-    self.hooks[id] = {}
+    *from will be searched for in the internal hooks, and if found *id will be
+    searched for inside, and an attempt will be make to unhook the callback. ]]
+function state:unhook<TShEnv, TStEnv>(from: string, id: string) : __type.SawdustState<TShEnv, TStEnv>
+        
+    assert(from, `:unhook() missing argument #1! This is the ID pointing towards the hook list.`)
+    assert(id, `:unhook() missing argument #2! This is the ID to unhook from the hook list.`)
+    assert(self.hooks[from][id], `hook @ {from}.{id} isn't linked!`)
+
+    self.hooks[from][id] = nil
     return self
 end
 
@@ -108,9 +135,8 @@ function state:entered() : boolean
         self.environment.total_state_time+=delta
 
         --] Run Update Hooks
-        if #self.hooks.update>0 then
-            for _, update_hook in pairs(self.hooks.update) do
-                update_hook(self.environment, delta) end
+        if count_tbl(self.hooks.update)>0 then
+            run_hooks(self.hooks.update, self.environment, delta)
         end
 
         --] Run Transition Conditions
@@ -121,9 +147,8 @@ function state:entered() : boolean
         end
     end)
 
-    if #self.hooks.enter>0 then
-        for _, enter_hook in pairs(self.hooks.enter) do
-            enter_hook(self.environment) end
+    if count_tbl(self.hooks.enter)>0 then
+        run_hooks(self.hooks.enter, self.environment)
     end
 
     return true
@@ -137,10 +162,8 @@ function state:exited() : boolean
         self.__update:Disconnect()
         self.__update = nil end
 
-    if #self.hooks.exit>0 then
-        for _, exit_hook in pairs(self.hooks.exit) do
-            exit_hook(self.environment)
-        end 
+    if count_tbl(self.hooks.exit)>0 then
+        run_hooks(self.hooks.exit, self.environment)
     end
 
     return true
@@ -151,14 +174,17 @@ end
 --[[ TRANSITIONS ]]--
 --#region
 
-function state:transition(state_name: string) : __type.StateTransition
+function state.transition<TShEnv>(self: __type.StateMachine<TShEnv>,
+        state_name: string) : __type.StateTransition
+
     assert(state_name~=self.name, `cannot map transition to same state!`)
     assert(not self.transitions[state_name], `transition {self.name} -> {state_name} is already mapped!`)
     
-    local machine = self.machine() :: __type.StateMachine
-    local found_state = machine.states[state_name] :: __type.SawdustState
+    local machine = self.machine() :: __type.StateMachine<TShEnv>
+    local found_state = machine.states[state_name] :: __type.SawdustState<TShEnv, any>
 
     assert(found_state, `failed to find state "{state_name}" inside state machine!`)
+
     local new_transition = transition.new{self, found_state}
     self.transitions[state_name] = new_transition
     new_transition:priority(count_tbl(self.transitions))

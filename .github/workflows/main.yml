@@ -1,0 +1,47 @@
+name: Build Rojo Project
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "wally.toml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Rojo
+        run: cargo install rojo --version ^7
+
+      - name: Build Rojo Project
+        run: rojo build default.project.json --output build.rbxl
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rojo-build
+          path: build.rbxl
+
+      - name: Generate release
+        uses: release-please/action@v4
+        with:
+          release-type: node
+          package-name: rojo-project
