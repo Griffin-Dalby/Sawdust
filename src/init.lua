@@ -126,17 +126,17 @@ export type SawdustPromise = promise.SawdustPromise
 
 --]] SIGNAL
 core.signal = signal
-export type SawdustEmitter          = signal.SawdustEmitter
-export type SawdustSignal           = signal.SawdustSignal
-export type SawdustSignalConnection = signal.SawdustSignalConnection
+export type SawdustEmitter             = signal.SawdustEmitter
+export type SawdustSignal<T>           = signal.SawdustSignal<T>
+export type SawdustSignalConnection<T> = signal.SawdustSignalConnection<T>
 
 --]] STATE MACHINE
 core.states = states
-export type StateMachine    = states_types.StateMachine
-export type SawdustState    = states_types.SawdustState
+export type StateMachine<TShEnv>         = states_types.StateMachine<TShEnv>
+export type SawdustState<TShEnv, TStEnv> = states_types.SawdustState<TShEnv, TStEnv>
 export type StateTransition = states_types.StateTransition
 
-export type StateEnvironment        = states_types.StateEnvironment
+export type StateEnvironment<TShEnv, TStEnv> = states_types.StateEnvironment<TShEnv, TStEnv>
 export type TransitionConditionData = states_types.TransitionConditionData
 
 
