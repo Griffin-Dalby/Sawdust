@@ -11,6 +11,8 @@
 
 --]]
 
+local promise = require(script.Parent.Parent.__impl.promise)
+
 --]] Service Manager
 local svcManager = {}
 svcManager.__index = svcManager
@@ -42,67 +44,84 @@ end
 
 --[[ svcManager:_resolve(id: string)
     Resolves a specific service, and invokes the "init" runtime. ]]
-function svcManager:_resolve(id: string)
-    if self._instances[id] then
-        return self._instances[id] end
+function svcManager:_resolve(id: string) : promise.SawdustPromise
+    return promise.new(function(resolve, reject)
+        if self._instances[id] then
+            return self._instances[id] end
 
-    if self._states[id] == 'init' then
-        warn(`[{script.Name}] Circular dependency detected on "{id}"`)
-        return end
+        if self._states[id] == 'init' then
+            reject(`Attempt to resolved an already initalizing service!\nThis may be due to a circular dependency, check your dependency tree!`)
+            return end
 
-    self._states[id] = 'init'
+        local builder = self._registry[id]
+        if not builder then
+            reject(`Attempt to resolve an unregistered service "{id}"!\nAlso make sure it is being properly registered to the Service Manager.\nMake sure the service name is correct.`)
+            return end
 
-    local builder = self._registry[id]
-    if not builder then
-        warn(`[{script.Name}] Service "{id}" not registered!`)
-        return end
+        self._states[id] = 'init'
 
-    local deps = {}
-    for _, depName in ipairs(builder.dependencies) do
-        deps[depName] = self:_resolve(depName) end
+        local deps = {}
+        for _, depName in ipairs(builder.dependencies) do
+            deps[depName] = self:_resolve(depName) end
 
-    if builder._initfn then
-        local returned = builder._initfn(builder, deps)
-        for _, injection in pairs(builder.injections.init) do
-            injection:run(builder, deps) end
-    end
+        if builder._initfn then
+            local returned = builder._initfn(builder, deps)
+            for _, injection in pairs(builder.injections.init) do
+                injection:run(builder, deps) end
+        end
 
-    self._instances[id] = builder
-    self._states[id] = 'ready'
+        self._instances[id] = builder
+        self._states[id] = 'ready'
 
-    return builder
+        resolve(builder)
+        return nil
+    end)
 end
 
 --[[ svcManager:_start(id: string)
     Starts a specific resolved service. ]]
-function svcManager:_start(id: string)
-    local instance = self._instances[id]
-    if not instance then
-        warn(`[{script.Name}] Cannot start unresolved service "{id}"!`)
-        return end
-    
-    local builder = self._registry[id]
-    if builder._startfn then
-        local returned = builder._startfn(instance)
-        if returned then self._instances[id] = returned end
-        for _, injection in pairs(builder.injections.start) do
-            injection:run(instance) end
-    end
+function svcManager:_start(id: string) : promise.SawdustPromise
+    return promise.new(function(resolve, reject)
+        local instance = self._instances[id]
+        if not instance then
+            reject(`Attempt to start unresolved service "{id}"!\nMake sure the service is being resolved somewhere along the chain before starting.\nAdditionaly, ensure the service name is correct.`)
+            return end
+        
+        local builder = self._registry[id]
+        if builder._startfn then
+            local returned = builder._startfn(instance)
+            if returned then self._instances[id] = returned end
+            for _, injection in pairs(builder.injections.start) do
+                injection:run(instance) end
+        end
+
+        resolve()
+    end)
 end
 
 --[[ svcManager:resolveAll()
     Resolves all registered, unresolved services. ]]
-function svcManager:resolveAll()
+function svcManager:resolveAll(timeout: number?)
+    timeout=timeout or 5
+
     for name in pairs(self._registry) do
-        self:_resolve(name)
+        local s, e = self:_resolve(name):wait(timeout)
+        if not s then
+            warn(debug.traceback(`Issue occured while resolving service "{name}"!\n{e}`, 3))
+        end
     end
 end
 
 --[[ svcManager:startAll()
     Starts all resolved services. ]]
-function svcManager:startAll()
+function svcManager:startAll(timeout: number?)
+    timeout=timeout or 5
+
     for name in pairs(self._registry) do
-        self:_start(name)
+        local s, e = self:_start(name):wait(timeout)
+        if not s then
+            warn(debug.traceback(`Issue occured while starting service "{name}"!\n{e}`, 3))
+        end
     end
 end
 
