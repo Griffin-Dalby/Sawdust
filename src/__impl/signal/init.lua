@@ -18,14 +18,14 @@ local https = game:GetService('HttpService')
 local connection = {}
 connection.__index = connection
 
-type self_connection = {
+type self_connection<T> = {
     uuid: string,
-    callback: (...any) -> nil,
+    callback: (T) -> nil,
 }
-export type SawdustSignalConnection = typeof(setmetatable({} :: self_connection, connection))
+export type SawdustSignalConnection<T> = typeof(setmetatable({} :: self_connection<T>, connection))
 
-function connection.new(signal: SawdustSignal, callback: (...any) -> nil)
-    local self = setmetatable({} :: self_connection, connection)
+function connection.new(signal: SawdustSignal<any>, callback: (...any) -> nil)
+    local self = setmetatable({} :: self_connection<any>, connection)
 
     self.uuid = `_sawdust_connection_{https:GenerateGUID(false)}`
     self.callback = callback
@@ -46,14 +46,14 @@ function connection:disconnect()
 local signal = {}
 signal.__index = signal
 
-type self_signal = {
+type self_signal<T> = {
     uuid: string,
-    connections: {[string]: SawdustSignalConnection}
+    connections: {[string]: SawdustSignalConnection<T>}
 }
-export type SawdustSignal = typeof(setmetatable({} :: self_signal, signal))
+export type SawdustSignal<T> = typeof(setmetatable({} :: self_signal<T>, signal))
 
-function signal.new(emitter: SawdustEmitter) : SawdustSignal
-    local self = setmetatable({} :: self_signal, signal)
+function signal.new(emitter: SawdustEmitter) : SawdustSignal<any>
+    local self = setmetatable({} :: self_signal<any>, signal)
 
     self.uuid = `_sawdust_signal_{https:GenerateGUID(false)}`
     self.connections = {}
@@ -61,7 +61,7 @@ function signal.new(emitter: SawdustEmitter) : SawdustSignal
     self.__discard = function()
         emitter.signals[self.uuid] = nil
 
-        for _, signal : SawdustSignalConnection in pairs(self.connections) do
+        for _, signal : SawdustSignalConnection<any> in pairs(self.connections) do
             signal:disconnect(); end
         
         table.clear(self)
@@ -72,14 +72,14 @@ function signal.new(emitter: SawdustEmitter) : SawdustSignal
     return self
 end
 
-function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection
+function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection<any>
     local connection = connection.new(self, callback)
     self.connections[connection.uuid] = connection
 
     return connection
 end
 
-function signal:once(callback: (...any) -> nil) : SawdustSignalConnection
+function signal:once(callback: (...any) -> nil) : SawdustSignalConnection<any>
     local connection
     connection = self:connect(function(...)
         callback(...)
@@ -127,7 +127,7 @@ end
 
 --[[ emitter:newSignal()
     Creates a new event, and adds it to the emitter. ]]
-function emitter:newSignal() : SawdustSignal
+function emitter:newSignal() : SawdustSignal<any>
     local newSignal = signal.new(self)
     return newSignal
 end
@@ -135,7 +135,7 @@ end
 --[[ emitter:discard()
     Destroys all signals and renders emitter unusable. ]]
 function emitter:discard()
-    for _, signal: SawdustSignal in pairs(self.signals) do
+    for _, signal: SawdustSignal<any> in pairs(self.signals) do
         signal:discard() end
         
     table.clear(self.signals)

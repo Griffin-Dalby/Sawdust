@@ -4,7 +4,7 @@ registry = "test"
 
 [[package]]
 name = "griffin-dalby/sawdust"
-version = "1.2.5"
+version = "1.4.1"
 dependencies = [["testez", "roblox/testez@0.4.1"]]
 
 [[package]]
