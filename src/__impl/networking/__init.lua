@@ -37,8 +37,10 @@ return function ()
 
     local connectionCache = networkingCache:createTable('connections')
 
-    for _, category: Folder in pairs(__settings.networking.fetchFolder:GetChildren()) do
-        for _, event: RemoteEvent in pairs(category:GetChildren()) do
+    for _, category: Instance in pairs(__settings.networking.fetchFolder:GetChildren()) do
+        if not category:IsA('Folder') then continue end
+        
+        for _, event: Instance in pairs(category:GetChildren()) do
             local eventPath = `{category.Name}.{event.Name}`
 
             if not (event:IsA('RemoteEvent') or event:IsA('UnreliableRemoteEvent')) then
