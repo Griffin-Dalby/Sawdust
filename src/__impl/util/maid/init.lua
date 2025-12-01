@@ -33,7 +33,7 @@ tasks['Instance'] = function(instance: Instance)
 tasks['function'] = function(f: () -> nil)
     f() end
 
-tasks['table'] = function(table: {})
+tasks['table'] = function(table: any)
     if typeof(table.discard) == 'function' then    --> Default Sawdust Deconstructor
         table:discard()
     elseif typeof(table.disconnect) == 'function' then --> Sawdust's Networking/Signal Event
@@ -197,20 +197,19 @@ end
 function maid:clean(tag: string?)
     --> Clean Instances
     for cleanInstance: any, wrappedInstance: SawdustMaidWrapper in pairs(self.tracked) do
-        if tag then
-            if wrappedInstance:hasTag(tag) then
-                wrappedInstance:clean()
-            end
-        else
+        --> Rawset
+        local should_clean = (not tag or (tag and wrappedInstance:hasTag(tag)))
+        if should_clean then
             wrappedInstance:clean()
+            rawset(self.object, table.find(self.object, wrappedInstance), nil)
         end
     end
 
     --> Clean Object
     if self.object then
-        for i in pairs(self.object) do
-            rawset(self.object, i, nil) end
-        setmetatable(self.object, {})
+        if not tag then --> Only on full clean
+            setmetatable(self.object, {}) 
+        end
     end
 end
 
