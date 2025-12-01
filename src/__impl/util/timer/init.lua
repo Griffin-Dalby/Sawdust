@@ -18,41 +18,79 @@ local runService = game:GetService('RunService')
 local timer = {}
 timer.__index = timer
 
+--]] Type Definitions
 type self = {
     initalized: boolean,
     paused: boolean,
 
     elapsed: number,
-    decayDate: number?,
+    decay_date: number?,
 
     __callback: (self) -> (),
     connection: RBXScriptConnection,
 }
 export type SawdustTimer = typeof(setmetatable({} :: self, timer))
+export type SawdustTimerOptions = {
+    decay_time: number?,
+    server_sync: boolean?,
+}
 
---[[ timer.new(callback: (self) -> (), decayTime: number?)
+--]] Utilities
+local function ValidateOptions(options: SawdustTimerOptions)
+    if not options then options = {} end
+
+    options.decay_time = options.decay_time or nil
+    options.server_sync = options.server_sync or false
+
+    return options
+end
+
+--]] Constructor
+
+--[[ 
     Constructor function for the timer utility.
         
-    callback: Function running per-tick,
-    ]]
-function timer.new(callback: (self) -> (), decayTime: number?): SawdustTimer
+    @param callback Function running per-tick,
+    @param options Options for the Timer Instance.
+
+    @param options.decay_time Time until timer decays & cleans itself up.
+    @param options.server_sync? Use workspace:GetServerTime() rather than tick()
+]]
+function timer.new(callback: (self) -> (), options: SawdustTimerOptions): SawdustTimer
     local self = setmetatable({} :: self, timer)
 
+    --> Gather Options
+    ValidateOptions(options)
+
+    local decay_time = options.decay_time
+    local server_sync = options.server_sync
+
+    --> Utilities
+    local function GetTick()
+        return if server_sync then workspace:GetServerTimeNow() else tick()
+    end
+
+    --> Construct Timer
     self.initalized = false
     self.paused = false
 
     self.elapsed = 0
-    self.decayDate = decayTime and (tick() + decayTime) or nil
+    self.decay_date = if decay_time then (GetTick() + decay_time) else nil
 
+    --> Create Logic
     self.__callback = callback
     self.__hb_f = function(deltaTime)
+        --> Elapse
         self.elapsed += deltaTime
-        if self.decayDate then
-            if tick() > self.decayDate then
+
+        --> Check Decay
+        if self.decay_date then
+            if GetTick() > self.decay_date then
                 self:discard()
             end
         end
 
+        --> Check Pause
         if not self.paused then
             self.__callback(self)
         end
@@ -63,27 +101,35 @@ function timer.new(callback: (self) -> (), decayTime: number?): SawdustTimer
     return self
 end
 
---[[ timer:init(callback: (self) -> (), override: boolean?)
-    Initalizes this timer, providing the developer with direct access
-    to the timer's self. ]]
-function timer:init(callback: (self) -> (), override: boolean?)
+--[[ 
+    Initalizes this timer, providing the developer with a callback
+    which runs post-initalize, which includes the timer.
+
+    @param init_callback Function to call post-op w/ timer object.
+    @param override Allow a secondary initalization during a timer's runtime.
+]]
+function timer:init(init_callback: (self) -> (), override: boolean?)
     if self.initalized and not override then
         warn(`[{script.Name}] Timer already initalized! (Set "override" to true to allow this operation.)`)
         return end
 
-    callback(self)
+    init_callback(self)
     self.initalized = true
 end
 
---[[ timer:pause(callback: (self) -> (), silent: boolean?)
-    Pauses the internal connection, and provides developer with direct
-    access to the timer's self. ]]
-function timer:pause(callback: (self) -> (), silent: boolean?)
+--[[
+    Pauses the internal connection, providing the developer with a callback
+    which runs post-initalize, which includes the timer.
+    
+    @param pause_callback Function to call post-op w/ timer object.
+    @param silent If you :pause() an already paused timer, it will warn. Use this to silence that.
+]]
+function timer:pause(pause_callback: (self) -> (), silent: boolean?)
     if self.pause then
         if not silent then warn(`[{script.Name}] Attempt to pause timer while already paused! (Set "silent" to true to silence warning.)`) end
         return end
     
-    callback(self)
+    pause_callback(self)
     self.pause = true
 end
 
@@ -96,9 +142,13 @@ function timer:cancel()
     end
 end
 
---[[ timer:resume(callback: (self) -> (), silent: boolean?)
-    Resumes the internal connection, and provides developer with direct
-    access to the timer's self. ]]
+--[[
+    Resumes the internal connection, providing the developer with a callback
+    which runs post-initalize, which includes the timer.
+    
+    @param pause_callback Function to call post-op w/ timer object.
+    @param silent If you :resume() an already running timer, it will warn. Use this to silence that.
+]]
 function timer:resume(callback: (self) -> (), silent: boolean?)
     if not self.connection then
         self.connection = runService.Heartbeat:Connect(self.__hb_f)
@@ -112,13 +162,15 @@ function timer:resume(callback: (self) -> (), silent: boolean?)
     self.pause = false
 end
 
---[[ timer:getElapsed()
-    Gets time since timer started. ]]
+--[[
+    Gets time since timer started. 
+]]
 function timer:getElapsed()
    return self.elapsed end
 
---[[ timer:getRemaining()
-    Gets time until timer decays if specified. ]]
+--[[
+    Gets time until timer decays if specified. 
+]]
 function timer:getRemaining()
     return self.decayDate and self.decayDate-self.elapsed or nil; end
 
