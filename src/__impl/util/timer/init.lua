@@ -11,14 +11,14 @@
 
 --]]
 
---]] Services
+--]] SERVICES
 local runService = game:GetService('RunService')
 
---]] Timer
+--]] TIMER
 local timer = {}
 timer.__index = timer
 
---]] Type Definitions
+--]] TYPE DEFINITIONS
 type self = {
     initalized: boolean,
     paused: boolean,
@@ -36,7 +36,7 @@ export type SawdustTimerOptions = {
     cleanup: (() -> nil)?,
 }
 
---]] Utilities
+--]] UTILITIES
 local function ValidateOptions(options: SawdustTimerOptions)
     if not options then options = {} end
 
@@ -47,7 +47,7 @@ local function ValidateOptions(options: SawdustTimerOptions)
     return options
 end
 
---]] Constructor
+--]] CONSTRUCTOR
 
 --[[ 
     Constructor function for the timer utility.
@@ -97,7 +97,11 @@ function timer.new(callback: (self) -> (), options: SawdustTimerOptions): Sawdus
 
         --> Check Pause
         if not self.paused then
-            self.__callback(self)
+            if self.__callback then
+                self.__callback(self)
+            else
+                warn(`[{script.Name}] Timer callback not defined!`)
+            end
         end
     end
 
@@ -105,6 +109,8 @@ function timer.new(callback: (self) -> (), options: SawdustTimerOptions): Sawdus
 
     return self
 end
+
+--]] METHODS
 
 --[[ 
     Initalizes this timer, providing the developer with a callback
@@ -138,13 +144,16 @@ function timer:pause(pause_callback: (self) -> (), silent: boolean?)
     self.pause = true
 end
 
---[[ timer:cancel()
-    Disconnects the internal connection. ]]
-function timer:cancel()
+--[[
+    Discards the timer and smartly cleans up any garbage.
+]]
+function timer:discard()
     if self.connection then
-        self.connection:Disconect()
+        self.connection:Disconnect()
         self.connection = nil
     end
+
+    table.clear(self)
 end
 
 --[[
