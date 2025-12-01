@@ -33,6 +33,7 @@ export type SawdustTimer = typeof(setmetatable({} :: self, timer))
 export type SawdustTimerOptions = {
     decay_time: number?,
     server_sync: boolean?,
+    cleanup: (() -> nil)?,
 }
 
 --]] Utilities
@@ -41,6 +42,7 @@ local function ValidateOptions(options: SawdustTimerOptions)
 
     options.decay_time = options.decay_time or nil
     options.server_sync = options.server_sync or false
+    options.cleanup = options.cleanup or function() end
 
     return options
 end
@@ -55,15 +57,17 @@ end
 
     @param options.decay_time Time until timer decays & cleans itself up.
     @param options.server_sync? Use workspace:GetServerTime() rather than tick()
+    @param options.cleanup? Function called when this timer gets cleaned up.
 ]]
 function timer.new(callback: (self) -> (), options: SawdustTimerOptions): SawdustTimer
     local self = setmetatable({} :: self, timer)
 
     --> Gather Options
-    ValidateOptions(options)
+    ValidateOptions(options) --> Fill in defaults if needed
 
     local decay_time = options.decay_time
     local server_sync = options.server_sync
+    local f_cleanup = options.cleanup
 
     --> Utilities
     local function GetTick()
@@ -87,6 +91,7 @@ function timer.new(callback: (self) -> (), options: SawdustTimerOptions): Sawdus
         if self.decay_date then
             if GetTick() > self.decay_date then
                 self:discard()
+                f_cleanup()
             end
         end
 
