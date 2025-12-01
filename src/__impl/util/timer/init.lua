@@ -48,7 +48,7 @@ function timer.new(callback: (self) -> (), decayTime: number?): SawdustTimer
     self.__hb_f = function(deltaTime)
         self.elapsed += deltaTime
         if self.decayDate then
-            if tick > self.decayDate then
+            if tick() > self.decayDate then
                 self:discard()
             end
         end
