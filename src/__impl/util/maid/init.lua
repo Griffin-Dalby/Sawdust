@@ -200,8 +200,13 @@ function maid:clean(tag: string?)
         --> Rawset
         local should_clean = (not tag or (tag and wrappedInstance:hasTag(tag)))
         if should_clean then
+            if self.object then
+                local find_clean_inst = table.find(self.object, cleanInstance)
+                if find_clean_inst then
+                    rawset(self.object, find_clean_inst, nil)
+                end
+            end
             wrappedInstance:clean()
-            rawset(self.object, table.find(self.object, wrappedInstance), nil)
         end
     end
 
