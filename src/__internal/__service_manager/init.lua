@@ -49,7 +49,8 @@ function svcManager:_resolve(id: string) : promise.SawdustPromise
     -- print(`RESOLVING SVC: {id}`)
     return promise.new(function(resolve, reject)
         if self._instances[id] then
-            resolve(self._instances[id]) end
+            resolve(self._instances[id])
+            return end
 
         if self._states[id] == 'init' then
             reject(`Attempt to resolved an already initalizing service!\nThis may be due to a circular dependency, check your dependency tree!`)
@@ -71,7 +72,7 @@ function svcManager:_resolve(id: string) : promise.SawdustPromise
         end
 
         if builder._initfn then
-            local returned = builder._initfn(builder, deps)
+            builder._initfn(builder, deps)
             for _, injection in pairs(builder.injections.init) do
                 injection:run(builder, deps) end
         end
@@ -86,7 +87,6 @@ end
 --[[ svcManager:_start(id: string)
     Starts a specific resolved service. ]]
 function svcManager:_start(id: string) : promise.SawdustPromise
-    print(`STARTING SVC: {id}`)
     return promise.new(function(resolve, reject)
         local instance = self._instances[id]
         if not instance then
