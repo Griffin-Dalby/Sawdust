@@ -23,10 +23,10 @@ injection.__index = injection
 type self_injection = {
     fn: (...any) -> ...any
 }
-export type SawdustSVCInjection = typeof(setmetatable({} :: self, injection))
+export type SawdustSVCInjection = typeof(setmetatable({} :: self_injection, injection))
 
 function injection.new(fn: (...any) -> ...any)
-    local self = setmetatable({} :: self, injection)
+    local self = setmetatable({} :: self_injection, injection)
 
     self.fn = fn
 
@@ -41,11 +41,11 @@ end
 local builder = {}
 builder.__index = builder
 
-type self<T> = {
+type self = {
     id: string,
 
-    _initfn: (self: T, deps: {}, ...any) -> ...any,
-    _startfn: (self: T, ...any) -> ...any,
+    _initfn: (self:  SawdustService, deps: {}, ...any) -> ...any,
+    _startfn: (self: SawdustService, ...any) -> ...any,
 
     injections: {
         init: {SawdustSVCInjection},
@@ -55,13 +55,19 @@ type self<T> = {
     dependencies: {[number]: string},
     meta: {string: {}}
 }
-export type SawdustService<T> = typeof(setmetatable({} :: self<T>, builder))
+export type SawdustService = typeof(setmetatable({} :: self, builder))
 
---[[ builder.new(id: string)
-    Constructor for the builder object.
-    Service will be injected into the game w/ the *id*]]
-function builder.new(id: string): SawdustService<any>
-    local self = setmetatable({} :: self<any>, builder)
+--[[
+    Constructor for the builder object. This instance is used to construct new
+    Sawdust Services, allowing you to compose the service before registering &
+    starting it.
+
+    @param id Internal identifier for this service
+
+    @return SawdustService
+]]
+function builder.new(id: string): SawdustService
+    local self = setmetatable({} :: self, builder)
 
     self.id = id
 
@@ -79,30 +85,51 @@ function builder.new(id: string): SawdustService<any>
     return self
 end
 
---[[ builder:dependsOn(...string)
-    Requires that this service be loaded AFTER services defined in tuple. ]]
+--[[
+    Requires that this service be loaded AFTER services defined in tuple.
+    Also provides a direct reference to all dependencies in the initalization
+    function.
+
+    @param tuple<string> Dependencies
+]]
 function builder:dependsOn(...)
     self.dependencies = {...}
     return self
 end
 
---[[ builder:init(fn)
-    Attaches a function into the initalize runtime ]]
-function builder:init(fn: (...any) -> ...any)
-    self._initfn = fn
+--[[
+    Attaches a function into the initalize runtime, this is where you'll
+    prepare the service to be started. Treat this like a constructor.
+
+    @param init_fn Init function
+]]
+function builder:init(init_fn: (self: SawdustService, deps: {[string]: SawdustService}) -> ...any)
+    self._initfn = init_fn
     return self
 end
 
---[[ builder:start(fn)
-    Attaches a function into the start runtime ]]
-function builder:start(fn: (...any) -> ...any)
-    self._startfn = fn
+--[[
+    Attaches a function to the start runtime, this is where all post-init
+    & runtime logic should go.
+
+    @param start_fn Start runtime function
+]]
+function builder:start(start_fn: (self: SawdustService) -> ...any)
+    self._startfn = start_fn
     return self
 end
 
---[[ builder:method(name: string, callback: (self: self, ...any) -> ...any)
-    Adds a new method to this service, that can be called from outside the service. ]]
-function builder:method(name: string, callback: (self, ...any) -> ...any)
+--[[
+    Adds a new method to this service, that can be called from outside
+    of this service using the format: `service.method(args)`.
+
+    The callback provides a direct reference to the service & it's properties
+    (specifically for runtime properties) as the first argument.
+
+    @param name Name of the method that will be attributed.
+    @param callback Function that will be called when this method is invoked.
+]]
+function builder:method(name: string, callback: (self: SawdustService|{any}, ...any) -> ...any)
     if self[name] then
         warn(`[{script.Name}:method()] Cannot override value "{name}".`)
         return self end
@@ -112,22 +139,31 @@ function builder:method(name: string, callback: (self, ...any) -> ...any)
     return self
 end
 
---[[ builder:inject(phase: string, fn)
-    Adds an injection into a specified phase. ]]
-function builder:inject(phase: string, fn: (...any) -> ...any)
+--[[
+    Adds an injection into a specified phase, either 'init' or 'start'.
+    An "injection" is code that runs before the phase occurs, allowing
+    more flexability.
+
+    @param phase Phase to inject into, either 'init' or 'start'.
+    @param inject_fn Function to inject.
+]]
+function builder:inject(phase: string, inject_fn: (...any) -> ...any)
     if not self.injections[phase] then
         warn(`[{script.Name}] Invalid injection phase "{phase or '<none provided>'}"`)
         return self end
 
-    local inj = injection.new(fn)
+    local inj = injection.new(inject_fn)
     table.insert(self.injections[phase], inj)
     
     return self
 end
 
---[[ builder:loadMeta(meta: Folder)
+--[[
     Loads asset metadata from a provided folder, allowing the service to access
-    assets at runtime. ]]
+    assets at runtime. This gets injected into the "meta" service parameter.
+    
+    @param meta Folder to scan & load meta.
+]]
 function builder:loadMeta(meta: Folder)
     for _, asset: Instance in ipairs(meta:GetChildren()) do
         if self.meta[asset.Name] then
