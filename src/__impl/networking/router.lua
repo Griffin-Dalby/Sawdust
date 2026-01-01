@@ -29,7 +29,7 @@ local __settings = require(__internal.__settings)
 --]] Variables
 --]] Functions
 --]] Router
-local router = {}
+local router = {} :: types.methods_router
 router.__index = router
 
 --[[ router.new()
@@ -50,10 +50,8 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
             {_intent = intent, _data = req.data})
             
         if not success then
-            error(`failed to run middleware for router!`)
-            if return_pipeline and type(return_pipeline) == 'string' then
-                warn(`provided error message: {return_pipeline}`)
-            end
+            error(`failed to run middleware for router!{if (return_pipeline and type(return_pipeline)=='string') then
+                `\nProvided error message: {return_pipeline}` else " No error was provided."}`)
             return
         end
 
@@ -61,11 +59,8 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         req.intent = return_pipeline:getIntent()
 
         if return_pipeline:isHalted() then
-            error(`middleware has halted router execution!`)
-
-            if return_pipeline:getError() then
-                warn(`[{script.Name}] A message was provided: "{return_pipeline:getError()}"`)
-                return end
+            error(`middleware has halted router execution!{if return_pipeline:getError() then
+                `\nProvided error message: {return_pipeline:getError()}` else " No error was provided."}`)
         end
 
         if self.__routes[intent] then

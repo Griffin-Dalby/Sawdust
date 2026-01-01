@@ -1,4 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+--!strict
 --[[
 
     Sawdust Networking Types
@@ -31,10 +31,12 @@ export type self_channel = {
     __channel: Folder,
     [string]: NetworkingEvent
 }
-export type NetworkingChannel = typeof(setmetatable({} :: self_channel, channel))
+export type methods_channel = {
+    __index: methods_channel,
+    get: (channel_name: string, settings: ChannelSettings?) -> NetworkingChannel,
+}
 
-function channel.get(channelName: string, settings: ChannelSettings)
-end
+export type NetworkingChannel = typeof(setmetatable({} :: self_channel, channel))
 
 --> Call
 local call = {}
@@ -44,68 +46,100 @@ export type self_call = {
     __event: RemoteEvent,
     __middleware: NetworkingMiddleware,
 
-    --> Broadcast settings
-    _globalBroadcast: boolean|nil,
+    --> Internal
+    _return_id: string?,
 
-    _targets: {Player}|nil,
-    _filterType: 'include'|'exclude'|nil,
+    --> Broadcast Settings
+    _broadcast: {
+        global: boolean,
+        targets: {Player}|nil,
+        filter_type: 'include'|'exclude'|nil
+    },
 
-    --> Call data
-    _data: {},
-    _intent: string,
-    _timeout: number,
+    --> Call Data
+    _call: {
+        data: {},
+        intent: string,
+        timeout: number
+    },
 }
-export type NetworkingCall = typeof(setmetatable({} :: self_call, call))
 
-function call:broadcastGlobally(): NetworkingCall end
-function call:broadcastTo(targets: {Players}?): NetworkingCall end
-function call:setFilterType(filterType: 'include'|'exclude'): NetworkingCall  end
+export type methods_call = {
+    __index: methods_call,
+    new: (event: NetworkingEvent) -> NetworkingCall,
 
-function call:data(...): NetworkingCall end
-function call:intent(intent: string): NetworkingCall end
-function call:timeout(seconds: number): NetworkingCall end
+    broadcastGlobally: (self: NetworkingCall) -> NetworkingCall,
+    broadcastTo: (self: NetworkingCall, ...Player) -> NetworkingCall,
+    setFilterType: (self: NetworkingCall, filterType: 'include'|'exclude') -> NetworkingCall,
 
-function call:fire(): NetworkingPipeline end
-function call:invoke(): promise.SawdustPromise end
+    data: (self: NetworkingCall, ...any) -> NetworkingCall,
+    intent: (self: NetworkingCall, intent: string) -> NetworkingCall,
+    timeout: (self: NetworkingCall, seconds: number) -> NetworkingCall,
+
+    fire: (self: NetworkingCall) -> NetworkingPipeline,
+    invoke: (self: NetworkingCall) -> promise.SawdustPromise,
+
+    setReturnId: (self: NetworkingCall, return_id: string) -> NetworkingCall,
+}
+export type NetworkingCall = typeof(setmetatable({} :: self_call, {} :: methods_call))
 
 --> Events
 local event = {}
 event.__index = event
 
 export type self_event = {
+    --> Properties
     __event: RemoteEvent,
     __middleware: NetworkingMiddleware,
-    __connections: {RBXScriptConnection},
+    __connections: { [string]: NetworkingConnection },
 
-    __invoke_resolvers: {}
+    __invoke_resolvers: {},
 }  
-export type NetworkingEvent = typeof(setmetatable({} :: self_event, event))
 
-function event.new(channel: NetworkingChannel, event: RemoteEvent)
-end
+export type methods_event = {
+    __index: methods_event,
+    new: (channel: NetworkingChannel, event: RemoteEvent) -> NetworkingEvent,
 
-function event:with() : NetworkingCall
-end
-function event:handle(callback: (req: ConnectionRequest, res: ConnectionResult) -> nil)
-end
-function event:route() : NetworkingRouter
-end
-function event:useMiddleware(phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> nil, msettings: {protected: boolean})
-end
+    with: (self: NetworkingEvent) -> NetworkingCall,
+    handle: (self: NetworkingEvent, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> nil,
+    route: (self: NetworkingEvent) -> NetworkingRouter,
+    useMiddleware: (self: NetworkingEvent, phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> nil, msettings: {protected: boolean}) -> nil,
+}
+export type NetworkingEvent = typeof(setmetatable({} :: self_event, {} :: methods_event))
 
 --> Connection 
 local connection = {}
 connection.__index = connection
 
 export type self_connection = {
+    --> Properties
     cache: cache.SawdustCache,
     connectionId: string,
     callback: (player: Player, ...any) -> nil,
 
+    --> Internal Methods
     removeFromEvent: () -> nil,
-    returnCall: (data: {}) -> nil
+    returnCall: (data: {}) -> nil,
+
+    --> Methods
+    run: (raw_data: {}) -> nil,
+    disconnect: () -> nil,
+}
+export type methods_connection = {
+    __index: methods_connection,
+    new: (callback: (req: ConnectionRequest, res: ConnectionResult) -> nil, event: NetworkingEvent) -> NetworkingConnection,
+
+    --> Internal Methods
+    removeFromEvent: () -> nil,
+    returnCall: (data: {}) -> nil,
+
+    --> Methods
+    run: (raw_data: {}) -> nil,
+    disconnect: () -> nil,
 }
 export type NetworkingConnection = typeof(setmetatable({} :: self_connection, connection))
+
+-- req & res of Connections.
 export type ConnectionRequest = {
     caller: Player?,
     intent: string,
@@ -121,75 +155,82 @@ export type ConnectionResult  = {
     assert: (condition: boolean, message: string) -> boolean,
 }
 
-function connection:run(rawData: {})
-end
-function connection:disconnect()
-end
-
 --> Middleware
-local middleware = {}
-middleware.__index = middleware
-
 export type __registered_func__ = {
     order: number,
     callback: (NetworkingPipeline) -> NetworkingPipeline,
     protected: boolean,
 }
+
 export type self_middleware = {
+    --> Registry
     __registry: {
         before: {__registered_func__},
         after:  {__registered_func__},
     },
 }
-export type NetworkingMiddleware = typeof(setmetatable({} :: self_middleware, middleware))
+export type methods_middleware = {
+    __index: methods_middleware,
+    new: (locked_phases: {}?) -> NetworkingMiddleware,
 
-function middleware.new() : NetworkingMiddleware
-end
-function middleware:use(
-    phase: string, order: number,
-    callback: (NetworkingPipeline) -> NetworkingPipeline, 
-    args: {internal: boolean, protected: boolean}) end
-function middleware:run(phase: string, args: {any}): NetworkingPipeline end
+    use: (self: NetworkingMiddleware,
+        phase: string, order: number,
+        callback: (NetworkingPipeline) -> NetworkingPipeline,
+        args: {internal: boolean, protected: boolean}) -> nil,
+    run: (self: NetworkingMiddleware,
+        phase: string, args: NetworkingCall) -> NetworkingPipeline
+}
+export type NetworkingMiddleware = typeof(setmetatable({} :: self_middleware, {} :: methods_middleware))
 
 --> Pipeline
 local pipeline = {}
 pipeline.__index = pipeline
 
 export type self_pipeline = {
+    --> Properties
     phase: string,
     intent: string,
     data: {any},
 
     halted: boolean,
-    errorMsg: string?,
+    errorMsg: string?
 }
-export type NetworkingPipeline = typeof(setmetatable({} :: self_pipeline, pipeline))
+export type methods_pipeline = {
+    __index: methods_pipeline,
+    new: (phase: string, call: NetworkingCall) -> NetworkingPipeline,
 
-function pipeline:setIntent(intent: string): boolean end
-function pipeline:setData(args: {any}, ...): boolean end
-function pipeline:setHalted(halted: boolean): boolean end
+    --> Downstream Methods
+    setIntent: (self: NetworkingPipeline, intent: string) -> boolean,
+    setData:   (self: NetworkingPipeline, args: {any}, ...any) -> boolean,
+    setHalted: (self: NetworkingPipeline, halted: boolean) -> boolean,
 
-function pipeline:getIntent(): string end
-function pipeline:getData(): {any} end
-function pipeline:isHalted() : boolean end
-function pipeline:getError() : string? end
-function pipeline:getPhase(): string end
+    --> Upstream Accessors
+    getIntent: (self: NetworkingPipeline) -> string,
+    getData:   (self: NetworkingPipeline) -> {any},
+    isHalted:  (self: NetworkingPipeline) -> boolean,
+    getError:  (self: NetworkingPipeline) -> string?,
+    getPhase:  (self: NetworkingPipeline) -> string
+}
+export type NetworkingPipeline = typeof(setmetatable({} :: self_pipeline, {} :: methods_pipeline))
 
 --> Intent Router
 local router = {}
 router.__index = router
 
 export type self_router = {
+    --> Properties
     __routes: {[string]: (req: ConnectionRequest, res: ConnectionResult) -> nil},
     __listener: NetworkingConnection
 }
-export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
+export type methods_router = {
+    __index: methods_router,
+    new: (event: NetworkingEvent) -> NetworkingRouter,
 
-function router:on(intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil): NetworkingRouter end
-function router:onAny(callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) end
-function router:useMiddleware(order: number, callback: (pipeline: NetworkingPipeline) -> nil)
-    
-end
-function router:discard() end
+    on: (self: NetworkingRouter, intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingRouter,
+    onAny: (self: NetworkingRouter, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingRouter,
+    useMiddleware: (self: NetworkingRouter, order: number, callback: (pipeline: NetworkingPipeline) -> nil) -> NetworkingRouter,
+    discard: (self: NetworkingRouter) -> nil,
+}
+export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
 
 return types

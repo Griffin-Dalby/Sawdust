@@ -25,8 +25,6 @@
 local types = require(script.types)
 
 local channel = require(script.channel)
-local event = require(script.event)
-local middleware = require(script.middleware)
 
 --]] Constants
 --]] Variables
@@ -34,6 +32,16 @@ local middleware = require(script.middleware)
 --]] Module
 local networking = {}
 
+--]] Types
+export type NetworkingChannel = types.NetworkingChannel
+export type NetworkingCall = types.NetworkingCall
+export type NetworkingEvent = types.NetworkingEvent
+export type NetworkingRouter = types.NetworkingRouter
+export type NetworkingConnection = types.NetworkingConnection
+export type NetworkingMiddleware = types.NetworkingMiddleware
+export type NetworkingPipeline = types.NetworkingPipeline
+
+--]] Methods
 networking.getChannel = channel.get
 
 return networking

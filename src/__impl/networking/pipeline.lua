@@ -25,7 +25,7 @@ local __internal = sawdust.__internal
 local __settings = require(__internal.__settings)
 
 --]] Channel
-local pipeline = {}
+local pipeline = {} :: types.methods_pipeline
 pipeline.__index = pipeline
 
 function pipeline.new(phase: string, call: types.NetworkingCall) : types.NetworkingPipeline

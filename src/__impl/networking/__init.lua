@@ -32,7 +32,6 @@ local warnTag = `[{script.Parent.Name}{script.Name}]`
 --]] Initalizer
 return function ()
     local networkingCache = caching.findCache('__networking_cache')
-    local middlewareCache = networkingCache:createTable('middleware')
     local requestCache = networkingCache:createTable('requests')
 
     local connectionCache = networkingCache:createTable('connections')

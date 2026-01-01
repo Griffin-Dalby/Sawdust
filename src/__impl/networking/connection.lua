@@ -11,7 +11,6 @@
 
 --]] Services
 local https = game:GetService('HttpService')
-local Players = game:GetService('Players')
 
 --]] Modules
 --> Local types
@@ -33,7 +32,7 @@ local requestCache = networkingCache:findTable('requests')
 --]] Variables
 --]] Functions
 --]] Module
-local connection = {}
+local connection = {} :: types.methods_connection
 connection.__index = connection
 
 function connection.new(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil, event: types.NetworkingEvent) : types.NetworkingConnection

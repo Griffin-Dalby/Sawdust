@@ -27,42 +27,43 @@ local __internal = sawdust.__internal
 local __settings = require(__internal.__settings)
 
 --]] Cache
-local networkingCache = caching.findCache('__networking_cache')
-local channelCache = networkingCache:createTable('channels')
+local networking_cache = caching.findCache('__networking_cache')
+local channel_cache = networking_cache:createTable('channels')
 
 --]] Channel
-local channel = {}
+local channel = {} :: types.methods_channel
 channel.__index = channel
 
-function channel.get(channelName: string, settings: types.ChannelSettings) : types.NetworkingChannel
-    assert(channelName, `Missing channelName argument!`)
+function channel.get(channel_name: string, settings: types.ChannelSettings?) : types.NetworkingChannel
+    assert(channel_name, `Missing channelName argument!`)
 
     --> Cache check
-    local channelInCache = networkingCache:hasEntry(channelName)
-    if channelInCache then
+    local channel_cached = channel_cache:hasEntry(channel_name)
+    if channel_cached then
         if not settings or not settings.returnFresh then
-            return channelInCache end
+            return channel_cache:getValue(channel_name) end
     end
 
     --> Fetch channel folder
-    local fetchFolder = __settings.networking.fetchFolder
+    local fetch_folder = __settings.networking.fetchFolder
 
-    local channelFolder = fetchFolder:FindFirstChild(channelName)
-    assert(channelFolder, `Failed to find channel w/ name "{channelName}!"`)
+    local channel_folder = fetch_folder:FindFirstChild(channel_name)
+    assert(channel_folder, `Failed to find channel w/ name "{channel_name}!"`)
 
     --> Construct self & find events
     local self = setmetatable({} :: types.self_channel, channel)
 
-    self.__channel = channelFolder
-    for _, ievent: RemoteEvent in pairs(channelFolder:GetChildren()) do
+    self.__channel = channel_folder
+    for _, ievent: RemoteEvent in pairs(channel_folder:GetChildren()) do
         self[ievent.Name] = event.new(self, ievent)
     end
 
     --> Finalize
-    if not channelInCache
+    if not channel_cached
         or settings.replaceFresh then
         
-        channelCache:setValue(channelName, self)
+        --> Update cache
+        channel_cache:setValue(channel_name, self)
     end
 
     return self

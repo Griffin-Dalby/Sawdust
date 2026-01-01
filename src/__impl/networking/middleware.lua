@@ -23,13 +23,18 @@ local __internal = sawdust.__internal
 local __settings = require(__internal.__settings)
 
 --]] Channel
-local middleware = {}
+local middleware = {} :: types.methods_middleware
 middleware.__index = middleware
 
---[[ middleware.new()
+--[[
     "Middleware" provides a environment allowing developers to inject
     code into the event lifecycle, exposing access to the "pipeline"
-    where you can further modify information about the call ]]
+    where you can further modify information about the call.
+    
+    @param locked_phases You can lock 'before' or 'after' phases from being hooked.
+
+    @return NetworkingMiddleware
+]]
 function middleware.new(locked_phases: {}?) : types.NetworkingMiddleware?
     local self = setmetatable({} :: types.self_middleware, middleware)
 
@@ -39,6 +44,7 @@ function middleware.new(locked_phases: {}?) : types.NetworkingMiddleware?
             error(`invalid phase lock "{v}"!`); return end
     end
 
+    --> Generate Registry
     self.__registry = {
         __internal = {
             before = {},
@@ -100,7 +106,7 @@ end
 --[[ Middleware:run(phase: string)
     Only to be called internally for the event lifecycle.
     Please don't call this unless you have a good reason! ]]
-function middleware:run(phase: string, args: {[number]: any}): types.NetworkingPipeline
+function middleware:run(phase: string, args: types.NetworkingCall): types.NetworkingPipeline
     assert(self.__registry[phase], `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
 
     local runphase = self.__registry[phase]
