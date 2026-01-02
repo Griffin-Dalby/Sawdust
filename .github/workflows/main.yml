@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "wally.toml"
+      - "CHANGELOG.md"
 
 jobs:
   build:
