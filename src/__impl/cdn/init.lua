@@ -23,7 +23,17 @@ local caching = require(script.Parent.cache)
 local cdnCache = caching.findCache('__cdn_cache')
 
 --]] Provider
-local provider = {}
+type self_methods = {
+    __index: self_methods,
+    getProvider: (provider_name: string) -> SawdustCDNProvider,
+
+    getAsset: (fetch_id: string) -> SawdustCDNReturnTemplate | Instance,
+    getAllAssets: () -> {[string]: SawdustCDNReturnTemplate | Instance},
+
+    hasAsset: (asset_id: string) -> boolean
+}
+
+local provider = {} :: self_methods
 provider.__index = provider
 
 export type SawdustCDNReturnTemplate = {
@@ -36,7 +46,7 @@ type self = {
     provider: Folder,
     preload: __preload.SawdustCDNPreloader,
 }
-export type SawdustCDNProvider = typeof(setmetatable({} :: self, provider))
+export type SawdustCDNProvider = typeof(setmetatable({} :: self, {} :: self_methods))
 export type SawdustCDNPreloader = __preload.SawdustCDNPreloader
 
 --[[
