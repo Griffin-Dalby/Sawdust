@@ -143,7 +143,7 @@ export type NetworkingConnection = typeof(setmetatable({} :: self_connection, co
 export type ConnectionRequest = {
     caller: Player?,
     intent: string,
-    data: {any: any},
+    data: {[number]: any?},
 
 }
 export type ConnectionResult  = {
@@ -190,7 +190,7 @@ export type self_pipeline = {
     --> Properties
     phase: string,
     intent: string,
-    data: {any},
+    data: {[number]: any?},
 
     halted: boolean,
     errorMsg: string?
@@ -219,18 +219,18 @@ router.__index = router
 
 export type self_router = {
     --> Properties
-    __routes: {[string]: (req: ConnectionRequest, res: ConnectionResult) -> nil},
+    __routes: {[string]: (req: ConnectionRequest, res: ConnectionResult) -> any?},
     __listener: NetworkingConnection
 }
 export type methods_router = {
     __index: methods_router,
     new: (event: NetworkingEvent) -> NetworkingRouter,
 
-    on: (self: NetworkingRouter, intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingRouter,
-    onAny: (self: NetworkingRouter, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingRouter,
-    useMiddleware: (self: NetworkingRouter, order: number, callback: (pipeline: NetworkingPipeline) -> nil) -> NetworkingRouter,
+    on: (self: NetworkingRouter, intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
+    onAny: (self: NetworkingRouter, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
+    useMiddleware: (self: NetworkingRouter, order: number, callback: (pipeline: NetworkingPipeline) -> any?) -> NetworkingRouter,
     discard: (self: NetworkingRouter) -> nil,
 }
-export type NetworkingRouter = typeof(setmetatable({} :: self_router, router))
+export type NetworkingRouter = typeof(setmetatable({} :: self_router, {} :: methods_router))
 
 return types
