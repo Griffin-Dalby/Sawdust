@@ -47,7 +47,7 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         local success, return_pipeline: types.NetworkingPipeline = pcall(
             self.__middleware.run,
             self.__middleware, 'after',
-            {_intent = intent, _data = req.data})
+            {_call = {intent = intent, data = req.data}})
             
         if not success then
             error(`failed to run middleware for router!{if (return_pipeline and type(return_pipeline)=='string') then

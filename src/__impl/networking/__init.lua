@@ -49,12 +49,13 @@ return function ()
             local eventTable = connectionCache:createTable(event)
             local function protocol(player: Player, data: {}) --> Actual function for connections.
                 --> Verify is sawdust event
-                if typeof(player) ~= 'table' then
+                if typeof(player) == 'Instance' and player:IsA('Player') then
+                    --> Server, Player is first argument; Save to .caller
                     data.caller = player
                     player = nil
                 else
+                    --> Client, Data is first argument (player)
                     data = player
-                    
                 end
 				
                 if not data or typeof(data) ~= 'table' then return end --> Table check

@@ -32,8 +32,8 @@ function pipeline.new(phase: string, call: types.NetworkingCall) : types.Network
     local self = setmetatable({} :: types.self_pipeline, pipeline)
 
     self.phase = phase
-    self.intent = call._intent
-    self.data = call._data
+    self.intent = call._call.intent
+    self.data = call._call.data
 
     self.halted = false
     self.errorMsg = nil
