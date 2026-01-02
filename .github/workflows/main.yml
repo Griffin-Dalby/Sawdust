@@ -18,33 +18,13 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup aftman and install tools
+        uses: ok-nick/setup-aftman@v0.4.1
         with:
-          node-version: '20'
-
-      - name: Install Wally
-        run: npm install -g @upliftgames/wally
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Wally packages
         run: wally install
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install Rojo
-        run: cargo install rojo --version ^7
-
-      - name: Install Wally
-        run: cargo install wally-cli
 
       - name: Build Rojo Project
         run: rojo build default.project.json --output build.rbxl
@@ -67,5 +47,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload ${{ steps.release.outputs.tag_name }} build.rbxl
-          
-
