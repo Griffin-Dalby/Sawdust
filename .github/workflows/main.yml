@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repo
@@ -40,8 +41,17 @@ jobs:
           name: rojo-build
           path: build.rbxl
 
-      - name: Generate release
-        uses: release-please/action@v4
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
         with:
-          release-type: node
-          package-name: rojo-project
+          release-type: simple
+
+      - name: Upload Release Asset
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.release.outputs.tag_name }} build.rbxl
+          
+
