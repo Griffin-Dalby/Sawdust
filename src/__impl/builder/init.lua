@@ -38,7 +38,21 @@ function injection:run(...)
 end
 
 --]] Builder
-local builder = {}
+type self_methods = {
+    __index: self_methods,
+    new: (id: string) -> SawdustService,
+
+    dependsOn: (self: SawdustService, ...string)    -> SawdustService,
+    loadMeta:  (self: SawdustService, meta: Folder) -> SawdustService,
+
+    init:  (self: SawdustService, init_fn: (self: SawdustService, deps: {[string]: SawdustService}) -> ...any) -> SawdustService,
+    start: (self: SawdustService, start_fn: (self: SawdustService) -> ...any) -> SawdustService,
+
+    method: (self: SawdustService, name: string, callback: (self: SawdustService|{any}, ...any) -> ...any) -> SawdustService,
+    inject: (self: SawdustService, phase: string, inject_fn: (...any) -> ...any) -> SawdustService
+}
+
+local builder = {} :: self_methods
 builder.__index = builder
 
 type self = {
@@ -53,9 +67,11 @@ type self = {
     },
 
     dependencies: {[number]: string},
-    meta: {string: {}}
+    meta: {[string]: {}},
+
+    [any]: any,
 }
-export type SawdustService = typeof(setmetatable({} :: self, builder))
+export type SawdustService = typeof(setmetatable({} :: self, {} :: self_methods))
 
 --[[
     Constructor for the builder object. This instance is used to construct new
@@ -92,9 +108,9 @@ end
 
     @param tuple<string> Dependencies
 ]]
-function builder:dependsOn(...)
+function builder:dependsOn(...) : SawdustService
     self.dependencies = {...}
-    return self
+    return self :: SawdustService
 end
 
 --[[
@@ -103,7 +119,7 @@ end
 
     @param init_fn Init function
 ]]
-function builder:init(init_fn: (self: SawdustService, deps: {[string]: SawdustService}) -> ...any)
+function builder:init(init_fn: (self: SawdustService, deps: {[string]: SawdustService}) -> ...any) : SawdustService
     self._initfn = init_fn
     return self
 end
@@ -114,7 +130,7 @@ end
 
     @param start_fn Start runtime function
 ]]
-function builder:start(start_fn: (self: SawdustService) -> ...any)
+function builder:start(start_fn: (self: SawdustService) -> ...any) : SawdustService
     self._startfn = start_fn
     return self
 end
@@ -129,7 +145,7 @@ end
     @param name Name of the method that will be attributed.
     @param callback Function that will be called when this method is invoked.
 ]]
-function builder:method(name: string, callback: (self: SawdustService|{any}, ...any) -> ...any)
+function builder:method(name: string, callback: (self: SawdustService|{any}, ...any) -> ...any) : SawdustService
     if self[name] then
         warn(`[{script.Name}:method()] Cannot override value "{name}".`)
         return self end
@@ -147,13 +163,15 @@ end
     @param phase Phase to inject into, either 'init' or 'start'.
     @param inject_fn Function to inject.
 ]]
-function builder:inject(phase: string, inject_fn: (...any) -> ...any)
-    if not self.injections[phase] then
+function builder:inject(phase: 'init'|'start', inject_fn: (...any) -> ...any) : SawdustService
+    local injections = self.injections :: {[string]: {SawdustSVCInjection}}
+
+    if injections[phase]==nil then
         warn(`[{script.Name}] Invalid injection phase "{phase or '<none provided>'}"`)
         return self end
 
     local inj = injection.new(inject_fn)
-    table.insert(self.injections[phase], inj)
+    table.insert(injections[phase], inj)
     
     return self
 end
@@ -164,14 +182,16 @@ end
     
     @param meta Folder to scan & load meta.
 ]]
-function builder:loadMeta(meta: Folder)
-    for _, asset: Instance in ipairs(meta:GetChildren()) do
-        if self.meta[asset.Name] then
+function builder:loadMeta(meta_f: Folder) : SawdustService
+    local meta = self.meta :: {[string]: any}
+
+    for _, asset: Instance in ipairs(meta_f:GetChildren()) do
+        if meta[asset.Name] then
             warn(`[{script.Name}:loadMeta()] Cannot override meta asset "{asset.Name}".`)
         return self end
 
         if asset:IsA("ModuleScript") then
-            self.meta[asset.Name] = require(asset)
+            meta[asset.Name] = require(asset)
         else
             warn(`[{script.Name}:loadMeta()] Unsupported meta asset type "{asset.ClassName}" for asset "{asset.Name}".`)
         end
