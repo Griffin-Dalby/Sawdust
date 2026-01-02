@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/Griffin-Dalby/Sawdust/compare/v1.5.0...v1.5.1) (2026-01-02)
+
+
+### Bug Fixes
+
+* **networking:** Ensured pipeline & router adhere to new NetworkingCall schemantics. ([833f243](https://github.com/Griffin-Dalby/Sawdust/commit/833f24362747dc9b9140e4efbba0bd24108cd19d))
+
 ## [1.5.0](https://github.com/Griffin-Dalby/Sawdust/compare/v1.4.2...v1.5.0) (2026-01-02)
 
 
