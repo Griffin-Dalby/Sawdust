@@ -18,17 +18,31 @@
 --]]
 
 --]] Promises
-local promise = {}
+type self_methods = {
+    __index: self_methods,
+    new: (callback: (resolve: anyFunction, reject: anyFunction) -> any) -> SawdustPromise,
+
+    resolve: (...any) -> SawdustPromise,
+    reject: (...any) -> SawdustPromise,
+    race: (promises: {SawdustPromise}) -> nil,
+    settleAll: (promises: {SawdustPromise}) -> nil,
+
+    andThen: (callback: anyFunction) -> SawdustPromise,
+    catch: (callback: anyFunction) -> SawdustPromise,
+    finally: (callback: () -> any?) -> SawdustPromise
+}
+
+local promise = {} :: self_methods
 promise.__index = promise
 
-type anyFunction = (...any) -> ...any
+type anyFunction = (...any) -> any?
 
 type self = {
     _state: "pending"|"fulfilled"|"rejected",
     _value: {any},
     _queue: {}
 }
-export type SawdustPromise = typeof(setmetatable({} :: self, promise))
+export type SawdustPromise = typeof(setmetatable({} :: self, {} :: self_methods))
 
 function promise:_settle(state, res)
     if self._state ~= 'pending' then return end
@@ -199,7 +213,7 @@ end
 
     @return SawdustPromise
 ]]
-function promise:catch(callback: (...any) -> nil): SawdustPromise
+function promise:catch(callback: anyFunction): SawdustPromise
     return promise.new(function(resolve, reject)
         local function handleFailure(...)
             local ok, res = pcall(callback, ...)
@@ -225,7 +239,7 @@ end
     
     @return SawdustPromise
 ]]
-function promise:finally(callback: () -> ()): SawdustPromise
+function promise:finally(callback: () -> any?): SawdustPromise
     return self:andThen(function(...)
         callback()
         return ...
