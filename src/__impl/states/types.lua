@@ -1,4 +1,3 @@
---!nocheck
 --[[
 
     State Manager Types
@@ -41,7 +40,7 @@ export type self_state<TShEnv, TStEnv> = {
 
     },
 
-    state_updated: signal.SawdustSignal,
+    state_updated: signal.SawdustSignal<any>,
 
 }
 export type SawdustState<TShEnv, TStEnv> = typeof(setmetatable({} :: self_state<TShEnv, TStEnv>, state))
@@ -77,7 +76,7 @@ export type TransitionConditionData = {
 
 export type self_transition = {
     __fetch_state: ('from'|'to') -> SawdustState<any, any>?,
-    __fetch_machine: StateMachine<any, any>,
+    __fetch_machine: StateMachine<any>,
     __priority: number,
 
     conditions: { TransitionConditionData },
