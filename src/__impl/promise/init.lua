@@ -44,10 +44,17 @@ function promise:_settle(state, res)
     self._queue = {}
 end
 
---[[ promise.new(callback: (resolve: anyFunction, reject: anyFunction))
+--=============--
+-- CONSTRUCTOR --
+--=============--
+
+--[[
     Creates a new async function, and lets developers call resolve() or
-    reject() to return data through two different paths. ]]
-function promise.new(callback: (resolve: anyFunction, reject: anyFunction) -> nil): SawdustPromise
+    reject() to return data through two different paths.
+    
+    @param callback Function to run in Promise, provided with resolve & reject.
+]]
+function promise.new(callback: (resolve: anyFunction, reject: anyFunction) -> any): SawdustPromise
     local self = setmetatable({
         _state = 'pending',
         _value = {},
@@ -65,23 +72,36 @@ function promise.new(callback: (resolve: anyFunction, reject: anyFunction) -> ni
     return self
 end
 
---[[ promise.resolve(...)
-    Returns an instantly fulfilled promise. ]]
+--[[
+    Returns an instantly fulfilled promise.
+
+    @params tuple<any> Values in promise
+
+    @return SawdustPromise
+]]
 function promise.resolve(...): SawdustPromise
     local args = {...}
     return promise.new(function(resolve)
         resolve(unpack(args)) end) end
 
---[[ promise.reject(...)
-    Returns an instantly rejected promise. ]]
+--[[
+    Returns an instantly rejected promise.
+
+    @params tuple<any> Values in promise
+
+    @return SawdustPromise
+]]
 function promise.reject(...): SawdustPromise
     local args = {...}
     return promise.new(function(_, reject)
         reject(unpack(args)) end) end
 
---[[ promise.race(promises: {SawdustPromise})
+--[[
     "Races" a selection of promises, resolving or rejecting
-    with the first one that settles. ]]
+    with the first one that settles.
+
+    @param promises Table of promises to race
+]]
 function promise.race(promises: {SawdustPromise})
     return promise.new(function(resolve, reject)
         local settled = false
@@ -103,9 +123,12 @@ function promise.race(promises: {SawdustPromise})
     end)
 end
 
---[[ promise.settleAll(promises: {SawdustPromise})
+--[[
     Resolves or rejects when all promises settle, returning
-    array with the results of each. ]]
+    array with the results of each.
+    
+    @param promises Table of promises to settle
+]]
 function promise.settleAll(promises: {SawdustPromise})
     return promise.new(function(resolve, reject)
         local results = table.create(#promises)
@@ -132,12 +155,18 @@ function promise.settleAll(promises: {SawdustPromise})
     end)
 end
 
+--==========--
+-- CHAINING --
+--==========--
 
-
-
---[[ promise:andThen(callback: (...any) -> ...any)
+--[[
     Chains a 'then' operation, taking the results of the last chained
-    action, and setting _value to the result of this action. ]]
+    action, and setting _value to the result of this action. 
+    
+    @param callback Callback to call on this operation
+
+    @return SawdustPromise
+]]
 function promise:andThen(callback: anyFunction): SawdustPromise
     local nextPromise = promise.new(function(resolve, reject)
         local function handleSuccess(...)
@@ -162,9 +191,14 @@ function promise:andThen(callback: anyFunction): SawdustPromise
     return nextPromise
 end
 
---[[ promise:catch(callback(...any))
+--[[
     Catches any error that comes from the last chained action, or the
-    inital promise. ]]
+    inital promise. 
+    
+    @param callback Callback to call on this operation
+
+    @return SawdustPromise
+]]
 function promise:catch(callback: (...any) -> nil): SawdustPromise
     return promise.new(function(resolve, reject)
         local function handleFailure(...)
@@ -183,9 +217,14 @@ function promise:catch(callback: (...any) -> nil): SawdustPromise
     end)
 end
 
---[[ promise:finally(callback: () -> ())
+--[[
     Always runs regardless of fulfillment or rejection, and also passes
-    nothing. ]]
+    nothing. 
+    
+    @param callback Callback to call on this operation
+    
+    @return SawdustPromise
+]]
 function promise:finally(callback: () -> ()): SawdustPromise
     return self:andThen(function(...)
         callback()
@@ -196,12 +235,18 @@ function promise:finally(callback: () -> ()): SawdustPromise
     end)
 end
 
---[[ promise:wait(timeout: number?) : any...
+--[[
     Yields the current thread until this promise resolves/rejects
     You can modify the timeout time to avoid an infinite yield.
 
     This will return a success status boolean, as well as an unpacked
-    tuple array of the promise return data. ]]
+    tuple array of the promise return data. 
+    
+    @param timeout_time Maximum yield until it cancels
+
+    @return boolean: Is Fulfilled
+    @return tuple<any>: Values from promise
+]]
 function promise:wait(timeout_time: number?)
     timeout_time = timeout_time or 5
 

@@ -17,8 +17,13 @@ local __type = require(script.Parent.Parent.types)
 local transition = {}
 transition.__index = transition
 
---[[ transition.new() : StateTransition
-    This creates a new, blank transition data builder. ]]
+--[[
+    This creates a new, blank transition condition builder.
+    
+    @param targets Table defining transition, where the first value is the inital state, and second is the final state.
+
+    @return StateTransition
+]]
 function transition.new(targets: {}) : __type.StateTransition
     local self = setmetatable({} :: __type.self_transition, transition)
 
@@ -47,11 +52,18 @@ end
 
 --[[ LOGIC ]]--
 --#region
+
+--[[
+    Run the transition between two states no matter if the condition is met.
+]]
 function transition:runTransition()
     local machine = self.__fetch_machine() :: __type.StateMachine<any>
     machine:switchState(self.__fetch_state('to').name)
 end
 
+--[[
+    Run the transition between two states only if the condition is met.
+]]
 function transition:runConditionals()
     local do_transition = false
     local t_from = self.__fetch_state('from') :: __type.SawdustState<any, any>
@@ -71,6 +83,9 @@ function transition:runConditionals()
     return do_transition
 end
 
+--[[
+    Runs when a event is called, transitions if the event is our condition.
+]]
 function transition:eventCalled(event_id: string)
     local do_transition = false
     for _, condition_data in pairs(self.conditions) do
@@ -89,9 +104,14 @@ end
 --[[ CONDITIONS ]]--
 --#region
 
---[[ transition:priority(priority: number)
+--[[
     This will set the priority of this transition, higher numbers will
-    be called first. ]]
+    be called first.
+
+    @param priority Priority of this transition
+
+    @return StateTransition (Chained)
+]]
 function transition:priority(priority: number) : __type.StateTransition
     assert(priority, `attempt to set priority to nil!`)
     assert(type(priority)=='number', `attempt to set priority to invalid type! (Provided: {type(priority)}, Expected a number.)`)
@@ -100,9 +120,14 @@ function transition:priority(priority: number) : __type.StateTransition
     return self
 end
 
---[[ transition:when(conditional: (env) -> boolean)
+--[[ 
     This will add a new condition where the result of the provided callback
-    dictates if the transition occurs. ]]
+    dictates if the transition occurs. 
+
+    @param conditional Function statement as conditional
+
+    @return StateTransition (Chained)
+]]
 function transition:when(conditional: (env: __type.StateEnvironment<any, any>) -> boolean) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'custom'
@@ -112,9 +137,14 @@ function transition:when(conditional: (env: __type.StateEnvironment<any, any>) -
     return self
 end
 
---[[ transition:on(event_id: string)
+--[[
     This will add a new condition awaiting an event call within the state
-    machine. ]]
+    machine. 
+
+    @param event_id Event to listen for
+
+    @return StateTransition (Chained)
+]]
 function transition:on(event_id: string) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'event'
@@ -124,9 +154,14 @@ function transition:on(event_id: string) : __type.StateTransition
     return self
 end
 
---[[ transition:after(time: number)
+--[[
     This will add a new condition that will wait a certain time, then
-    run. ]]
+    run. 
+    
+    @param time Time to wait until condition fires
+
+    @return StateTransition (Chained)
+]]
 function transition:after(time: number) : __type.StateTransition
     local condition_data = {}
     condition_data.type = 'time'

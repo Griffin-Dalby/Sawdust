@@ -28,8 +28,12 @@ end
 local state = {}
 state.__index = state
 
---[[ state.new()
-    This will create a new state, and open a handler interface. ]]
+--[[
+    This will create a new state, and open a composer interface.
+
+    @param state_machine State Machine this state is attributed to
+    @param state_name Name of this state
+]]
 function state.new<TShEnv, TStEnv>(state_machine: __type.StateMachine<TShEnv>,
         state_name: string) : __type.SawdustState<TShEnv, TStEnv>
 
@@ -62,8 +66,15 @@ end
 --[[ state:hook(to: string, id: string, callback: (env: StateEnvironment) -> nil)
     This will hook a function to a specific lifecycle event.
 
-    *to will be searched for in the internal hooks, and if found the *callback
-    will be attached with the specific *id. ]]
+    &to will be searched for in the internal hooks, and if found the &callback
+    will be attached with the specific &id. 
+    
+    @param to Identifier of the hook to embed this in
+    @param id Identifier of this specific function
+    @param callback Code that runs when hook is called
+    
+    @return SawdustState (Chained)
+]]
 function state:hook<TShEnv, TStEnv>(
         to: string,
         id: string,
@@ -85,11 +96,17 @@ function state:hook<TShEnv, TStEnv>(
     return self
 end
 
---[[ state:unhook(from: string, id: string)
+--[[
     This will unhook a function from a specific lifecycle event.
 
-    *from will be searched for in the internal hooks, and if found *id will be
-    searched for inside, and an attempt will be make to unhook the callback. ]]
+    &from will be searched for in the internal hooks, and if found &id will be
+    searched for inside, and an attempt will be make to unhook the callback. 
+    
+    @param from Identifier of the hook to remove from
+    @param id Identifier of the function to remove
+
+    @return SawdustState (Chained)
+]]
 function state:unhook<TShEnv, TStEnv>(from: string, id: string) : __type.SawdustState<TShEnv, TStEnv>
         
     assert(from, `:unhook() missing argument #1! This is the ID pointing towards the hook list.`)
@@ -105,9 +122,12 @@ end
 --[[ HOOK EVENTS ]]--
 --#region
 
---[[ state:entered()
+--[[
     This will trigger the "entered" lifecycle for this state, and start the
-    update loop. ]]
+    update loop. 
+    
+    @return Success (boolean)
+]]
 function state:entered() : boolean
     self.environment.total_state_time = 0
 
@@ -119,7 +139,7 @@ function state:entered() : boolean
     for _, transition : __type.StateTransition in pairs(self.transitions) do
         if pl_check_list[transition.__priority] then
             error(`there are multiple transitions @ priority {tostring(transition.__priority)}!`)
-            break end
+            end
             
         pl_check_list[transition.__priority] = true
         table.insert(prioritized_list, transition)
@@ -154,9 +174,12 @@ function state:entered() : boolean
     return true
 end
 
---[[ state:exited()
+--[[
     This will trigger the "exited" lifecycle for this state, and stop the
-    update loop. ]]
+    update loop. 
+
+    @return Success (boolean)
+]]
 function state:exited() : boolean
     if self.__update then
         self.__update:Disconnect()
@@ -174,6 +197,13 @@ end
 --[[ TRANSITIONS ]]--
 --#region
 
+--[[
+    Create a transition condition from the current state to another.
+
+    @param state_name State to transition into
+
+    @return StateTransition
+]]
 function state.transition<TShEnv>(self: __type.StateMachine<TShEnv>,
         state_name: string) : __type.StateTransition
 

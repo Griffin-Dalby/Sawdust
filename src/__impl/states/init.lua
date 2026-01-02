@@ -25,11 +25,14 @@ local signal = require(script.Parent.signal)
 local machine = {}
 machine.__index = machine
 
---[[ machine.create<TShEnv>() : StateMachine
+--[[
     Constructor function for the State Machine.
         
     The generic operator <TShEnv: {}> allows for enforcing a template
-    for the shared environment table. ]]
+    for the shared environment table. 
+
+    @return StateMachine
+]]
 function machine.create<TShEnv>() : __type.StateMachine<TShEnv>
     local self = setmetatable({} :: __type.self_machine<TShEnv>, machine)
 
@@ -46,8 +49,13 @@ end
 --[[ STATE CONTROL ]]--
 --#region
 
---[[ machine:state(state_name: string)
-    This will create a new state & open a handler. ]]
+--[[
+    This will create a new state & return a composer. 
+    
+    @param state_name Name of the state being created
+
+    @return SawdustState
+]]
 function machine:state<TShEnv, TStEnv>(state_name: string) : __type.SawdustState<TShEnv, TStEnv>
     assert(state_name, `attempt to create state with nil state_name!`)
     assert(type(state_name) == 'string', `state_name is a "{type(state_name)}", but it was expected to be a string!`)
@@ -59,8 +67,11 @@ function machine:state<TShEnv, TStEnv>(state_name: string) : __type.SawdustState
     return new_state
 end
 
---[[ machine:event(event_name: string)
-    Fires an event, which will pass it along to the current state. ]]
+--[[
+    Fires an event, which will pass it along to the current state.
+    
+    @param event_name Name of the event to fire
+]]
 function machine:event(event_name: string)
     assert(event_name, `attempt to fire event with nil event_name!`)
     assert(type(event_name) == 'string', `event_name is a "{type(event_name)}", but it was expected to be a string!`)
@@ -71,7 +82,7 @@ function machine:event(event_name: string)
     for _, transition: __type.StateTransition in pairs(self.c_state.transitions) do
         if pl_check_list[transition.__priority] then
             error(`there are multiple transitions @ priority {tostring(transition.__priority)}!`)
-            break end
+        end
             
         pl_check_list[transition.__priority] = true
         table.insert(prioritized_list, transition) end
@@ -85,8 +96,11 @@ function machine:event(event_name: string)
     end
 end
 
---[[ machine:switchState(state_name: string)
-    This will switch this machine's state to state_name. ]]
+--[[
+    This will switch this machine's state to another state.
+
+    @param state_name State to transition into.
+]]
 function machine:switchState(state_name: string)
     assert(state_name, `attempt to switch state with nil state_name!`)
     assert(type(state_name) == 'string', `state_name is a "{type(state_name)}", but it was expected to be a string!`)

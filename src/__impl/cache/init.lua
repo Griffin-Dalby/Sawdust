@@ -34,27 +34,42 @@ type self = {
 }
 export type SawdustCache = typeof(setmetatable({} :: self, cache))
 
---[[ cache.findCache(cacheName: string!)
-    Finds a cache table w/ "cacheName". ]]
-function cache.findCache(cacheName: string): SawdustCache
-    assert(cacheName, `.findCache() missing argument 1! (cacheName)`)
-    assert(type(cacheName)=='string', `.findCache() argument 1 type mismatch! (expected string, got {type(cacheName)}!)`)
+--[[
+    Finds a cache table w/ a specified name, searching the i-cache (internal cache) first.
+    
+    If it's located in the i-cache then it will be returned from there,
+    elsewise it'll be located & saved in the i-cache.
 
-    if __cache[cacheName] then
-        return __cache[cacheName]  end
+    @param cache_name
+]]
+function cache.findCache(cache_name: string): SawdustCache
+    assert(cache_name, `.findCache() missing argument 1! (cacheName)`)
+    assert(type(cache_name)=='string', `.findCache() argument 1 type mismatch! (expected string, got {type(cache_name)}!)`)
+
+    if __cache[cache_name] then
+        return __cache[cache_name]  end
 
     local self = setmetatable({} :: self, cache)
 
-    self.cacheName = cacheName
+    self.cacheName = cache_name
     self.contents = {}
 
-    __cache[cacheName] = self
+    __cache[cache_name] = self
     return self
 end
 
---[[ cache:getValue(keys: ...string)
-    Fetches multiple or singular values from the current cache. ]]
-function cache:getValue(...) : any...
+--================--
+-- STORAGE SYSTEM --
+--================--
+
+--[[
+    Fetches multiple or singular values from the current cache.
+    
+    @param tuple<any> Cache ID's to search for
+
+    @return tuple<any> Elements located inside of cache.
+]]
+function cache:getValue(...) : (...any)
     assert(self, `:getValue() called without a targeted cache!`)
 
     local keys = {...} :: {[number]: string}
@@ -70,24 +85,36 @@ function cache:getValue(...) : any...
     return unpack(found)
 end
 
---[[ cache:hasEntry(entry: any)
-    Checks if the current cache has an entry for "entry". ]]
+--[[
+    Checks if the current cache has an entry for "entry".
+    
+    @param entry ID to search for.
+
+    @return boolean Existence of entry
+]]
 function cache:hasEntry(entry: any) : boolean
     assert(self, `:hasEntry() called without a targeted cache!`)
     assert(entry, `:hasEntry() missing argument 1! (entry)`)
     return self.contents[entry] ~= nil
 end
 
---[[ cache:getContents()
-    Returns a copy of all values within the current cache. ]]
-function cache:getContents() : {[string]: any}
+--[[
+    Returns a copy of all values within the current cache.
+    
+    @return Table of all contents
+]]
+function cache:getContents() : {[any]: any}
     assert(self, `:getContents() called without a targeted cache!`)
     return table.clone(self.contents)
 end
 
---[[ cache:setValue(key: any, value: any)
+--[[
     Sets the value of key "key" to "value".
-    Setting a value to "nil" is a valid way to delete data. ]]
+    Setting a value to "nil" is a valid way to delete data.
+    
+    @param key Cache entry to set
+    @param value Value to set it to
+]]
 function cache:setValue(key: any, value: any)
     assert(self, `:setValue() called without a targeted cache!`)
     assert(key, `:setValue() missing argument 1! (key)`)
@@ -95,49 +122,63 @@ function cache:setValue(key: any, value: any)
     self.contents[key] = value
 end
 
---[[ cache:createTable(tableKey: any, create: boolean?)
+--==============--
+-- TABLE SYSTEM --
+--================
+
+--[[
     Creates a table within the cache, basically having caches in caches.
     
-    safe(false) : If true & the table already exists, it will be returned.
-    Usually this would result in a conflict error. ]]
-function cache:createTable(tableKey: any, safe: boolean?) : SawdustCache
+    @param table_key Identification key for this table
+    @param safe If true & the table already exists, it will be returned.
+    Usually this would result in a conflict error. 
+]]
+function cache:createTable(table_key: any, safe: boolean?) : SawdustCache
     assert(self, `:createTable() called without a targeted cache!`)
-    assert(tableKey, `:createTable() missing argument 1! (tableKey)`)
+    assert(table_key, `:createTable() missing argument 1! (table_key)`)
     if safe then
-        if self.contents[tableKey] then return self.contents[tableKey] end
+        if self.contents[table_key] then return self.contents[table_key] end
     else
-        assert(not self.contents[tableKey], `:createTable() conflict while creating a new table!`)
+        assert(not self.contents[table_key], `:createTable() conflict while creating a new table!`)
     end
 
     local pseudoCache = setmetatable({} :: self, cache)
 
-    pseudoCache.cacheName = tableKey
+    pseudoCache.cacheName = table_key
     pseudoCache.contents = {}
 
-    self.contents[tableKey] = pseudoCache
+    self.contents[table_key] = pseudoCache
     return pseudoCache
 end
 
---[[ cache:findTable(tableKey: any)
-   Finds a specified table, returning it as if it were another cache. ]]
-function cache:findTable(tableKey: any) : SawdustCache
+--[[
+   Finds a specified table, returning it as if it were another cache.
+   
+   @param table_key Identifier to look up for table
+   
+   @return SawdustCache
+]]
+function cache:findTable(table_key: any) : SawdustCache
     assert(self, `:findTable() called without a targeted cache!`)
-    assert(tableKey, `:findTable() missing argument 1! (tableKey)`)
-    assert(self.contents[tableKey], `:findTable() unable to find table w/ name "{tableKey}"!`)
+    assert(table_key, `:findTable() missing argument 1! (table_key)`)
+    assert(self.contents[table_key], `:findTable() unable to find table w/ name "{table_key}"!`)
     assert(type(self.contents)=='table', `:findTable() located value is a {type(self.contents)}, not a table!`)
 
-    return self.contents[tableKey] :: SawdustCache
+    return self.contents[table_key] :: SawdustCache
 end
 
---[[ cache:deleteTable(tableKey: any)
-    Finds & deletes the specified table. ]]
-function cache:deleteTable(tableKey: any)
+--[[
+    Finds & deletes the specified table.
+    
+    @param table_key Identifier to look up & delete
+]]
+function cache:deleteTable(table_key: any)
     assert(self, `:deleteTable() called without a targeted cache!`)
-    assert(tableKey, `:deleteTable() missing argument 1! (tableKey)`)
-    assert(self.contents[tableKey], `:deleteTable() unable to find table w/ name "{tableKey}"!`)
+    assert(table_key, `:deleteTable() missing argument 1! (table_key)`)
+    assert(self.contents[table_key], `:deleteTable() unable to find table w/ name "{table_key}"!`)
     assert(type(self.contents)=='table', `:deleteTable() located value is a {type(self.contents)}, not a table!`)
 
-    self.contents[tableKey] = nil
+    self.contents[table_key] = nil
 end
 
 return cache

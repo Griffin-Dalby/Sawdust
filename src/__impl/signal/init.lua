@@ -52,6 +52,14 @@ type self_signal<T> = {
 }
 export type SawdustSignal<T> = typeof(setmetatable({} :: self_signal<T>, signal))
 
+--[[
+    Creates a new Signal attributed to a Emitter. This is the instance
+    you can Fire & Connect to.
+
+    @param emitter Emitter to attribute to
+
+    @return SawdustSignal<any>
+]]
 function signal.new(emitter: SawdustEmitter) : SawdustSignal<any>
     local self = setmetatable({} :: self_signal<any>, signal)
 
@@ -72,6 +80,13 @@ function signal.new(emitter: SawdustEmitter) : SawdustSignal<any>
     return self
 end
 
+--[[
+    Creates a new Signal connection, which fires each time it gets called.
+
+    @param callback Function to run on event
+
+    @return SawdustSignalConnection
+]]
 function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection<any>
     local connection = connection.new(self, callback)
     self.connections[connection.uuid] = connection
@@ -79,6 +94,13 @@ function signal:connect(callback: (...any) -> nil) : SawdustSignalConnection<any
     return connection
 end
 
+--[[
+    Creates a new Signal connection, that disconnects after the first fire.
+
+    @param callback Function to run on event
+
+    @return SawdustSignalConnection
+]]
 function signal:once(callback: (...any) -> nil) : SawdustSignalConnection<any>
     local connection
     connection = self:connect(function(...)
@@ -89,6 +111,11 @@ function signal:once(callback: (...any) -> nil) : SawdustSignalConnection<any>
     return connection
 end
 
+--[[
+    Fires the signal with arguments, which runs all attached code.
+
+    @param tuple<any> Arguments
+]]
 function signal:fire(...)
     local args = {...}
     for connectionUUID: string, connection: (...any) -> nil in pairs(self.connections) do
@@ -103,6 +130,9 @@ function signal:fire(...)
     end
 end
 
+--[[
+    Discards this signal
+]]
 function signal:discard()
     self.__discard() end
 
@@ -115,8 +145,12 @@ type self_emitter = {
 }
 export type SawdustEmitter = typeof(setmetatable({} :: self_emitter, emitter))
 
---[[ emitter.new()
-    Constructor to create a new emitter. ]]
+--[[
+    Constructor to create a new emitter, the base class that Signal Events
+    derive from.
+
+    @return SawdustEmitter
+]]
 function emitter.new() : SawdustEmitter
     local self = setmetatable({} :: self_emitter, emitter)
 
@@ -125,15 +159,19 @@ function emitter.new() : SawdustEmitter
     return self
 end
 
---[[ emitter:newSignal()
-    Creates a new event, and adds it to the emitter. ]]
+--[[
+    Creates a new event, and adds it to the emitter.
+
+    @return SawdustSignal<any>
+]]
 function emitter:newSignal() : SawdustSignal<any>
     local newSignal = signal.new(self)
     return newSignal
 end
 
---[[ emitter:discard()
-    Destroys all signals and renders emitter unusable. ]]
+--[[
+    Destroys all signals and renders emitter unusable.    
+]]
 function emitter:discard()
     for _, signal: SawdustSignal<any> in pairs(self.signals) do
         signal:discard() end

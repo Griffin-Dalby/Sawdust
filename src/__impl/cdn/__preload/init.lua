@@ -37,7 +37,7 @@ function scanTable(table: {}, seen: {})
             for _, assetId: string in pairs(foundAssetIds) do
                 table.insert(assetIdList, assetId)  end
         elseif typeof(v) == 'string' then
-            if v:match('^rbxassetid://%d+') or v:match('^%d+$') or v:match('asset%/?%?id=%d+') then
+            if v:match('^rbxassetid://%d+') or v:match('^%d+$') or v:match('asset/?%?id=%d+') then
                 table.insert(assetIdList, v)
             end
         end
@@ -58,8 +58,11 @@ type self = {
 }
 export type SawdustCDNPreloader = typeof(setmetatable({} :: self, preload))
 
---[[ preload.new()
-    Constructor function for the preloader instance. ]]
+--[[
+    Constructor function for the preloader instance. 
+
+    @param provider CDN Provider Folder
+]]
 function preload.new(provider: Folder) : SawdustCDNPreloader
     local self = setmetatable({} :: self, preload)
 
@@ -69,8 +72,11 @@ function preload.new(provider: Folder) : SawdustCDNPreloader
     return self
 end
 
---[[ preload:preload(tag: string)
-    Locates all assets that are tagged within the tagTable, and preloads them. ]]
+--[[
+    Locates all assets that are tagged within the tagTable, and preloads them.
+
+    @param tag Instance tag to preload
+]]
 function preload:preload(tag: string)
     local debug = __settings.global.debug and __settings.content.debug.preload
 
@@ -132,10 +138,14 @@ function preload:preload(tag: string)
     end
 end
 
---[[ preload:addTag(tag: string, assetIds: ...string)
-    Adds all assetIds specified as a tuple after *tag*, to the specified tag.
-    This makes it so when you call :preload(tag: string), those assetIds will be included.
-    You could also call it like :addTag('tag', '*') to preload everything in a provider. ]]
+--[[
+    Adds all assetIds specified as a tuple after *tag*, to the specified tag.<br>
+    This makes it so when you call :preload(tag: string), those assetIds will be included.<br>
+    You could also call it like :addTag('tag', '*') to preload everything in a provider.
+
+    @param tag Tag to add to instances
+    @param tuple<string>|'*' Instances to tag
+]]
 function preload:addTag(tag: string, ...)
     local tagTable = self.tags[tag]
     if not tagTable then
@@ -156,8 +166,11 @@ function preload:addTag(tag: string, ...)
     end
 end
 
---[[ preload:clearTag(tag: string)
-    Clears all assetIds within the specified tag, and deletes the tagTable. ]]
+--[[
+    Clears all assetIds within the specified tag, and deletes the tagTable.
+  
+    @param tag Tag to clear
+]]
 function preload:clearTag(tag: string)
     local tagTable = self.tags[tag]
     if not tagTable then return end
