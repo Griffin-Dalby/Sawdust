@@ -36,7 +36,7 @@ export type methods_channel = {
     get: (channel_name: string, settings: ChannelSettings?) -> NetworkingChannel,
 }
 
-export type NetworkingChannel = typeof(setmetatable({} :: self_channel, channel))
+export type NetworkingChannel = typeof(setmetatable({} :: self_channel, {} :: methods_channel))
 
 --> Call
 local call = {}
@@ -137,7 +137,7 @@ export type methods_connection = {
     run: (raw_data: {}) -> nil,
     disconnect: () -> nil,
 }
-export type NetworkingConnection = typeof(setmetatable({} :: self_connection, connection))
+export type NetworkingConnection = typeof(setmetatable({} :: self_connection, {} :: methods_connection))
 
 -- req & res of Connections.
 export type ConnectionRequest = {
