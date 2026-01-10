@@ -24,12 +24,15 @@ type self_methods = {
 
     resolve: (...any) -> SawdustPromise,
     reject: (...any) -> SawdustPromise,
-    race: (promises: {SawdustPromise}) -> nil,
-    settleAll: (promises: {SawdustPromise}) -> nil,
+    race: (promises: {SawdustPromise}) -> SawdustPromise,
+    settleAll: (promises: {SawdustPromise}) -> SawdustPromise,
 
-    andThen: (callback: anyFunction) -> SawdustPromise,
-    catch: (callback: anyFunction) -> SawdustPromise,
-    finally: (callback: () -> any?) -> SawdustPromise
+    andThen: (self: SawdustPromise, callback: anyFunction) -> SawdustPromise,
+    catch: (self: SawdustPromise, callback: anyFunction) -> SawdustPromise,
+    finally: (self: SawdustPromise, callback: () -> any?) -> SawdustPromise,
+    wait: (self: SawdustPromise, timeout_time: number?) -> (boolean, ...any),
+    
+    _settle: (self: SawdustPromise, state: "pending"|"fulfilled"|"rejected", res: {any}) -> nil,
 }
 
 local promise = {} :: self_methods
