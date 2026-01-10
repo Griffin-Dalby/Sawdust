@@ -85,7 +85,8 @@ function wrapper:clean()
         print(formatError('clean', `Cleaned up {itype=='Instance' and `"{self.wrappedI.Name}"` or 'wrapped instance.'} (Type: {itype})`)) end
 
     task(self.wrappedI)
-    table.clear(self.tags)
+    if self.tags then
+        table.clear(self.tags) end
     table.clear(self)
 end
 
