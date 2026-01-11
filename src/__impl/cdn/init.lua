@@ -27,10 +27,10 @@ type self_methods = {
     __index: self_methods,
     getProvider: (provider_name: string) -> SawdustCDNProvider,
 
-    getAsset: (fetch_id: string) -> SawdustCDNReturnTemplate | Instance,
-    getAllAssets: () -> {[string]: SawdustCDNReturnTemplate | Instance},
+    getAsset: (self: SawdustCDNProvider, fetch_id: string) -> SawdustCDNReturnTemplate | Instance,
+    getAllAssets: (self: SawdustCDNProvider) -> {[string]: SawdustCDNReturnTemplate | Instance},
 
-    hasAsset: (asset_id: string) -> boolean
+    hasAsset: (self: SawdustCDNProvider, asset_id: string) -> boolean
 }
 
 local provider = {} :: self_methods
