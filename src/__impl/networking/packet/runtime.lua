@@ -1,3 +1,4 @@
+--!strict
 --[[
 
     Networking Initalizer
@@ -14,11 +15,13 @@
 local runService = game:GetService('RunService')
 
 --]] Modules
+local net_root = script.Parent.Parent
+
 --> Local
-local types = require(script.Parent.types)
+local types = require(net_root.types)
 
 --> Sawdust
-local __impl = script.Parent.Parent
+local __impl = net_root.Parent
 
 local __internal = __impl.Parent.__internal
 local __settings = require(__internal.__settings)
@@ -47,12 +50,11 @@ return function ()
                 return end
 
             local eventTable = connectionCache:createTable(event)
-            local function protocol(player: Player, data: {}) --> Actual function for connections.
+            local function protocol(player: Player, data: types.raw_data & {[number]: any}) --> Actual function for connections.
                 --> Verify is sawdust event
                 if typeof(player) == 'Instance' and player:IsA('Player') then
                     --> Server, Player is first argument; Save to .caller
                     data.caller = player
-                    player = nil
                 else
                     --> Client, Data is first argument (player)
                     data = player
@@ -90,9 +92,9 @@ return function ()
 
             eventTable:setValue(
                 '__protocol',
-                isServer
-                    and event.OnServerEvent:Connect(protocol)
-                    or  event.OnClientEvent:Connect(protocol) )
+                (isServer
+                    and (event :: RemoteEvent).OnServerEvent:Connect(protocol)
+                    or  (event :: RemoteEvent).OnClientEvent:Connect(protocol)) :: RBXScriptConnection )
         end
     end
 end

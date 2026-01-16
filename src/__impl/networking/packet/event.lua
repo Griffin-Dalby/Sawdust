@@ -19,14 +19,20 @@ local runService = game:GetService('RunService')
 local isServer   = runService:IsServer()
 
 --]] Modules
+local net_root = script.Parent.Parent
+local net_handle = net_root.handle
+local net_packet = net_root.packet
+
 --> Networking logic
-local middleware = require(script.Parent.middleware)
-local connection = require(script.Parent.connection)
-local router = require(script.Parent.router)
-local types = require(script.Parent.types)
+local middleware = require(net_handle.middleware)
+local router = require(net_handle.router)
+
+local connection = require(net_packet.connection)
+
+local types = require(net_root.types)
 
 --> Sawdust implementations
-local __impl = script.Parent.Parent
+local __impl = net_root.Parent
 
 local promise = require(__impl.promise)
 local caching = require(__impl.cache)

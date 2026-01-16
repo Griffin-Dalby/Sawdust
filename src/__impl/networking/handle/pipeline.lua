@@ -12,11 +12,13 @@
 --]]
     
 --]] Modules
+local net_root = script.Parent.Parent
+
 --> Networking logic
-local types = require(script.Parent.types)
+local types = require(net_root.types)
 
 --> Sawdust implementations
-local __impl = script.Parent.Parent
+local __impl = net_root.Parent
 
 --> Sawdust
 local sawdust = __impl.Parent

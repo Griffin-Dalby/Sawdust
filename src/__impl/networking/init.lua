@@ -24,7 +24,7 @@
 --> Networking logic
 local types = require(script.types)
 
-local channel = require(script.channel)
+local channel = require(script.packet.channel)
 
 --]] Constants
 --]] Variables

@@ -79,7 +79,7 @@ export type methods_call = {
     fire: (self: NetworkingCall) -> NetworkingPipeline,
     invoke: (self: NetworkingCall) -> promise.SawdustPromise,
 
-    setReturnId: (self: NetworkingCall, return_id: string) -> NetworkingCall,
+    setReturnId: (self: NetworkingCall, return_id: string?) -> NetworkingCall,
 }
 export type NetworkingCall = typeof(setmetatable({} :: self_call, {} :: methods_call))
 
@@ -111,31 +111,33 @@ export type NetworkingEvent = typeof(setmetatable({} :: self_event, {} :: method
 local connection = {}
 connection.__index = connection
 
+export type raw_data = {
+    caller: Player?,
+    intent: string,
+    data: { [any]: any },
+}
+
 export type self_connection = {
     --> Properties
     cache: cache.SawdustCache,
     connectionId: string,
-    callback: (player: Player, ...any) -> nil,
+    callback: (req: ConnectionRequest, res: ConnectionResult) -> nil,
 
     --> Internal Methods
     removeFromEvent: () -> nil,
-    returnCall: (data: {}) -> nil,
-
-    --> Methods
-    run: (raw_data: {}) -> nil,
-    disconnect: () -> nil,
+    returnCall: (body: raw_data & { returnId: string? }, caller: Player?) -> nil,
 }
 export type methods_connection = {
     __index: methods_connection,
     new: (callback: (req: ConnectionRequest, res: ConnectionResult) -> nil, event: NetworkingEvent) -> NetworkingConnection,
 
-    --> Internal Methods
-    removeFromEvent: () -> nil,
-    returnCall: (data: {}) -> nil,
-
     --> Methods
-    run: (raw_data: {}) -> nil,
-    disconnect: () -> nil,
+    Run: (self: NetworkingConnection, raw_data: {}) -> nil,
+    Disconnect: (self: NetworkingConnection) -> nil,
+
+    --> Deprecated Methods
+    run: (self: NetworkingConnection, raw_data: {}) -> nil,
+    disconnect: (self: NetworkingConnection) -> nil,
 }
 export type NetworkingConnection = typeof(setmetatable({} :: self_connection, {} :: methods_connection))
 
@@ -150,8 +152,8 @@ export type ConnectionResult  = {
     intent: (intent: string) -> nil,
     data: (...any) -> nil,
     append: (key: string, value: any) -> nil,
-    send: () -> nil,
-    reject: (message: string) -> nil,
+    send: (...any?) -> nil,
+    reject: (...any?) -> nil,
     assert: (condition: boolean, message: string) -> boolean,
 }
 
@@ -163,22 +165,38 @@ export type __registered_func__ = {
 }
 
 export type self_middleware = {
+    __locked_phases: {string},
+
     --> Registry
     __registry: {
+        __internal: {
+            before: {__registered_func__},
+            after:  {__registered_func__}
+        },
+
         before: {__registered_func__},
         after:  {__registered_func__},
-    },
+    }
 }
 export type methods_middleware = {
     __index: methods_middleware,
     new: (locked_phases: {}?) -> NetworkingMiddleware,
 
+    --> Methods
+    Use: (self: NetworkingMiddleware,
+        phase: string, order: number,
+        callback: (NetworkingPipeline) -> NetworkingPipeline,
+        args: {internal: boolean, protected: boolean}) -> nil,
+    Run: (self: NetworkingMiddleware,
+        phase: string, args: NetworkingCall) -> NetworkingPipeline,
+
+    --> Deprecated
     use: (self: NetworkingMiddleware,
         phase: string, order: number,
         callback: (NetworkingPipeline) -> NetworkingPipeline,
         args: {internal: boolean, protected: boolean}) -> nil,
     run: (self: NetworkingMiddleware,
-        phase: string, args: NetworkingCall) -> NetworkingPipeline
+        phase: string, args: NetworkingCall) -> NetworkingPipeline,
 }
 export type NetworkingMiddleware = typeof(setmetatable({} :: self_middleware, {} :: methods_middleware))
 

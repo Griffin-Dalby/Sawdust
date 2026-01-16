@@ -1,3 +1,4 @@
+--!strict
 --[[
 
     Networking Middleware
@@ -9,12 +10,14 @@
 --]]
     
 --]] Modules
+local net_root = script.Parent.Parent
+
 --> Networking logic
-local types = require(script.Parent.types)
+local types = require(net_root.types)
 local pipeline = require(script.Parent.pipeline)
 
 --> Sawdust implementations
-local __impl = script.Parent.Parent
+local __impl = net_root.Parent
 
 --> Sawdust
 local sawdust = __impl.Parent
@@ -35,13 +38,13 @@ middleware.__index = middleware
 
     @return NetworkingMiddleware
 ]]
-function middleware.new(locked_phases: {}?) : types.NetworkingMiddleware?
+function middleware.new(locked_phases: {string}?) : types.NetworkingMiddleware?
     local self = setmetatable({} :: types.self_middleware, middleware)
 
     self.__locked_phases = locked_phases or {}
     for i, v in pairs(self.__locked_phases) do
         if not table.find({'before', 'after'}, v) then
-            error(`invalid phase lock "{v}"!`); return end
+            error(`invalid phase lock "{v}"!`); return nil end
     end
 
     --> Generate Registry
@@ -58,15 +61,22 @@ function middleware.new(locked_phases: {}?) : types.NetworkingMiddleware?
     return self
 end
 
---[[ middleware:use()
-    Registers *callback to be used at the specified *order in the
-    *phase. If the order's already in use, it'll be replaced by this
-    one unless it's protected. ]]
-function middleware:use(phase: string, order: number, callback: (types.NetworkingPipeline) -> types.NetworkingPipeline, args: {internal: boolean, protected: boolean})
+--[[
+    Registers a callback to be used in a specific order during a specific
+    phase.<br>
+
+    If the order's already in use, it'll be replaced by this
+    one unless it's protected.
+
+    @param phase Middleware's lifecycle; "before", or "after.
+    @param order Order in execution chain
+    @param callback Function to call during execution
+]]
+function middleware:Use(phase: string, order: number, callback: (types.NetworkingPipeline) -> types.NetworkingPipeline, args: {internal: boolean, protected: boolean})
     --> Check phase-lock
     if table.find(self.__locked_phases, phase) then
         error(`attempt to use a locked phase "{phase}"!`)
-        return end
+        return nil end
 
     --> Find registrar
     args = args or {
@@ -92,31 +102,43 @@ function middleware:use(phase: string, order: number, callback: (types.Networkin
         if not registered.protected then
             registrar[phase][order] = registeredFunc
         else
-            warn(`[{script.Name}] Attempt to overwrite protected entry!`)    
+            error(`[{script.Name}] Attempt to overwrite protected entry!`)    
         end
     else
         table.insert(registrar[phase], registeredFunc)
     end
     
-    table.sort(registrar[phase], function(a, b)
+    table.sort(registrar[phase], function(a: {order: number}, b)
         return a.order < b.order
     end)
+
+    return nil
 end
 
---[[ Middleware:run(phase: string)
+--[[
     Only to be called internally for the event lifecycle.
-    Please don't call this unless you have a good reason! ]]
-function middleware:run(phase: string, args: types.NetworkingCall): types.NetworkingPipeline
-    assert(self.__registry[phase], `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
+    Please don't call this unless you have a good reason! 
+    
+    @param phase Either 'before' or 'after'
+    @param args Call Arguments
+]]
+function middleware:Run(phase: 'before'|'after', args: types.NetworkingCall): types.NetworkingPipeline
+    local registry = self.__registry :: {[string]: types.__registered_func__}
+    local run_phase = registry[phase] :: {types.__registered_func__}
+    
+    assert(run_phase, `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
 
-    local runphase = self.__registry[phase]
-    local runpipeline = pipeline.new(phase, args)
+    local run_pipeline = pipeline.new(phase, args)
 
-    for i, data: types.__registered_func__ in ipairs(runphase) do
-        data.callback(runpipeline)
+    for i, data in ipairs(run_phase) do
+        data.callback(run_pipeline)
     end
 
-    return runpipeline
+    return run_pipeline
 end
+
+@deprecated
+function middleware:run(phase: 'before'|'after', args: types.NetworkingCall): types.NetworkingPipeline
+    return self:Run(phase, args) end
 
 return middleware

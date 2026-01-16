@@ -1,3 +1,4 @@
+--!strict
 --[[
 
     Networking Channel
@@ -11,12 +12,14 @@
 --]]
 
 --]] Modules
+local net_root = script.Parent.Parent
+
 --> Networking logic
-local types = require(script.Parent.types)
-local event = require(script.Parent.event)
+local types = require(net_root.types)
+local event = require(net_root.packet.event)
 
 --> Sawdust implementations
-local __impl = script.Parent.Parent
+local __impl = net_root.Parent
 
 local caching = require(__impl.cache)
 
@@ -47,20 +50,25 @@ function channel.get(channel_name: string, settings: types.ChannelSettings?) : t
     --> Fetch channel folder
     local fetch_folder = __settings.networking.fetchFolder
 
-    local channel_folder = fetch_folder:FindFirstChild(channel_name)
+    local channel_folder = fetch_folder:FindFirstChild(channel_name) :: Folder?
     assert(channel_folder, `Failed to find channel w/ name "{channel_name}!"`)
 
     --> Construct self & find events
     local self = setmetatable({} :: types.self_channel, channel)
 
     self.__channel = channel_folder
-    for _, ievent: RemoteEvent in pairs(channel_folder:GetChildren()) do
-        self[ievent.Name] = event.new(self, ievent)
+    for _, i_event in pairs(channel_folder:GetChildren()) do
+        if not i_event:IsA("RemoteEvent")
+        or not i_event:IsA("UnreliableRemoteEvent") then
+            continue end
+
+        --> Register Event
+        self[i_event.Name] = event.new(self, i_event)
     end
 
     --> Finalize
     if not channel_cached
-        or settings.replaceFresh then
+        or (settings and settings.replaceFresh) then
         
         --> Update cache
         channel_cache:setValue(channel_name, self)
