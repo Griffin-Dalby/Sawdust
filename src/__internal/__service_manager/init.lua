@@ -11,6 +11,7 @@
 
 --]]
 
+--]] Modules
 local promise = require(script.Parent.Parent.__impl.promise)
 
 --]] Service Manager
@@ -24,8 +25,12 @@ type self = {
 }
 export type SawdustSVCManager = typeof(setmetatable({} :: self, svcManager))
 
---[[ svcManager.new()
-    Creates a new Service Manager, in which services can be gradually registered, and resolved.]]
+--[[
+    Creates a new Service Manager, in which services can be gradually
+    registered (initalized), and resolved. (started)
+
+    @return SawdustSVCManager
+]]
 function svcManager.new(): SawdustSVCManager
     local self = setmetatable({} :: self, svcManager)
 
@@ -36,17 +41,29 @@ function svcManager.new(): SawdustSVCManager
     return self
 end
 
---[[ svcManager:register(service: SawdustService)
-    Registers a service to the Service Manager. ]]
-function svcManager:register(service)
-    -- print(`REGISTERED SVC: {service.id}`)
+--[[
+    Registers a service to the Service Manager.<br>
+    Services are created through the **builder** interface.
+
+    @param service Builder service constructor
+]]
+function svcManager:Register(service)
     self._registry[service.id] = service
 end
 
---[[ svcManager:_resolve(id: string)
-    Resolves a specific service, and invokes the "init" runtime. ]]
+@deprecated
+function svcManager:register(service)
+    return self:Register(service) end
+
+--[[
+    Resolves a specific service, and invokes the "init" runtime in the
+    service's lifecycle.
+    
+    @param id ID of the service to resolve
+
+    @return SawdustPromise
+]]
 function svcManager:_resolve(id: string) : promise.SawdustPromise
-    -- print(`RESOLVING SVC: {id}`)
     return promise.new(function(resolve, reject)
         if self._instances[id] then
             resolve(self._instances[id])
@@ -84,8 +101,14 @@ function svcManager:_resolve(id: string) : promise.SawdustPromise
     end)
 end
 
---[[ svcManager:_start(id: string)
-    Starts a specific resolved service. ]]
+--[[
+    Starts a specific resolved service, invoking the "start" runtime in
+    the service's lifecycle.
+    
+    @param id ID of the service to start
+
+    @return SawdustPromise
+]]
 function svcManager:_start(id: string) : promise.SawdustPromise
     return promise.new(function(resolve, reject)
         local instance = self._instances[id]
@@ -106,41 +129,62 @@ function svcManager:_start(id: string) : promise.SawdustPromise
     end)
 end
 
---[[ svcManager:resolveAll()
-    Resolves all registered, unresolved services. ]]
-function svcManager:resolveAll(timeout: number?)
+--[[
+    Resolves all registered, but unresolved (initalized) services.
+    
+    @param timeout? Maximum allowed time (in seconds) until timeout rejection gets triggered. Default is 3.
+]]
+function svcManager:ResolveAll(timeout: number?)
     timeout=timeout or 3
 
     for name in pairs(self._registry) do
         local s, e = self:_resolve(name):wait(timeout)
         if not s then
-            warn(debug.traceback(`Issue occured while resolving service "{name}"!\n{e}`, 3))
+            error(`Issue occured while resolving service "{name}"!\n{e}`)
         end
     end
 end
 
---[[ svcManager:startAll()
-    Starts all resolved services. ]]
-function svcManager:startAll(timeout: number?)
-    timeout=timeout or 3
+@deprecated
+function svcManager:resolveAll(timeout: number?)
+    return self:ResolveAll(timeout) end
+
+--[[
+    Starts all registered, and resolved (initalized) services. 
+    
+    @param timeout? Maximum allowed time (in seconds) until timeout rejection gets triggered. Default is 5
+]]
+function svcManager:StartAll(timeout: number?)
+    timeout=timeout or 5
 
     for name in pairs(self._registry) do
         local s, e = self:_start(name):wait(timeout)
         if not s then
-            warn(debug.traceback(`Issue occured while starting service "{name}"!\n{e}`, 3))
+            error(`Issue occured while starting service "{name}"!\n{e}`)
         end
     end
 end
 
---[[ svcManager:getService(name: string)
-    Gets a specific instantiated service. ]]
-function svcManager:getService(name: string)
-    local instance = self._instances[name]
+@deprecated
+function svcManager:startAll(timeout: number?)
+    return self:StartAll(timeout) end
+
+--[[
+    Gets a specific registered, and started service.
+
+    @param id ID of the service to fetch.
+]]
+function svcManager:GetService(id: string)
+    local instance = self._instances[id]
     if not instance then
-        warn(`[{script.Name}] Failed to find service w/ name "{name}"!`)
+        warn(`[{script.Name}] Failed to find service w/ name "{id}"!`)
         return end
 
     return instance
 end
+
+@deprecated
+function svcManager:getService(id: string)
+    return self:GetService(id) end
 
 return svcManager
