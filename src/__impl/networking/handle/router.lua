@@ -1,3 +1,4 @@
+--!strict
 --[[
 
     Networking Router
@@ -34,8 +35,6 @@ local __settings = require(__internal.__settings)
 local router = {} :: types.methods_router
 router.__index = router
 
---[[ router.new()
-    This will return a new router object. ]]
 function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
     local self = setmetatable({} :: types.self_router, router)
 
@@ -44,17 +43,18 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
     self.__routes = {}
     self.__listener = event:handle(function(req, res)
         local intent = req.intent
-        if (not self.__routes[intent]) and (not self.__on_any) then return end
+        if (not self.__routes[intent]) and (not self.__on_any) then return nil end
 
         local success, return_pipeline: types.NetworkingPipeline = pcall(
             self.__middleware.run,
             self.__middleware, 'after',
-            {_call = {intent = intent, data = req.data}})
+            {_call = {intent = intent, data = req.data}} :: types.NetworkingCall
+        )
             
         if not success then
             error(`failed to run middleware for router!{if (return_pipeline and type(return_pipeline)=='string') then
                 `\nProvided error message: {return_pipeline}` else " No error was provided."}`)
-            return
+            return nil
         end
 
         req.data = return_pipeline:getData()
@@ -70,27 +70,28 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         elseif self.__on_any then
             self.__on_any(req, res)
         end
+
+        return nil
     end)
 
     return self
 end
 
---[[ router:useMiddleware(order: number, callback: (pipeline) -> nil)
-    This will add a middleware that will run each time this router
-    is activated.
-    
-    "activated" refers to when this event is called, and one of the
-    routes are intended inside of the object. ]]
-function router:useMiddleware(order: number, callback: (pipeline: types.NetworkingPipeline) -> nil) : types.NetworkingRouter
+
+
+function router:UseMiddleware(order: number, callback: (pipeline: types.NetworkingPipeline) -> types.NetworkingPipeline) : types.NetworkingRouter
     self.__middleware:use('after', order, callback,
-        { protected = false })
+        { internal = false, protected = false })
     return self
 end
 
---[[ router:onAny(callback: (req, res) -> nil)
-    Chainable function that will route any call to the remote despite
-    intent to the provided callback. ]]
-function router:onAny(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
+@deprecated
+function router:useMiddleware(order: number, callback: (pipeline: types.NetworkingPipeline) -> nil) : types.NetworkingRouter
+    return self:UseMiddleware(order, callback) end
+
+
+
+function router:OnAny(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
     assert(self, `Attempt to call :onAny() without constructing router!`)
 
     assert(callback, `:onAny() argument 1 missing! (callback: (req, res) -> nil)`)
@@ -99,13 +100,14 @@ function router:onAny(callback: (req: types.ConnectionRequest, res: types.Connec
     return self
 end
 
---[[ router:on(intent: string, callback: (req, res) -> nil)
-    Chainable function that will add a new "route" to this router object.
-    
-    Whenever a new call is intercepted, it will be checked against the
-    internal route list, and if a match is found it'll pass the req and res
-    objects through. ]]
-function router:on(intent: string, callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
+@deprecated
+function router:onAny(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
+    return self:OnAny(callback) end
+
+
+
+
+function router:On(intent: string, callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
     assert(self, `Attempt to call :on() without constructing router!`)
 
     assert(intent, `:on() argument 1 missing! (intent: string)`)
@@ -116,15 +118,25 @@ function router:on(intent: string, callback: (req: types.ConnectionRequest, res:
     return self
 end
 
---[[ router:discard()
-    This will properly clean up the internal listener connection,
-    and ]]
-function router:discard()
+@deprecated
+function router:on(intent: string, callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> nil) : types.NetworkingRouter
+    return self:On(intent, callback) end
+
+
+    
+
+function router:Discard()
     assert(self, `Attempt to call :destroy() without constructing router!`)
 
     self.__listener:disconnect()
     table.clear(self.__routes)
     table.clear(self)
+
+    return nil
 end
+
+@deprecated
+function router:discard()
+    return self:discard() end
 
 return router

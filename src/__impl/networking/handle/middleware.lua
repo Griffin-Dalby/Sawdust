@@ -6,6 +6,9 @@
     Griffin Dalby
     2025.07.06
 
+    The Middleware system allows developers to inject code to alter
+    downstream data after recieving an event, before it reaches the
+    final handling point.
 
 --]]
     

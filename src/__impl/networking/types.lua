@@ -18,7 +18,11 @@ local __impl = script.Parent.Parent
 local promise = require(__impl.promise)
 local cache = require(__impl.cache)
 
---> Channels
+--=========--
+-- CHANNEL --
+--=========--
+--#region
+
 local channel = {}
 channel.__index = channel
 
@@ -38,7 +42,13 @@ export type methods_channel = {
 
 export type NetworkingChannel = typeof(setmetatable({} :: self_channel, {} :: methods_channel))
 
---> Call
+--#endregion
+
+--======--
+-- CALL --
+--======--
+--#region
+
 local call = {}
 call.__index = call
 
@@ -58,7 +68,7 @@ export type self_call = {
 
     --> Call Data
     _call: {
-        data: {},
+        data: {any},
         intent: string,
         timeout: number
     },
@@ -83,7 +93,12 @@ export type methods_call = {
 }
 export type NetworkingCall = typeof(setmetatable({} :: self_call, {} :: methods_call))
 
---> Events
+--#endregion
+
+--=======--
+-- EVENT --
+--=======--
+--#region
 local event = {}
 event.__index = event
 
@@ -97,17 +112,60 @@ export type self_event = {
 }  
 
 export type methods_event = {
+    --> Constructor
     __index: methods_event,
     new: (channel: NetworkingChannel, event: RemoteEvent) -> NetworkingEvent,
 
+    --> Methods
+
+    --[[
+        Opens a new "NetworkingCall", which allows you to compose a
+        event request & send it.
+
+        @return NetworkingCall
+    ]]
+    With: (self: NetworkingEvent) -> NetworkingCall,
+
+    --[[
+        Returns a NetworkingConnection that routes every call that
+        arrives at the event, no matter the intent.
+
+        @return NetworkingConnection
+    ]]
+    Handle: (self: NetworkingEvent, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingConnection,
+    
+    --[[
+        Returns a NetworkingRouter which allows the developer to
+        selectively respond to certain intents that arrive at the
+        event.
+
+        @return NetworkingRouter
+    ]]
+    Route: (self: NetworkingEvent) -> NetworkingRouter,
+
+    --[[
+        Injects a new Middleware object into a specific Phase & Order.
+
+        @param phase Either "Before", or "After" the event gets handled.
+        @param order Execution order of this Middleware.
+        @param callback Callback to run when middleware gets executed.
+    ]]
+    UseMiddleware: (self: NetworkingEvent, phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> NetworkingPipeline, msettings: {protected: boolean}) -> nil,
+
+    --> Deprecated Methods
     with: (self: NetworkingEvent) -> NetworkingCall,
-    handle: (self: NetworkingEvent, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> nil,
+    handle: (self: NetworkingEvent, callback: (req: ConnectionRequest, res: ConnectionResult) -> nil) -> NetworkingConnection,
     route: (self: NetworkingEvent) -> NetworkingRouter,
-    useMiddleware: (self: NetworkingEvent, phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> nil, msettings: {protected: boolean}) -> nil,
+    useMiddleware: (self: NetworkingEvent, phase: string, order: number, callback: (pipeline: NetworkingPipeline) -> NetworkingPipeline, msettings: {protected: boolean}) -> nil,
 }
 export type NetworkingEvent = typeof(setmetatable({} :: self_event, {} :: methods_event))
 
---> Connection 
+--#endregion
+
+--============--
+-- CONNECTION --
+--============--
+--#region
 local connection = {}
 connection.__index = connection
 
@@ -157,7 +215,12 @@ export type ConnectionResult  = {
     assert: (condition: boolean, message: string) -> boolean,
 }
 
---> Middleware
+--#endregion
+
+--============--
+-- MIDDLEWARE --
+--============--
+--#region
 export type __registered_func__ = {
     order: number,
     callback: (NetworkingPipeline) -> NetworkingPipeline,
@@ -200,7 +263,13 @@ export type methods_middleware = {
 }
 export type NetworkingMiddleware = typeof(setmetatable({} :: self_middleware, {} :: methods_middleware))
 
---> Pipeline
+--#endregion
+
+--==========--
+-- PIPELINE --
+--==========--
+--#region
+
 local pipeline = {}
 pipeline.__index = pipeline
 
@@ -221,6 +290,7 @@ export type methods_pipeline = {
     setIntent: (self: NetworkingPipeline, intent: string) -> boolean,
     setData:   (self: NetworkingPipeline, args: {any}, ...any) -> boolean,
     setHalted: (self: NetworkingPipeline, halted: boolean) -> boolean,
+    setError:  (self: NetworkingPipeline, message: string) -> boolean,
 
     --> Upstream Accessors
     getIntent: (self: NetworkingPipeline) -> string,
@@ -231,24 +301,91 @@ export type methods_pipeline = {
 }
 export type NetworkingPipeline = typeof(setmetatable({} :: self_pipeline, {} :: methods_pipeline))
 
---> Intent Router
+--#endregion
+
+--===============--
+-- INTENT ROUTER --
+--===============--
+--#region
+
 local router = {}
 router.__index = router
 
 export type self_router = {
     --> Properties
     __routes: {[string]: (req: ConnectionRequest, res: ConnectionResult) -> any?},
-    __listener: NetworkingConnection
+    __listener: NetworkingConnection,
+    __middleware: NetworkingMiddleware,
+
+    __on_any: ((req: ConnectionRequest, res: ConnectionResult) -> any?)?,
 }
 export type methods_router = {
     __index: methods_router,
     new: (event: NetworkingEvent) -> NetworkingRouter,
 
+    --> Methods
+
+    --[[
+        Routes a specific intent to a callback function, with a req and res object.
+        
+        @param intent Intent to listen for
+        @param callback Callback to run when intent gets called
+
+        @return NetworkingRouter
+    ]]
+    On: (self: NetworkingRouter, intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
+    
+    --[[
+        Routes any intent into this callback.
+
+        @param callback Callback to run when evnt gets called
+
+        @return NetworkingRouter
+    ]]
+    OnAny: (self: NetworkingRouter, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
+    
+    --[[
+        Injects middleware into the router, which get injected into every
+        route in the router. Always into the "after" phase.
+
+        @param order Execution order of this middleware.
+        @param callback Callback to run on middleware execution.
+
+        @return NetworkingRouter
+    ]]
+    UseMiddleware: (self: NetworkingRouter, order: number, callback: (pipeline: NetworkingPipeline) -> any?) -> NetworkingRouter,
+    
+    --[[
+        Discards this route and cleans up the NetworkConnection.
+    ]]
+    Discard: (self: NetworkingRouter) -> nil,
+
+    --> Deprecated
     on: (self: NetworkingRouter, intent: string, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
     onAny: (self: NetworkingRouter, callback: (req: ConnectionRequest, res: ConnectionResult) -> any?) -> NetworkingRouter,
     useMiddleware: (self: NetworkingRouter, order: number, callback: (pipeline: NetworkingPipeline) -> any?) -> NetworkingRouter,
     discard: (self: NetworkingRouter) -> nil,
 }
 export type NetworkingRouter = typeof(setmetatable({} :: self_router, {} :: methods_router))
+
+--#endregion
+
+--==============--
+-- RATE LIMITER --
+--==============--
+--#region
+
+export type self_limiter = {
+    --> Properties
+
+}
+export type methods_limiter = {
+    --> Constructor
+    __index: methods_limiter,
+}
+
+export type NetworkingLimiter = typeof(setmetatable({} :: self_limiter, {} :: methods_limiter))
+
+--#endregion
 
 return types

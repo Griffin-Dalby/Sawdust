@@ -498,10 +498,15 @@ function Event.new(channel: types.NetworkingChannel, _event: RemoteEvent) : type
     return self
 end
 
-function Event:with() : types.NetworkingCall
+function Event:With() : types.NetworkingCall
     return EventCall.new(self) end
 
-function Event:handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any) : types.NetworkingConnection
+@deprecated
+function Event:with() : types.NetworkingCall
+    return self:With() end
+
+
+function Event:Handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any) : types.NetworkingConnection
     local new_connection = connection.new(callback, self)
 
     self.__connections[new_connection.connectionId] = new_connection
@@ -510,12 +515,22 @@ function Event:handle(callback: (req: types.ConnectionRequest, res: types.Connec
     return new_connection
 end
 
-function Event:route() : types.NetworkingRouter
+@deprecated
+function Event:handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any) : types.NetworkingConnection
+    return self:Handle(callback) end
+
+
+function Event:Route() : types.NetworkingRouter
     local newRoute = router.new(self)
     return newRoute
 end
 
-function Event:useMiddleware(phase: string, order: number, callback: (pipeline: types.NetworkingPipeline) -> types.NetworkingPipeline, msettings: {protected: boolean})
+@deprecated
+function Event:route() : types.NetworkingRouter
+    return self:Route() end
+
+
+function Event:UseMiddleware(phase: string, order: number, callback: (pipeline: types.NetworkingPipeline) -> types.NetworkingPipeline, msettings: {protected: boolean})
 	msettings = msettings or { protected = false }
 	
 	self.__middleware:use(phase, order, callback, {
@@ -525,5 +540,9 @@ function Event:useMiddleware(phase: string, order: number, callback: (pipeline: 
 
     return nil
 end
+
+@deprecated
+function Event:useMiddleware(phase: string, order: number, callback: (pipeline: types.NetworkingPipeline) -> types.NetworkingPipeline, msettings: {protected: boolean})
+    return self:UseMiddleware(phase, order, callback, msettings) end
 
 return Event
