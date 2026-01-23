@@ -18,11 +18,11 @@ local https = game:GetService('HttpService')
 local connection = {}
 connection.__index = connection
 
-type self_connection<T> = {
+type self_connection<any...> = {
     uuid: string,
-    callback: (T) -> nil,
+    callback: (any...) -> nil,
 }
-export type SawdustSignalConnection<T> = typeof(setmetatable({} :: self_connection<T>, connection))
+export type SawdustSignalConnection<any...> = typeof(setmetatable({} :: self_connection<any...>, connection))
 
 function connection.new(signal: SawdustSignal<any>, callback: (...any) -> nil)
     local self = setmetatable({} :: self_connection<any>, connection)
@@ -46,12 +46,11 @@ function connection:disconnect()
 local signal = {}
 signal.__index = signal
 
-type self_signal<T> = {
+type self_signal<any...> = {
     uuid: string,
-    connections: {[string]: SawdustSignalConnection<T>}
+    connections: {[string]: SawdustSignalConnection<any...>}
 }
-export type SawdustSignal<T> = typeof(setmetatable({} :: self_signal<T>, signal))
-
+export type SawdustSignal<any...> = typeof(setmetatable({} :: self_signal<any...>, signal))
 --[[
     Creates a new Signal attributed to a Emitter. This is the instance
     you can Fire & Connect to.
@@ -118,7 +117,7 @@ end
 ]]
 function signal:fire(...)
     local args = {...}
-    for connectionUUID: string, connection: (...any) -> nil in pairs(self.connections) do
+    for connectionUUID: string, connection: {callback: (...any) -> nil} in pairs(self.connections) do
         local s, e = pcall(function()
             connection.callback(unpack(args))
         end)
