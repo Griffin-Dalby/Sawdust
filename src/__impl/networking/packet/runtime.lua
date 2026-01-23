@@ -51,7 +51,7 @@ return function ()
 
             local eventTable = connectionCache:createTable(event)
             local function protocol(player: Player, data: types.raw_data & {[number]: any}) --> Actual function for connections.
-                --> Verify is sawdust event
+                --> Allocate Player Properly
                 if typeof(player) == 'Instance' and player:IsA('Player') then
                     --> Server, Player is first argument; Save to .caller
                     data.caller = player
@@ -60,30 +60,41 @@ return function ()
                     data = player
                 end
 				
+                --> Verify Sawdust header
                 if not data or typeof(data) ~= 'table' then return end --> Table check
-                if not data[1] or data[1] ~= __settings.global.version then return end --> Sawdust protocol check
+
+                local header = data[1] :: string
+                local saw_id, timestamp = unpack(string.split(header, '@'))
+
+                if not saw_id or not timestamp then return end --> Header format check
+                if saw_id~=`saw{__settings.global.version}` then return end --> Sawdust ID check
+                if not tonumber(timestamp) then return end --> Timestamp check
                 
+                data[1] = timestamp --> The header gets turned into the Timestamp
+                                    --> If extra data in header ever gets introduced, create another library.
+
                 --> Return protocol
                 if data[2] == 3 then
-                    local returnId = data[3]
-                    if not eventTable:hasEntry(returnId) then
-                        warn(`{warnTag} No resolver found for returnId {returnId} in event {eventPath}!`)
+                    local return_id = data[3]
+                    if not eventTable:hasEntry(return_id) then
+                        warn(`{warnTag} No resolver found for Return ID {return_id} in event {eventPath}!`)
                         return end
 
-                    local resolver = eventTable:getValue(returnId)
+                    local resolver = eventTable:getValue(return_id)
                     
-                    requestCache:setValue(returnId, {
+                    requestCache:setValue(return_id, {
                         caller = data.caller 
                     })
+
                     resolver(data) --> Resolve the returnId with the data
-                    eventTable:setValue(returnId, nil) --> Remove resolver
+                    eventTable:setValue(return_id, nil) --> Remove resolver
 
                     return
                 end --> Type 3 is for data returns
 
                 --> Run connections
                 for eventId: string, connection: types.NetworkingConnection in pairs(eventTable:getContents()) do
-					if eventId:sub(1,2)=='__' then continue end
+					if eventId:sub(1,2)=='__' then continue end --> Ignore internal entries
 					if eventId:sub(1,event.Name:len())==event.Name then continue end --> Is returnId resolver
 
                     connection:run(data) --> Run w/ raw data

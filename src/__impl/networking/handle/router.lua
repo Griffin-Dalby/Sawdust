@@ -61,8 +61,11 @@ function router.new(event: types.NetworkingEvent) : types.NetworkingRouter
         req.intent = return_pipeline:getIntent()
 
         if return_pipeline:isHalted() then
-            error(`middleware has halted router execution!{if return_pipeline:getError() then
-                `\nProvided error message: {return_pipeline:getError()}` else " No error was provided."}`)
+            if return_pipeline:getError() then
+                error(`middleware has halted router execution!\nProvided error message: {return_pipeline:getError()}`)
+            end
+
+            return nil
         end
 
         if self.__routes[intent] then

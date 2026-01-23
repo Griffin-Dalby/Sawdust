@@ -58,8 +58,8 @@ function channel.get(channel_name: string, settings: types.ChannelSettings?) : t
 
     self.__channel = channel_folder
     for _, i_event in pairs(channel_folder:GetChildren()) do
-        if not i_event:IsA("RemoteEvent")
-        or not i_event:IsA("UnreliableRemoteEvent") then
+        if  not i_event:IsA("RemoteEvent")
+        and not i_event:IsA("UnreliableRemoteEvent") then
             continue end
 
         --> Register Event

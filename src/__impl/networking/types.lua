@@ -114,7 +114,7 @@ export type self_event = {
 export type methods_event = {
     --> Constructor
     __index: methods_event,
-    new: (channel: NetworkingChannel, event: RemoteEvent) -> NetworkingEvent,
+    new: (channel: NetworkingChannel, event: RemoteEvent|UnreliableRemoteEvent) -> NetworkingEvent,
 
     --> Methods
 
@@ -180,6 +180,7 @@ export type self_connection = {
     cache: cache.SawdustCache,
     connectionId: string,
     callback: (req: ConnectionRequest, res: ConnectionResult) -> nil,
+    middleware: NetworkingMiddleware,
 
     --> Internal Methods
     removeFromEvent: () -> nil,
@@ -201,9 +202,32 @@ export type NetworkingConnection = typeof(setmetatable({} :: self_connection, {}
 
 -- req & res of Connections.
 export type ConnectionRequest = {
+    -- Player who called this event
     caller: Player?,
+
+
+    -- Time request was sent (from client, untrustable.)
+    sent_time: number,
+
+    -- Time request arrived (to server, trustable.)
+    arrival_time: number,
+
+    -- Latency of request (server_time-req_time)
+    latency: number,
+
+
+    -- Intent of request
     intent: string,
+
+    -- Data body of request
     data: {[number]: any?},
+
+    
+    -- Unmodified, pre-middleware intent & data.
+    unmod: {
+        intent: string,
+        data: {[number]: any?}
+    }?
 
 }
 export type ConnectionResult  = {
@@ -212,9 +236,10 @@ export type ConnectionResult  = {
     append: (key: string, value: any) -> nil,
     send: (...any?) -> nil,
     reject: (...any?) -> nil,
-    assert: (condition: boolean, message: string) -> boolean,
+    assert: (condition: boolean, ...any?) -> boolean,
 }
 
+--> Params of Connections.
 --#endregion
 
 --============--
@@ -249,17 +274,17 @@ export type methods_middleware = {
     Use: (self: NetworkingMiddleware,
         phase: string, order: number,
         callback: (NetworkingPipeline) -> NetworkingPipeline,
-        args: {internal: boolean, protected: boolean}) -> nil,
+        args: {internal: boolean, protected: boolean}) -> number?,
     Run: (self: NetworkingMiddleware,
-        phase: string, args: NetworkingCall) -> NetworkingPipeline,
+        phase: string, args: NetworkingCall | ConnectionRequest) -> NetworkingPipeline,
 
     --> Deprecated
     use: (self: NetworkingMiddleware,
         phase: string, order: number,
         callback: (NetworkingPipeline) -> NetworkingPipeline,
-        args: {internal: boolean, protected: boolean}) -> nil,
+        args: {internal: boolean, protected: boolean}) -> number?,
     run: (self: NetworkingMiddleware,
-        phase: string, args: NetworkingCall) -> NetworkingPipeline,
+        phase: string, args: NetworkingCall | ConnectionRequest) -> NetworkingPipeline,
 }
 export type NetworkingMiddleware = typeof(setmetatable({} :: self_middleware, {} :: methods_middleware))
 
@@ -284,7 +309,7 @@ export type self_pipeline = {
 }
 export type methods_pipeline = {
     __index: methods_pipeline,
-    new: (phase: string, call: NetworkingCall) -> NetworkingPipeline,
+    new: (phase: string, call: NetworkingCall | ConnectionRequest) -> NetworkingPipeline,
 
     --> Downstream Methods
     setIntent: (self: NetworkingPipeline, intent: string) -> boolean,
@@ -367,24 +392,6 @@ export type methods_router = {
     discard: (self: NetworkingRouter) -> nil,
 }
 export type NetworkingRouter = typeof(setmetatable({} :: self_router, {} :: methods_router))
-
---#endregion
-
---==============--
--- RATE LIMITER --
---==============--
---#region
-
-export type self_limiter = {
-    --> Properties
-
-}
-export type methods_limiter = {
-    --> Constructor
-    __index: methods_limiter,
-}
-
-export type NetworkingLimiter = typeof(setmetatable({} :: self_limiter, {} :: methods_limiter))
 
 --#endregion
 

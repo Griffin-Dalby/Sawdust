@@ -115,7 +115,7 @@ function middleware:Use(phase: string, order: number, callback: (types.Networkin
         return a.order < b.order
     end)
 
-    return nil
+    return table.find(registrar[phase], registeredFunc)
 end
 
 --[[
@@ -125,15 +125,21 @@ end
     @param phase Either 'before' or 'after'
     @param args Call Arguments
 ]]
-function middleware:Run(phase: 'before'|'after', args: types.NetworkingCall): types.NetworkingPipeline
-    local registry = self.__registry :: {[string]: types.__registered_func__}
-    local run_phase = registry[phase] :: {types.__registered_func__}
-    
+function middleware:Run(phase: 'before'|'after', args: types.NetworkingCall | types.ConnectionRequest): types.NetworkingPipeline
+    local registry = self.__registry :: {[string]: types.__registered_func__, __internal: {[string]: {types.__registered_func__}}}
+    local run_phase = registry[phase] :: {[number]: types.__registered_func__}
+    local run_internal_phase = registry.__internal[phase] :: {types.__registered_func__}
+
     assert(run_phase, `[{script.Name}] Phase "{phase or '<none provided>'}" isn't valid!`)
 
     local run_pipeline = pipeline.new(phase, args)
 
+    for i, data in ipairs(run_internal_phase) do
+        print(`Running internal-{phase}-{data.order}`)
+        data.callback(run_pipeline)
+    end
     for i, data in ipairs(run_phase) do
+        print(`Running regular-{phase}-{data.order}`)
         data.callback(run_pipeline)
     end
 

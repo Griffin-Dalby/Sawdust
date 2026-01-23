@@ -25,12 +25,17 @@
 local types = require(script.types)
 
 local channel = require(script.packet.channel)
+local limiter = require(script.middleware.limiter)
 
 --]] Constants
 --]] Variables
 --]] Functions
 --]] Module
-local networking = {}
+local networking = {
+    Middleware = {
+        Limiter = limiter.new
+    }
+}
 
 --]] Types
 export type NetworkingChannel = types.NetworkingChannel
@@ -42,6 +47,7 @@ export type NetworkingMiddleware = types.NetworkingMiddleware
 export type NetworkingPipeline = types.NetworkingPipeline
 
 --]] Methods
+networking.GetChannel = channel.get
 networking.getChannel = channel.get
 
 return networking

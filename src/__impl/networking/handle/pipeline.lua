@@ -31,12 +31,13 @@ local __settings = require(__internal.__settings)
 local pipeline = {} :: types.methods_pipeline
 pipeline.__index = pipeline
 
-function pipeline.new(phase: string, call: types.NetworkingCall) : types.NetworkingPipeline
+function pipeline.new(phase: string, call: types.NetworkingCall | (types.ConnectionRequest & {_call: {intent: string, data: {any}}?})) : types.NetworkingPipeline
     local self = setmetatable({} :: types.self_pipeline, pipeline)
+    local call_data = call._call or call
 
     self.phase = phase
-    self.intent = call._call.intent
-    self.data = call._call.data
+    self.intent = call_data.intent
+    self.data = call_data.data
 
     self.halted = false
     self.errorMsg = nil

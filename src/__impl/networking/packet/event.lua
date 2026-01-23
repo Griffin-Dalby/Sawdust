@@ -251,7 +251,7 @@ function EventCall:fire() : types.NetworkingPipeline
     local return_id = self._return_id
     local final_data = { --> Compile event data
         --] Headers
-        [1] = __settings.global.version, --> Version
+        [1] = `saw{__settings.global.version}@{workspace:GetServerTimeNow()}`, --> Version
         [2] = return_id and 3 or 1, --> Event type, 1 for "Fire", 2 for "Invoke", 3 for "Response"
         
         --] Body
@@ -347,7 +347,7 @@ function EventCall:invoke() : promise.SawdustPromise
     local request_id = `{self.__event.Name}.{https:GenerateGUID(false)}`
     local final_data = {
         --] Headers
-        [1] = __settings.global.version, --> SawD Version
+        [1] = `saw{__settings.global.version}@{workspace:GetServerTimeNow()}`, --> SawD Version
         [2] = 2, --> Code for Invocation
 
         --] Body
@@ -369,7 +369,7 @@ function EventCall:invoke() : promise.SawdustPromise
         local start_timestamp = tick()
 
 		local timeout, resolver
-		local this_cache = connectionCache:findTable(self.__event)
+		local this_cache = connectionCache:createTable(self.__event, true)
 		
         local function clean()
             if timeout then timeout:Disconnect(); timeout = nil end
@@ -476,6 +476,8 @@ function EventCall:invoke() : promise.SawdustPromise
             self.__event:FireServer(final_data)
 
         end
+
+        return nil
     end)
     return promise
 end
@@ -505,7 +507,12 @@ function Event:With() : types.NetworkingCall
 function Event:with() : types.NetworkingCall
     return self:With() end
 
+--[[
+    Creates a new connection, and adds it to the internal & shared connection cache.
 
+    @param callback Function to call upon connection run
+    @param params Optional table to enable additional features
+]]
 function Event:Handle(callback: (req: types.ConnectionRequest, res: types.ConnectionResult) -> ...any) : types.NetworkingConnection
     local new_connection = connection.new(callback, self)
 
