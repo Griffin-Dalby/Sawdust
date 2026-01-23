@@ -50,7 +50,7 @@ export type SawdustSettings = __sawdustSettings
 --> Settings
 __settings.global = {
 	debug = false,
-	version = 4,
+	version = 53,
 }
 
 __settings.networking = {
