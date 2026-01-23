@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.6.0](https://github.com/Griffin-Dalby/Sawdust/compare/v1.5.1...v1.6.0) (2026-01-23)
+
+
+### Features
+
+* **networking:** Networking V2. ([f0becfe](https://github.com/Griffin-Dalby/Sawdust/commit/f0becfe27895dbe805af1ac33e584aaa8a98e276))
+* **promise:** Documented methods in type, and added an "Await" method, that returns a new promising, resolving or rejecting once a table of promises all complete. ([93bff7c](https://github.com/Griffin-Dalby/Sawdust/commit/93bff7cbc852e527c1970a22d22a42d05fdcfa72))
+* **tests:** Tests are not located in a seperate folder, outside of src/ ([0923259](https://github.com/Griffin-Dalby/Sawdust/commit/09232590684032cd0c032dfe2af68452849af217))
+
+
+### Bug Fixes
+
+* **builder:** Fixed issues with new typesolver, split methods and properties. ([76627cb](https://github.com/Griffin-Dalby/Sawdust/commit/76627cbefa934e1ed50e24b187d1d5b6c5b6025b))
+* **cdn:** Fixed issues with new typesolver, split methods and properties. ([1fb770e](https://github.com/Griffin-Dalby/Sawdust/commit/1fb770eee88f6f646ef1b262de36d6106a3fd251))
+* **cdn:** Method Types did not include self argument. ([07832f6](https://github.com/Griffin-Dalby/Sawdust/commit/07832f60290c1ba7a17010e287ae3f844eb3ce4f))
+* **maid:** Fixed tags being nil, after :clean() iterates over a previously cleaned element. ([cd38d7f](https://github.com/Griffin-Dalby/Sawdust/commit/cd38d7fef43d08baf6e450957eab0f84bafb2088))
+* **networking:** Fixed composition type solve issues for data and callbacks ([f302bf5](https://github.com/Griffin-Dalby/Sawdust/commit/f302bf531df632425ea1fd059153ee0030f347da))
+* **networking:** Fixed rest of types under strict typechecking, preparing for limiter. ([b7ced2c](https://github.com/Griffin-Dalby/Sawdust/commit/b7ced2ca984cf3c23ea6db3769187eecae89e1e0))
+* **networking:** Fixed types under strict typechecking to iron any edge cases ([3664fab](https://github.com/Griffin-Dalby/Sawdust/commit/3664fabf1636d70bc2f65737ca95896933c7b2dc))
+* **networking:** Fully transitioned metatables to modern type syntax ([5d82b50](https://github.com/Griffin-Dalby/Sawdust/commit/5d82b50a61cfe720b5ba6ce32795ff500778e03b))
+* **promise:** Fixed issues with new typesolver, split methods and properties. ([c961e72](https://github.com/Griffin-Dalby/Sawdust/commit/c961e72f09e44786a3c2074ca9c7bed09152d186))
+* **promise:** Fully migrated & fixed promise methods ([474c91d](https://github.com/Griffin-Dalby/Sawdust/commit/474c91da27b8650c66acf8b12c6703608b3e7da1))
+* **sawdust:** Fixed dev-util gitignore overlapping with util modules ([2d93947](https://github.com/Griffin-Dalby/Sawdust/commit/2d93947b259129293327fa4c70b7e0c73373389a))
+* **signal:** Event Generics now support a varadic any argument, rather than a strict singular any argument. ([934385d](https://github.com/Griffin-Dalby/Sawdust/commit/934385d03acc8777af4893861635d7c176f2b0b2))
+
 ## [1.5.1](https://github.com/Griffin-Dalby/Sawdust/compare/v1.5.0...v1.5.1) (2026-01-02)
 
 
