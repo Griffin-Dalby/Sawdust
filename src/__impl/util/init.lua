@@ -11,17 +11,11 @@
 --]]
 
 local debounce = require(script.debounce)
-local enumMap = require(script.enum_map)
 local timer = require(script.timer)
-local uuid = require(script.uuid)
 local maid = require(script.maid)
 
 --]] Util
 local util = {}
-
-util.enumMap = enumMap
-export type SawdustEnumMap = enumMap.SawdustEnumMap
-
 
 
 util.timer = timer

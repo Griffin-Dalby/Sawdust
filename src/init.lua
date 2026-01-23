@@ -158,7 +158,6 @@ export type SawdustCDNReturnTemplate = cdn.SawdustCDNReturnTemplate
 sawdust.util = util
 export type SawdustMaid     = util.SawdustMaid
 export type SawdustTimer    = util.SawdustTimer
-export type SawdustEnumMap  = util.SawdustEnumMap
 export type DebounceTracker = util.DebounceTracker
 --#endregion
 
