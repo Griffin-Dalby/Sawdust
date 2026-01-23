@@ -14,7 +14,16 @@
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "sawdustTests": {
-        "$path": "tests"
+        "$path": "tests/server"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "sawdustTests": {
+          "$path": "tests/client"
+        }
       }
     }
   }
