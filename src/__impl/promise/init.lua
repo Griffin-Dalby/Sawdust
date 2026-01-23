@@ -20,16 +20,100 @@
 --]] Promises
 type self_methods = {
     __index: self_methods,
+
+    --[[
+        Creates a new async function, and lets developers call resolve() or
+        reject() to return data through two different paths.
+        
+        @param callback Function to run in Promise, provided with resolve & reject.
+    ]]
     new: (callback: (resolve: anyFunction, reject: anyFunction) -> any) -> SawdustPromise,
 
+    --[[
+        Returns an instantly fulfilled promise.
+
+        @params tuple<any> Values in promise
+
+        @return SawdustPromise
+    ]]
     resolve: (...any) -> SawdustPromise,
+
+    --[[
+        Returns an instantly rejected promise.
+
+        @params tuple<any> Values in promise
+
+        @return SawdustPromise
+    ]]
     reject: (...any) -> SawdustPromise,
+
+    --[[
+        "Races" a selection of promises, resolving or rejecting
+        with the first one that settles.
+
+        @param promises Table of promises to race
+    ]]
     race: (promises: {SawdustPromise}) -> SawdustPromise,
+
+    --[[
+        "Awaits" all promises to settle, regardless of fulfillment or
+        rejection.
+
+        @param promises Table of promises to await
+        @param timeout Optional timeout time
+    ]]
+    await: (promises: {SawdustPromise}, timeout: number?) -> SawdustPromise,
+
+    --[[
+        Resolves or rejects when all promises settle, returning
+        array with the results of each.
+        
+        @param promises Table of promises to settle
+    ]]
     settleAll: (promises: {SawdustPromise}) -> SawdustPromise,
 
+    --[[
+        Chains a 'then' operation, taking the results of the last chained
+        action, and setting _value to the result of this action. 
+        
+        @param callback Callback to call on this operation
+
+        @return SawdustPromise
+    ]]
     andThen: (self: SawdustPromise, callback: anyFunction) -> SawdustPromise,
+
+    --[[
+        Catches any error that comes from the last chained action, or the
+        inital promise. 
+        
+        @param callback Callback to call on this operation
+
+        @return SawdustPromise
+    ]]
     catch: (self: SawdustPromise, callback: anyFunction) -> SawdustPromise,
+
+    --[[
+        Always runs regardless of fulfillment or rejection, and also passes
+        nothing. 
+        
+        @param callback Callback to call on this operation
+        
+        @return SawdustPromise
+    ]]    
     finally: (self: SawdustPromise, callback: () -> any?) -> SawdustPromise,
+    
+    --[[
+        Yields the current thread until this promise resolves/rejects
+        You can modify the timeout time to avoid an infinite yield.
+
+        This will return a success status boolean, as well as an unpacked
+        tuple array of the promise return data. 
+        
+        @param timeout_time Maximum yield until it cancels
+
+        @return boolean: Is Fulfilled
+        @return tuple<any>: Values from promise
+    ]]
     wait: (self: SawdustPromise, timeout_time: number?) -> (boolean, ...any),
     
     _settle: (self: SawdustPromise, state: "pending"|"fulfilled"|"rejected", res: {any}) -> nil,
@@ -135,6 +219,46 @@ function promise.race(promises: {SawdustPromise})
                 checkSettle('fulfilled', ...)
             end):catch(function(...)
                 checkSettle('rejected', ...)
+            end)
+        end
+    end)
+end
+
+--[[
+    "Awaits" all promises to settle, regardless of fulfillment or
+    rejection. Iterates all promises, links a promise, and saves
+    the result when settled.
+]]
+function promise.await(promises: {SawdustPromise}, timeout: number?)
+    timeout = timeout or 5
+
+    return promise.new(function(resolve, reject)
+        local results = table.create(#promises)
+        local completed = 0
+        local fulfilled = 0
+
+        local function save(status: 'fulfilled'|'rejected', i, p, ...)
+            if status == 'fulfilled' then fulfilled += 1 end
+            results[i] = {
+                status = status,
+                value = ...
+            }
+            
+            completed += 1
+            if completed == #promises then
+                if fulfilled == #promises then
+                    resolve(results)
+                else
+                    reject(results)
+                end
+            end
+        end
+        
+        for i, p in ipairs(promises) do
+            p:andThen(function(...)
+                save('fulfilled', i, p, ...)
+            end):catch(function(...)
+                save('rejected', i, p, ...)
             end)
         end
     end)
