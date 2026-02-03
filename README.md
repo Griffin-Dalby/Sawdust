@@ -4,6 +4,8 @@
 ![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue)
 
 Sawdust is a lightweight, modular framework for Roblox developers who want clarity, control, and smart abstractions, without the bloat 😉
+**New versions are now closed-sourced! This is staying open-source for my portfolio, and any other references.**
+
 
 > 💖 Built with love by **Griffin Dalby**<br>
 > 🛠 Designed for efficient, easy-to-read, and easy-to-use code - made for devs who hate reading docs.
